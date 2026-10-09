@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ffffff; --bg2: #f7f7f7; --border: #e5e5e5; --muted: #737373;
+  --dmuted: #525252; --text: #111111; --primary: #000000;
+  --ok: #3f6b4f; --warn: #8a6d1d; --err: #a33a3a;
+}
+@theme inline {
+  --color-bg: var(--bg); --color-bg2: var(--bg2); --color-line: var(--border);
+  --color-muted: var(--muted); --color-dmuted: var(--dmuted); --color-ink: var(--text);
+  --color-ok: var(--ok); --color-warn: var(--warn); --color-err: var(--err);
+  --font-sans: var(--font-inter); --font-display: var(--font-grotesk); --font-mono: var(--font-jb);
+}
+html { background: var(--bg); }
+body { background: var(--bg); color: var(--text); font-family: var(--font-inter), sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+h1,h2,h3 { font-family: var(--font-grotesk), sans-serif; letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes feedIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+@keyframes pulseDot { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+.rise { animation: rise .5s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.feed-in { animation: feedIn .3s ease-out both; }
+.dot-live { animation: pulseDot 1.4s ease-in-out infinite; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 6px; transition: border-color .2s, transform .2s; }
+.card:hover { border-color: #111; transform: translateY(-1px); }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:6px; font-weight:500; border:1px solid var(--border); background:#fff; cursor:pointer; transition: background .15s, transform .1s; }
+.btn:hover { background: var(--bg2); } .btn:active { transform: scale(.98); }
+.btn-primary { background:#000; color:#fff; border-color:#000; } .btn-primary:hover { background:#222; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.input { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:#fff; }
+.label-xs { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

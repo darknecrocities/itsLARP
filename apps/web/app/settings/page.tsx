@@ -1,0 +1,203 @@
+"use client";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api, apiGet } from "@/lib/api";
+import { Badge, PageHeader, ErrorBox } from "@/components/ui";
+
+type AIStatusResponse = {
+  provider: string;
+  model: string;
+  connected: boolean;
+  models: string[];
+  providers: {
+    id: string;
+    name: string;
+    connected: boolean;
+    default_model: string;
+  }[];
+};
+
+export default function SettingsPage() {
+  const { data, isLoading, refetch } = useQuery<AIStatusResponse>({
+    queryKey: ["ai_status"],
+    queryFn: () => apiGet<AIStatusResponse>("/ai/status"),
+    retry: false,
+  });
+
+  const [selectedProvider, setSelectedProvider] = useState<string>("ollama");
+  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+  const [saveErr, setSaveErr] = useState("");
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setSaveMsg("");
+    setSaveErr("");
+    try {
+      await api("/ai/configure", {
+        provider: selectedProvider,
+        model: selectedModel || (selectedProvider === "ollama" ? (data?.models[0] ?? "qwen2.5-coder:7b") : "gemini-1.5-flash"),
+        api_key: apiKey || undefined,
+      });
+      setSaveMsg("AI Gateway configuration updated successfully.");
+      refetch();
+    } catch (err: any) {
+      setSaveErr(err.message || "Failed to update configuration.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <PageHeader
+        title="Settings & AI Gateway"
+        sub="Local AI first. Ollama is a first-class provider. Multi-provider abstraction enables seamless switching without application rewrites."
+        action={
+          <button className="btn" onClick={() => refetch()}>
+            Re-check Status
+          </button>
+        }
+      />
+
+      <div className="grid lg:grid-cols-2 gap-8 max-w-4xl">
+        {/* Provider Status Table */}
+        <section className="card p-6">
+          <h2 className="text-lg font-semibold mb-3">AI Providers Overview</h2>
+          <table className="w-full text-left text-sm">
+            <thead className="label-xs border-b border-line">
+              <tr>
+                <th scope="col" className="py-2">Provider</th>
+                <th scope="col">Status</th>
+                <th scope="col">Active / Available Model</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.providers?.map((p) => {
+                const isActive = data.provider === p.id;
+                return (
+                  <tr key={p.id} className="border-b border-line">
+                    <td className="py-3 font-medium">
+                      {p.name} {isActive && <Badge tone="ok">ACTIVE</Badge>}
+                    </td>
+                    <td>
+                      <Badge tone={p.connected ? "ok" : "n"}>
+                        {p.connected ? "Connected" : "Offline"}
+                      </Badge>
+                    </td>
+                    <td className="font-mono text-xs text-muted">
+                      {p.id === "ollama" && data.models.length > 0
+                        ? `${data.models.length} local models`
+                        : p.default_model}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <div className="mt-4 p-3 bg-bg2 rounded text-xs text-muted">
+            {data?.connected ? (
+              <span className="text-ok font-medium">
+                ● Local Ollama is connected. {data.models.length} models detected.
+              </span>
+            ) : (
+              <span>
+                Ollama not detected on port 11434. The deterministic engine is active as an immediate fallback.
+              </span>
+            )}
+          </div>
+        </section>
+
+        {/* Configure Provider Form */}
+        <section className="card p-6">
+          <h2 className="text-lg font-semibold mb-3">Configure Active Model</h2>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div>
+              <label className="label-xs" htmlFor="pv">AI Provider</label>
+              <select
+                id="pv"
+                className="input mt-1"
+                value={selectedProvider}
+                onChange={(e) => {
+                  setSelectedProvider(e.target.value);
+                  setSelectedModel("");
+                }}
+              >
+                <option value="ollama">Ollama (Local AI First)</option>
+                <option value="google">Google Gemini API</option>
+                <option value="openai">OpenAI API</option>
+                <option value="anthropic">Anthropic Claude</option>
+              </select>
+            </div>
+
+            {selectedProvider === "ollama" ? (
+              <div>
+                <label className="label-xs" htmlFor="om">Installed Ollama Model</label>
+                <select
+                  id="om"
+                  className="input mt-1 font-mono text-xs"
+                  value={selectedModel || data?.model || ""}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                >
+                  {data?.models?.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                  {(!data?.models || data.models.length === 0) && (
+                    <option value="qwen2.5-coder:7b">qwen2.5-coder:7b (default)</option>
+                  )}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="label-xs" htmlFor="cm">Model Name</label>
+                <input
+                  id="cm"
+                  className="input mt-1"
+                  placeholder={
+                    selectedProvider === "google"
+                      ? "gemini-1.5-flash"
+                      : selectedProvider === "openai"
+                      ? "gpt-4o-mini"
+                      : "claude-3-5-haiku"
+                  }
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                />
+              </div>
+            )}
+
+            {selectedProvider !== "ollama" && (
+              <div>
+                <label className="label-xs" htmlFor="key">Provider API Key</label>
+                <input
+                  id="key"
+                  type="password"
+                  className="input mt-1 font-mono text-xs"
+                  placeholder="sk-... or AIzaSy..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+                <p className="text-[11px] text-muted mt-1">
+                  Cloud keys are securely configured server-side.
+                </p>
+              </div>
+            )}
+
+            {saveMsg && <p className="text-xs text-ok">{saveMsg}</p>}
+            {saveErr && <ErrorBox msg={saveErr} />}
+
+            <button type="submit" className="btn btn-primary w-full py-2" disabled={saving}>
+              {saving ? "Saving..." : "Save AI Gateway Configuration"}
+            </button>
+          </form>
+        </section>
+      </div>
+    </>
+  );
+}
