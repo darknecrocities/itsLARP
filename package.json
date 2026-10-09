@@ -1,0 +1,13 @@
+{
+  "name": "howtolarped",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Your AI Job-Hunting Workforce & Career Operating System",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:api": "cd apps/api && .venv/bin/uvicorn main:app --port 8000 --reload",
+    "build": "cd apps/web && npm run build",
+    "test": "cd apps/api && .venv/bin/pytest tests"
+  }
+}
