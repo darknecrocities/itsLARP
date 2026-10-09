@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from dataclasses import asdict
@@ -21,6 +21,50 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+from fastapi.responses import HTMLResponse
+
+@app.get("/")
+def root_index(request: Request):
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return HTMLResponse(
+            """<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HowToLarped Backend API</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; color: #09090b; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px; max-width: 440px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    h1 { font-size: 20px; margin: 0 0 8px 0; font-weight: 700; letter-spacing: -0.02em; }
+    p { font-size: 13px; color: #71717a; margin: 0 0 20px 0; line-height: 1.6; }
+    .badge { display: inline-block; font-size: 11px; font-family: monospace; padding: 2px 8px; background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 4px; margin-bottom: 12px; }
+    .btn { display: block; text-align: center; background: #000; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 4px; font-weight: 600; font-size: 13px; margin-bottom: 10px; transition: background 0.15s; }
+    .btn:hover { background: #27272a; }
+    .btn-sec { display: block; text-align: center; background: #fff; color: #09090b; border: 1px solid #e4e4e7; text-decoration: none; padding: 10px 16px; border-radius: 4px; font-weight: 600; font-size: 13px; transition: background 0.15s; }
+    .btn-sec:hover { background: #f4f4f5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">BACKEND API · PORT 8000</div>
+    <h1>HowToLarped API Online</h1>
+    <p>You have navigated to the FastAPI backend service on port 8000. The full website user interface is running on <strong>port 3000</strong>.</p>
+    <a href="http://localhost:3000" class="btn">Open Web App (localhost:3000) →</a>
+    <a href="/docs" class="btn-sec">View Swagger API Docs (/docs)</a>
+  </div>
+</body>
+</html>"""
+        )
+    return {
+        "service": "HowToLarped API",
+        "status": "online",
+        "web_app": "http://localhost:3000",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 
 @app.get("/health")

@@ -117,8 +117,11 @@ webProcess.on("exit", (code) => {
   }
 });
 
-console.log(C_SYS + "✓ API server starting on http://localhost:8000");
-console.log(C_SYS + "✓ Web application starting on http://localhost:3000");
+console.log("\n" + C_SYS + "==========================================================");
+console.log(C_SYS + "  🌐 WEBSITE APPLICATION: \x1b[1m\x1b[32mhttp://localhost:3000\x1b[0m  (Open this in browser)");
+console.log(C_SYS + "  ⚙️  BACKEND API SERVICE: \x1b[36mhttp://localhost:8000\x1b[0m");
+console.log(C_SYS + "  📚 SWAGGER API DOCS:    \x1b[36mhttp://localhost:8000/docs\x1b[0m");
+console.log(C_SYS + "==========================================================");
 console.log(C_SYS + "Press Ctrl+C to terminate both servers cleanly.\n");
 
 // Clean shutdown on Ctrl+C / kill signals
