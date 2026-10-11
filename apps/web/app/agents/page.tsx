@@ -118,8 +118,8 @@ export default function AgentsPage() {
   return (
     <>
       <PageHeader
-        title="Agent Workforce"
-        sub="1,000 concurrent task workers operating in parallel: 300 Crawlers (LinkedIn/JobStreet), 300 LLM Tailors, 400 Independent Application Bots."
+        title="Your Auto-Apply Bots"
+        sub="1,000 bots working together for you: 300 searching LinkedIn & JobStreet, 300 writing tailored resumes, and 400 preparing your applications."
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -141,19 +141,19 @@ export default function AgentsPage() {
                 disabled={running}
                 onClick={() => setSelectedWorkers(n)}
               >
-                {n.toLocaleString()} Workers
+                {n.toLocaleString()} Bots
               </button>
             ))}
             {running ? (
               <button className="btn btn-primary bg-black text-white hover:bg-neutral-800" onClick={stop}>
-                Stop Workforce
+                Stop Bots
               </button>
             ) : (
               <button
                 className="btn btn-primary"
                 onClick={() => handleStart(selectedWorkers)}
               >
-                Deploy {selectedWorkers.toLocaleString()} Workers
+                Launch {selectedWorkers.toLocaleString()} Bots
               </button>
             )}
           </div>
@@ -164,17 +164,17 @@ export default function AgentsPage() {
       {!running && (
         <div className="card p-4 mb-6 flex flex-wrap items-center justify-between gap-4 bg-bg2/40">
           <div className="flex-1 min-w-[280px]">
-            <label className="label-xs" htmlFor="tq">Target Career Queries & User Preferences (comma-separated)</label>
+            <label className="label-xs" htmlFor="tq">Job Titles & Keywords You Want (comma-separated)</label>
             <input
               id="tq"
               className="input mt-1"
               value={targetQuery}
               onChange={(e) => setTargetQuery(e.target.value)}
-              placeholder="Senior AI Engineer, Full Stack Developer, Machine Learning"
+              placeholder="Software Engineer, Full Stack Developer, Product Manager"
             />
           </div>
           <div className="text-xs text-muted max-w-sm">
-            300 Crawlers pull these preferences across LinkedIn, JobStreet, and Indeed. 300 Tailoring bots synthesize APA resumes via Local LLM, and 400 bots prepare applications independently.
+            300 bots will search LinkedIn, JobStreet, and Indeed for these roles. 300 bots build custom APA resumes, and 400 bots prepare applications for you.
           </div>
         </div>
       )}
@@ -301,7 +301,7 @@ export default function AgentsPage() {
           }`}
           onClick={() => setActiveTab("diagram")}
         >
-          Swarm Node Graph & Bot Matrix
+          Interactive Bot Network
         </button>
         <button
           className={`pb-2.5 font-bold border-b-2 transition-colors ${
@@ -309,7 +309,7 @@ export default function AgentsPage() {
           }`}
           onClick={() => setActiveTab("stages")}
         >
-          Task Stages & Live Feed
+          Application Steps & Live Feed
         </button>
         <button
           className={`pb-2.5 font-bold border-b-2 transition-colors flex items-center gap-2 ${
@@ -320,7 +320,7 @@ export default function AgentsPage() {
             fetchResults();
           }}
         >
-          Discovered Opportunities & Applications
+          Discovered Jobs & Applications
           {results.length > 0 && <Badge>{results.length}</Badge>}
         </button>
       </div>

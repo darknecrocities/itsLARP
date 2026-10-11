@@ -207,7 +207,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
               disabled={phase === "running" || phase === "verifying"}
               onClick={prepare}
             >
-              {phase === "idle" ? "Prepare Application Package" : "Regenerate Package"}
+              {phase === "idle" ? "Tailor Resume & Prepare Application" : "Regenerate Application"}
             </button>
           </div>
         }

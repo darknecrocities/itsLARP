@@ -40,16 +40,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 570,
     y: 180,
     labelY: 232,
-    label: "1: CAREER DNA",
-    title: "Career DNA Profile",
-    role: "Single Source of Truth",
-    badge: "100% Verifiable",
-    desc: "Your uploaded resume, verified GitHub repositories, and LinkedIn profile. The immutable baseline that guarantees 0% hallucinations across all 1,000 parallel workers.",
+    label: "1: YOUR PROFILE",
+    title: "Your Real Profile",
+    role: "100% Honest Experience",
+    badge: "Never Lies",
+    desc: "You upload your resume and connect your profiles once. The bots strictly use your real experience and verified projects—they never make things up or invent fake skills.",
     stats: [
-      { label: "Profile Source", val: "Resume + GitHub" },
-      { label: "Hallucination Gate", val: "Strict (0%)" },
-      { label: "Evidence Records", val: "Immutable" },
-      { label: "Format Standard", val: "APA 7th Edition" },
+      { label: "Your Info", val: "Resume & Profiles" },
+      { label: "Honesty", val: "Only Real Skills" },
+      { label: "Format", val: "Clean APA Style" },
+      { label: "Setup", val: "One-Time Upload" },
     ],
     poolKey: "all",
   },
@@ -58,16 +58,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 450,
     y: 280,
     labelY: 332,
-    label: "2: 300 CRAWLERS",
-    title: "300 Platform Crawlers",
-    role: "Targeted Job Discovery",
-    badge: "300 Parallel Bots",
-    desc: "300 lightweight autonomous crawlers continuously scouting LinkedIn, JobStreet, and Indeed based on user target criteria, salary expectations, and liking.",
+    label: "2: JOB FINDERS",
+    title: "300 Job Finders",
+    role: "Searching 24/7",
+    badge: "300 Bots",
+    desc: "300 bots constantly search LinkedIn, JobStreet, and Indeed around the clock to find job openings that match the roles, locations, and salaries you want.",
     stats: [
-      { label: "Active Crawlers", val: "300 Bots" },
       { label: "Platforms", val: "LinkedIn, JobStreet, Indeed" },
-      { label: "Session Security", val: "2FA Handlers" },
-      { label: "Ingestion Speed", val: "Real-time Queue" },
+      { label: "Bots Working", val: "300 Active Bots" },
+      { label: "Account Safety", val: "Safe & Secure" },
+      { label: "Speed", val: "Finds Jobs Instantly" },
     ],
     poolKey: "discovery",
   },
@@ -76,16 +76,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 250,
     y: 300,
     labelY: 352,
-    label: "3: LOCAL LLM",
-    title: "Local LLM Inference Engine",
-    role: "Requirement Extraction",
-    badge: "Ollama (On-Device)",
-    desc: "Processes discovered job postings locally using Ollama (Qwen, Llama, Gemma). Extracts hard skills, culture requirements, and computes match scores with 0% data leakage.",
+    label: "3: SMART MATCHER",
+    title: "Smart Job Matcher",
+    role: "Understands Requirements",
+    badge: "100% Private",
+    desc: "Our AI reads each job description, figures out what the company is really looking for, and checks how well your background fits—keeping your data safe and private.",
     stats: [
-      { label: "Inference Engine", val: "Local Ollama" },
-      { label: "Model Family", val: "Qwen / Llama 3" },
-      { label: "Data Privacy", val: "100% On-Device" },
-      { label: "Parsing Latency", val: "~420ms / job" },
+      { label: "Privacy", val: "Stays on Your Device" },
+      { label: "Job Reading", val: "Understands Requirements" },
+      { label: "Match Score", val: "Ranked by Compatibility" },
+      { label: "Best Matches", val: "Highlights Your Strengths" },
     ],
     poolKey: "tailor",
   },
@@ -94,16 +94,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 210,
     y: 150,
     labelY: 202,
-    label: "4: 300 TAILORS",
-    title: "300 Resume Tailoring Bots",
-    role: "APA Resume Synthesis",
-    badge: "300 Parallel Bots",
-    desc: "Generates tailored resumes strictly in APA 7th Edition format. Maps candidate project citations and academic credentials to specific job requirements with zero invented claims.",
+    label: "4: RESUME MAKER",
+    title: "300 Resume Makers",
+    role: "Custom Resumes for Every Job",
+    badge: "300 Bots",
+    desc: "Instead of sending the same generic resume, 300 bots build a tailored APA-format resume highlighting your relevant projects for each specific role.",
     stats: [
-      { label: "Active Tailors", val: "300 Bots" },
-      { label: "Resume Output", val: "APA 7th Format" },
-      { label: "Project Citations", val: "Verifiable Only" },
-      { label: "Diff Verification", val: "Semantic Check" },
+      { label: "Resume Style", val: "Clean APA Format" },
+      { label: "Customization", val: "Tailored Per Job" },
+      { label: "Honesty", val: "Zero Fake Skills" },
+      { label: "Download", val: "PDF & Text Ready" },
     ],
     poolKey: "tailor",
   },
@@ -112,16 +112,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 410,
     y: 120,
     labelY: 75,
-    label: "5: 400 APPLIERS",
-    title: "400 Independent Application Bots",
-    role: "Form Autofill & Staged Review",
-    badge: "400 Parallel Bots",
-    desc: "400 application agents independently fill form questions, stage submission packages, and halt at the human approval safety boundary for review.",
+    label: "5: AUTO-APPLIER",
+    title: "400 Auto-Appliers",
+    role: "Fills & Prepares Applications",
+    badge: "400 Bots",
+    desc: "400 bots do the boring work: filling out repetitive application questions and forms. Everything is staged for your quick review so you stay in total control.",
     stats: [
-      { label: "Active Appliers", val: "400 Bots" },
-      { label: "Submission Gate", val: "Human Review" },
-      { label: "Question Autofill", val: "Career DNA Backed" },
-      { label: "Safety Barrier", val: "Staged Approval" },
+      { label: "Applying Team", val: "400 Active Bots" },
+      { label: "Repetitive Forms", val: "Filled Automatically" },
+      { label: "Your Control", val: "Review Before Sending" },
+      { label: "Time Saved", val: "Hours Every Day" },
     ],
     poolKey: "apply",
   },
@@ -130,16 +130,16 @@ const GRAPH_NODES: GraphNode[] = [
     x: 80,
     y: 70,
     labelY: 28,
-    label: "6: NOTION MIRROR",
-    title: "Notion Mirror & Sync",
-    role: "Central Application Tracker",
-    badge: "1-Click Integration",
-    desc: "Self-creates and synchronizes a structured Notion database with Company Name, Position, Platform, Status, Match Score, and Application Date.",
+    label: "6: NOTION TRACKER",
+    title: "Notion Job Tracker",
+    role: "Auto-Organized List",
+    badge: "1-Click Setup",
+    desc: "In one click, creates a clean Notion spreadsheet tracking every applied job: company name, title, date applied, match score, and current status.",
     stats: [
-      { label: "Notion Status", val: "Auto-Created DB" },
-      { label: "Columns Mirrored", val: "Company, Role, Match, Status" },
-      { label: "Sync Engine", val: "PostgreSQL & Webhook" },
-      { label: "Export Formats", val: "Notion / APA / JSON" },
+      { label: "Database", val: "Auto-Created in Notion" },
+      { label: "Tracked Details", val: "Company, Role, Status" },
+      { label: "Spreadsheets", val: "No Manual Copying" },
+      { label: "Live Updates", val: "Always Up to Date" },
     ],
     poolKey: "all",
   },
@@ -193,14 +193,14 @@ export function HorizontalPipelineMap({
         pool: "discovery",
         platform: plat,
         status: running ? (i % 5 === 0 ? "needs_verification" : i % 2 === 0 ? "browsing" : "completed") : "idle",
-        current_task: running ? `Crawling ${plat} for target career roles` : "Standby in pool",
+        current_task: running ? `Searching ${plat} for matching jobs you like` : "Ready on standby",
         cpu_pct: +(0.2 + (i % 6) * 0.1).toFixed(2),
         memory_mb: +(1.1 + (i % 5) * 0.2).toFixed(2),
-        target_role: "AI Systems Engineer",
+        target_role: "Software Engineer",
         target_company: plat === "LinkedIn" ? "Tech Innovations" : "Global Systems",
         logs: [
-          { t: "12:00:01", msg: `Initialized async worker on ${plat}` },
-          { t: "12:00:04", msg: `Filtered matching listings via user preferences` },
+          { t: "12:00:01", msg: `Started searching on ${plat}` },
+          { t: "12:00:04", msg: `Found matching jobs matching your preferences` },
         ],
         verification_challenge:
           i % 5 === 0 && running
@@ -215,16 +215,16 @@ export function HorizontalPipelineMap({
       list.push({
         id: bid,
         pool: "tailor",
-        platform: "Local LLM (Ollama)",
+        platform: "Local AI",
         status: running ? (i % 2 === 0 ? "tailoring" : "completed") : "idle",
-        current_task: running ? "Synthesizing APA 7th Edition resume citations" : "Standby in pool",
+        current_task: running ? "Creating custom APA resume for this job" : "Ready on standby",
         cpu_pct: +(0.5 + (i % 4) * 0.1).toFixed(2),
         memory_mb: +(1.4 + (i % 4) * 0.2).toFixed(2),
-        target_company: "Apex Neural Corp",
-        target_role: "Machine Learning Lead",
+        target_company: "Apex Tech Corp",
+        target_role: "Full Stack Developer",
         logs: [
-          { t: "12:00:02", msg: "Evaluated job requirements with 0% hallucination gate" },
-          { t: "12:00:05", msg: "Generated APA 7th formatted resume diff" },
+          { t: "12:00:02", msg: "Read job requirements and checked skill match" },
+          { t: "12:00:05", msg: "Generated customized APA-format resume" },
         ],
       });
     }
@@ -238,14 +238,14 @@ export function HorizontalPipelineMap({
         pool: "apply",
         platform: plat,
         status: running ? (i % 3 === 0 ? "applying" : "completed") : "idle",
-        current_task: running ? `Staging application on ${plat} portal` : "Standby in pool",
+        current_task: running ? `Filling application questions on ${plat}` : "Ready on standby",
         cpu_pct: +(0.3 + (i % 5) * 0.1).toFixed(2),
         memory_mb: +(1.2 + (i % 6) * 0.15).toFixed(2),
         target_company: "DeepSignal AI",
-        target_role: "Staff Infrastructure Engineer",
+        target_role: "Software Developer",
         logs: [
-          { t: "12:00:03", msg: `Auto-filled form fields: Experience, Notice, Expected Salary` },
-          { t: "12:00:06", msg: `Application staged for human approval gate` },
+          { t: "12:00:03", msg: `Filled application questions from your profile` },
+          { t: "12:00:06", msg: `Application prepared and ready for your review` },
         ],
       });
     }
@@ -293,18 +293,18 @@ export function HorizontalPipelineMap({
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-4 mb-6 gap-3">
           <div>
-            <div className="label-xs text-neutral-500">WORKFORCE TOPOLOGY</div>
+            <div className="label-xs text-neutral-500">HOW YOUR BOTS WORK TOGETHER</div>
             <h3 className="text-xl font-bold font-sans tracking-tight text-black mt-0.5">
-              Swarm Node Architecture
+              Interactive Bot Network
             </h3>
             <p className="text-xs text-neutral-600 font-sans mt-0.5">
-              Interactive 6-node network graph governing 1,000 parallel workers with local LLM verification. Click any node to inspect.
+              Click any circle below to see how your bots find jobs, write resumes, and apply for you.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5 px-3 py-1 bg-neutral-100 rounded border border-neutral-300">
               <span className={`w-2 h-2 rounded-full ${running ? "bg-black animate-pulse" : "bg-neutral-400"}`} />
-              <strong className="text-black">{running ? "PARALLEL STREAMING" : "WORKFORCE IDLE"}</strong>
+              <strong className="text-black">{running ? "BOTS WORKING" : "BOTS READY"}</strong>
             </span>
             <span className="text-neutral-500">
               Total: <strong className="text-black">{totalWorkers} Bots</strong>
@@ -315,26 +315,8 @@ export function HorizontalPipelineMap({
           </div>
         </div>
 
-        {/* Node Selection Pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-4 text-xs font-mono">
-          <span className="text-neutral-500 text-[11px] mr-1">SELECT NODE:</span>
-          {GRAPH_NODES.map((n) => (
-            <button
-              key={n.id}
-              onClick={() => setSelectedNodeId(n.id)}
-              className={`px-2.5 py-1 rounded border text-xs font-bold transition-all ${
-                selectedNodeId === n.id
-                  ? "bg-black text-white border-black shadow-sm"
-                  : "bg-white text-black border-neutral-300 hover:border-black"
-              }`}
-            >
-              Node {n.id}: {n.title}
-            </button>
-          ))}
-        </div>
-
-        {/* Actual Node Diagram SVG Canvas */}
-        <div className="relative py-2 px-2 bg-neutral-50 border border-neutral-200 rounded overflow-x-auto flex justify-center">
+        {/* Actual Node Diagram SVG Canvas (Click nodes directly, no pill clutter) */}
+        <div className="relative py-3 px-2 bg-neutral-50 border border-neutral-200 rounded overflow-x-auto flex justify-center">
           <svg
             viewBox="0 0 660 380"
             className="w-full max-w-[660px] h-auto select-none"
@@ -409,7 +391,7 @@ export function HorizontalPipelineMap({
                       fill={isSelected ? "#000000" : "#ffffff"}
                       stroke="#000000"
                       strokeWidth="4"
-                      className="transition-colors duration-150"
+                      className="transition-colors duration-150 group-hover:stroke-black"
                     />
 
                     {/* Node Number Text */}
@@ -451,7 +433,7 @@ export function HorizontalPipelineMap({
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-4 font-mono">
             <div className="flex items-center gap-2.5">
               <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded">
-                NODE {String(selectedNode.id).padStart(2, "0")}
+                STEP {selectedNode.id}
               </span>
               <h4 className="text-base font-bold text-black font-sans">{selectedNode.title}</h4>
               <span className="text-xs text-neutral-600 font-sans">({selectedNode.role})</span>
@@ -462,7 +444,7 @@ export function HorizontalPipelineMap({
                 className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono"
                 onClick={() => setActivePoolTab(selectedNode.poolKey)}
               >
-                Filter Bots to Pool →
+                View Bots Below ↓
               </button>
             </div>
           </div>
@@ -471,7 +453,7 @@ export function HorizontalPipelineMap({
             {selectedNode.desc}
           </p>
 
-          {/* Node Metrics Grid */}
+          {/* Simple Step Highlights Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
             {selectedNode.stats.map((s, idx) => (
               <div key={idx} className="p-2.5 bg-white rounded border border-neutral-300">
@@ -481,39 +463,15 @@ export function HorizontalPipelineMap({
             ))}
           </div>
         </div>
-
-        {/* Swarm Telemetry Summary Strip */}
-        <div className="mt-6 pt-4 border-t border-neutral-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
-          <div className="p-2.5 bg-neutral-50 rounded border border-neutral-200">
-            <div className="text-[10px] text-neutral-500">WORKFORCE FOOTPRINT</div>
-            <div className="font-bold text-sm text-black mt-0.5">~1.2 MB / bot</div>
-            <div className="text-[10px] text-neutral-500">Lightweight async runner</div>
-          </div>
-          <div className="p-2.5 bg-neutral-50 rounded border border-neutral-200">
-            <div className="text-[10px] text-neutral-500">STREAM THROUGHPUT</div>
-            <div className="font-bold text-sm text-black mt-0.5">{running ? "38 jobs/min" : "0 jobs/min"}</div>
-            <div className="text-[10px] text-neutral-500">Parallel queue ingestion</div>
-          </div>
-          <div className="p-2.5 bg-neutral-50 rounded border border-neutral-200">
-            <div className="text-[10px] text-neutral-500">AUTHENTICATION GATE</div>
-            <div className="font-bold text-sm text-black mt-0.5">Prompt on 2FA</div>
-            <div className="text-[10px] text-neutral-500">Interactive OTP resume</div>
-          </div>
-          <div className="p-2.5 bg-neutral-50 rounded border border-neutral-200">
-            <div className="text-[10px] text-neutral-500">VERIFIED ACCURACY</div>
-            <div className="font-bold text-sm text-black mt-0.5">100% Evidence Backed</div>
-            <div className="text-[10px] text-neutral-500">Zero hallucinated skills</div>
-          </div>
-        </div>
       </div>
 
       {/* Bot Explorer & Matrix */}
       <div className="card p-6 bg-white text-black border border-neutral-300">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-lg font-bold font-sans">Individual Bot Explorer & Matrix</h3>
+            <h3 className="text-lg font-bold font-sans">Individual Bot Explorer</h3>
             <p className="text-xs text-neutral-600 font-sans">
-              Click any bot cell to inspect live logs, CPU allocation, memory footprint, and platform tasks.
+              Click any bot below to see its current job search task and recent actions.
             </p>
           </div>
 
@@ -527,7 +485,7 @@ export function HorizontalPipelineMap({
               }`}
               onClick={() => setActivePoolTab("all")}
             >
-              All Bots ({botsList.length})
+              All 1,000 Bots
             </button>
             <button
               className={`px-3 py-1 rounded border transition-colors ${
@@ -537,7 +495,7 @@ export function HorizontalPipelineMap({
               }`}
               onClick={() => setActivePoolTab("discovery")}
             >
-              Node 2: Crawlers (300)
+              300 Job Finders
             </button>
             <button
               className={`px-3 py-1 rounded border transition-colors ${
@@ -547,7 +505,7 @@ export function HorizontalPipelineMap({
               }`}
               onClick={() => setActivePoolTab("tailor")}
             >
-              Nodes 3 & 4: Tailors (300)
+              300 Resume Makers
             </button>
             <button
               className={`px-3 py-1 rounded border transition-colors ${
@@ -557,7 +515,7 @@ export function HorizontalPipelineMap({
               }`}
               onClick={() => setActivePoolTab("apply")}
             >
-              Node 5: Appliers (400)
+              400 Auto-Appliers
             </button>
             {alertsCount > 0 && (
               <button
@@ -569,7 +527,7 @@ export function HorizontalPipelineMap({
                 onClick={() => setActivePoolTab("alerts")}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
-                Needs 2FA ({alertsCount})
+                Needs Verification ({alertsCount})
               </button>
             )}
           </div>
@@ -609,7 +567,7 @@ export function HorizontalPipelineMap({
                 </div>
                 <div className="text-[10px] truncate mt-1 opacity-80">{bot.platform}</div>
                 <div className="text-[9px] truncate opacity-60 mt-0.5">
-                  {bot.memory_mb}MB · {bot.status}
+                  {bot.status}
                 </div>
               </button>
             );
@@ -633,7 +591,7 @@ export function HorizontalPipelineMap({
                 className="text-neutral-500 hover:text-black text-sm font-sans"
                 onClick={() => setInspectedBot(null)}
               >
-                ✕ Close Inspector
+                ✕ Close
               </button>
             </div>
 
@@ -642,22 +600,22 @@ export function HorizontalPipelineMap({
               <div className="p-4 mb-4 bg-neutral-100 border border-black rounded text-black">
                 <div className="flex items-center gap-2 font-bold mb-1">
                   <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-                  Security Verification Required on {inspectedBot.platform}
+                  Verification Required on {inspectedBot.platform}
                 </div>
                 <p className="text-neutral-700 text-xs font-sans mb-3">
                   {inspectedBot.verification_challenge?.prompt ||
-                    `The platform (${inspectedBot.platform}) has requested a 2FA OTP or session verification check. Enter the OTP code below to resume browsing.`}
+                    `The job platform (${inspectedBot.platform}) has requested a login confirmation or 2FA code. Enter the code below to resume.`}
                 </p>
                 <form onSubmit={handleVerifySubmit} className="flex gap-2 max-w-md">
                   <input
                     type="text"
                     className="input text-xs"
-                    placeholder="Enter 2FA Code (e.g. 123456 or Session OK)"
+                    placeholder="Enter Code (e.g. 123456)"
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value)}
                   />
                   <button type="submit" className="btn btn-primary text-xs" disabled={verifying}>
-                    {verifying ? "Verifying..." : "Confirm & Resume Bot"}
+                    {verifying ? "Checking..." : "Confirm & Resume"}
                   </button>
                 </form>
               </div>
@@ -665,21 +623,10 @@ export function HorizontalPipelineMap({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <div className="label-xs text-neutral-500">CURRENT OPERATION</div>
+                <div className="label-xs text-neutral-500">WHAT THIS BOT IS DOING</div>
                 <p className="font-sans text-sm font-medium text-black mt-1">
                   {inspectedBot.current_task}
                 </p>
-
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2 bg-neutral-50 rounded border border-neutral-200">
-                    <span className="text-neutral-500 text-[10px]">CPU ALLOCATION</span>
-                    <div className="font-bold text-black">{inspectedBot.cpu_pct}%</div>
-                  </div>
-                  <div className="p-2 bg-neutral-50 rounded border border-neutral-200">
-                    <span className="text-neutral-500 text-[10px]">MEMORY USAGE</span>
-                    <div className="font-bold text-black">{inspectedBot.memory_mb} MB (Lightweight)</div>
-                  </div>
-                </div>
 
                 {inspectedBot.target_company && (
                   <div className="mt-3 p-2 bg-neutral-50 rounded border border-neutral-200 text-xs font-sans">
@@ -691,7 +638,7 @@ export function HorizontalPipelineMap({
               </div>
 
               <div>
-                <div className="label-xs text-neutral-500 mb-2">LIVE BOT TELEMETRY LOGS</div>
+                <div className="label-xs text-neutral-500 mb-2">RECENT ACTIONS</div>
                 <div className="p-3 bg-neutral-50 rounded border border-neutral-200 space-y-1.5 max-h-40 overflow-y-auto text-[11px]">
                   {inspectedBot.logs && inspectedBot.logs.length > 0 ? (
                     inspectedBot.logs.map((l, i) => (
@@ -701,7 +648,7 @@ export function HorizontalPipelineMap({
                       </div>
                     ))
                   ) : (
-                    <div className="text-neutral-500">Awaiting activity stream...</div>
+                    <div className="text-neutral-500">Waiting for next action...</div>
                   )}
                 </div>
               </div>

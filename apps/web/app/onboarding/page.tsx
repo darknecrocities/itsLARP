@@ -134,12 +134,12 @@ export default function OnboardingPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <div className="mb-8">
-        <div className="label-xs text-muted">STEP 01 — CAREER DNA INGESTION</div>
+        <div className="label-xs text-muted">STEP 01 — YOUR PROFILE</div>
         <h1 className="text-3xl font-bold font-sans tracking-tight text-ink mt-1">
-          Upload Your Career & Synthesize Candidate Info
+          Upload Your Resume & Experience
         </h1>
         <p className="text-muted text-sm mt-1">
-          Upload your resume, connect GitHub, and provide LinkedIn. The Local LLM extracts and lists down candidate attributes with strict anti-hallucination verification.
+          Drop your resume and connect your GitHub or LinkedIn. Our AI reads your real skills and organizes your profile so you never have to apply manually again.
         </p>
       </div>
 
@@ -244,7 +244,7 @@ export default function OnboardingPage() {
             disabled={busy || (!resumeText && !github && !liText)}
             onClick={runLocalLLMExtraction}
           >
-            {busy ? "Running Local LLM Extraction..." : "⚡ Synthesize Candidate Info via Local LLM →"}
+            {busy ? "Reading Your Experience with AI..." : "⚡ Build My Profile with AI →"}
           </button>
         </div>
       ) : (
@@ -254,7 +254,7 @@ export default function OnboardingPage() {
             <div className="flex justify-between items-center border-b border-line pb-3 mb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-black text-white rounded">
-                  LOCAL LLM EXTRACTION COMPLETE
+                  AI PROFILE READY
                 </span>
                 <h2 className="text-2xl font-bold font-sans mt-1">{extractedCandidate.name || "Candidate Name"}</h2>
                 <div className="text-dmuted text-sm font-medium">{extractedCandidate.headline || "Software Engineer"}</div>

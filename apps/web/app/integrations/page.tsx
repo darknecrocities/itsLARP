@@ -67,8 +67,8 @@ export default function Integrations() {
   return (
     <>
       <PageHeader
-        title="Integrations & Mirrors"
-        sub="Connect external services. PostgreSQL remains the verified source of truth; Notion acts as a synchronized live mirror."
+        title="App Integrations"
+        sub="Connect Notion to automatically organize and track every job application in your personal workspace."
       />
 
       <section className="card p-6 max-w-2xl bg-bg border border-line">

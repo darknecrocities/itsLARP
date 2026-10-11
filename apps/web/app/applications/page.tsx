@@ -66,7 +66,7 @@ export default function ApplicationsPage() {
     <>
       <PageHeader
         title="Application Tracker"
-        sub="Track application statuses, timelines, and interview stages. Synchronized with PostgreSQL and Notion mirror."
+        sub="Track every job application, interview, and offer in real time. Automatically synced with your Notion list."
         action={
           <div className="flex gap-2">
             <Link href="/jobs" className="btn btn-primary">

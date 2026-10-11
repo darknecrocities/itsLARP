@@ -34,11 +34,11 @@ export default function Dashboard() {
     <>
       <PageHeader
         title="Dashboard"
-        sub="Your centralized career command center. All applications, evidence, and active AI workers in real time."
+        sub="See all your job applications, tailored resumes, and active bot results in one place."
         action={
           <div className="flex gap-2">
             <Link href="/agents" className="btn btn-primary">
-              Deploy Workforce
+              Launch Bots
             </Link>
             <Link href="/jobs" className="btn">
               Discover Jobs

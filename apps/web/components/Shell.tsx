@@ -6,15 +6,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 
 const NAV = [
-  ["/dashboard", "Dashboard", "Command center"],
-  ["/profile", "Career DNA", "Source of truth"],
-  ["/jobs", "Jobs", "Live discovery & scoring"],
-  ["/resume", "Resume Studio", "Master & versions"],
-  ["/apply", "Applications", "Pipeline tracker"],
-  ["/agents", "Agent Workforce", "1,000 parallel workers"],
-  ["/analytics", "Analytics", "Conversion metrics"],
-  ["/integrations", "Integrations", "Notion mirror"],
-  ["/settings", "Settings", "Local AI / Ollama"],
+  ["/dashboard", "Dashboard", "Overview"],
+  ["/profile", "Career Profile", "Your real skills"],
+  ["/jobs", "Jobs", "Matching openings"],
+  ["/resume", "APA Resume", "Download & edit"],
+  ["/apply", "Applications", "Track progress"],
+  ["/agents", "Auto-Apply Bots", "1,000 active bots"],
+  ["/analytics", "Analytics", "Success rates"],
+  ["/integrations", "Notion Sync", "List integration"],
+  ["/settings", "Settings", "Preferences"],
 ] as const;
 
 const BARE = ["/", "/login", "/onboarding"];
@@ -76,7 +76,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   v1.0
                 </span>
               </Link>
-              <p className="text-[11px] text-muted font-mono mt-1">AI Job-Hunting Workforce</p>
+              <p className="text-[11px] text-muted font-mono mt-1">Auto-Apply Bots</p>
             </div>
 
             {/* Navigation links */}

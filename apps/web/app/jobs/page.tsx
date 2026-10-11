@@ -75,14 +75,14 @@ export default function JobsPage() {
     <>
       <PageHeader
         title="Jobs"
-        sub="Dynamic multi-source discovery: Remotive, Arbeitnow, and custom URL ingest. Normalized and scored against Career DNA."
+        sub="Browse openings found for you across top job boards, scored by how well they match your profile."
         action={
           <div className="flex gap-2">
             <button className="btn btn-primary" onClick={() => setShowImport(true)}>
               + Add Job / URL
             </button>
             <Link href="/agents" className="btn">
-              Deploy Swarm
+              Launch Bots
             </Link>
           </div>
         }

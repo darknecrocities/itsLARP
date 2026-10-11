@@ -75,7 +75,7 @@ export default function ResumeStudio() {
     <>
       <PageHeader
         title="Resume Studio"
-        sub="One Master Resume as the verifiable source of truth, formatted in standard APA 7th Edition style and customizable for any opportunity."
+        sub="Clean, professional APA-format resume generated from your real experience. Ready to download or customize for any job."
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button

@@ -54,8 +54,8 @@ export default function ProfilePage() {
   return (
     <>
       <PageHeader
-        title="Career DNA & Evidence Repository"
-        sub="The single source of truth. Structured career data backed by traceable evidence. AI is strictly constrained to this repository."
+        title="Your Career Profile"
+        sub="Your real skills, experience, and projects. The bots use this information to customize your resumes and apply for jobs."
         action={
           <div className="flex gap-2">
             <Link href="/onboarding" className="btn text-xs">
