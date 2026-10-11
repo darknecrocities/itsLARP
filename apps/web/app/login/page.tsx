@@ -45,7 +45,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen grid place-items-center p-6">
       <div className="card p-8 w-full max-w-md rise shadow-xl border border-line">
-        <h1 className="text-2xl font-semibold">Sign in to HowToLarped</h1>
+        <h1 className="text-2xl font-semibold">Sign in to itsLARP</h1>
         <p className="text-muted text-sm mt-1 mb-6">
           Your AI Job-Hunting Workforce & Career Operating System.
         </p>

@@ -87,8 +87,8 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="font-display font-bold text-xl tracking-tight text-ink group flex items-center gap-2">
-              <span>itsLARP / HowToLarped</span>
+            <Link href="/" className="font-display font-bold text-2xl tracking-tight text-ink group flex items-center gap-2">
+              <span>itsLARP</span>
             </Link>
           </div>
 
@@ -631,8 +631,8 @@ export default function LandingPage() {
         <FadeIn distance={14}>
           <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6">
             <div>
-              <div className="font-display font-bold text-sm tracking-tight text-ink">
-                itsLARP / HowToLarped
+              <div className="font-display font-bold text-base tracking-tight text-ink">
+                itsLARP
               </div>
               <p className="text-muted text-[11px] mt-0.5">Your AI Job-Hunting Team · No Manual Applications Needed</p>
             </div>

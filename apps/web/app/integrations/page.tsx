@@ -42,7 +42,7 @@ export default function Integrations() {
           role: a.role,
           match: a.match,
           status: a.status,
-          notes: a.events?.[0]?.text || "Synced from HowToLarped",
+          notes: a.events?.[0]?.text || "Synced from itsLARP",
         })),
       });
 
@@ -50,7 +50,7 @@ export default function Integrations() {
       setNotion({ token: token.trim(), databaseId: res.database_id, connected: true });
       setDbUrl(res.database_url);
       setMsg(
-        `✓ Success! Self-created “HowToLarped Job Applications” in Notion with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirrored ${res.synced_count} applications!`
+        `✓ Success! Self-created “itsLARP Job Applications” in Notion with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirrored ${res.synced_count} applications!`
       );
     });
 

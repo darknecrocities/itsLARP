@@ -232,7 +232,7 @@ export default function ResumeStudio() {
 
               {/* Action Toolbar */}
               <div className="mt-8 pt-4 border-t border-neutral-300 flex justify-between items-center text-xs font-mono text-neutral-600 no-print">
-                <span>APA 7th Standard · Verified via HowToLarped OS</span>
+                <span>APA 7th Standard · Verified via itsLARP</span>
                 <div className="flex gap-2">
                   <button
                     className="btn text-xs py-1 px-3 bg-black text-white"

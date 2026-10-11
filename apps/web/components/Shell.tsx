@@ -44,7 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between border-b border-line px-4 py-3 bg-bg">
           <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-base tracking-tight">HowToLarped</span>
+            <span className="font-display font-bold text-xl tracking-tight text-ink">itsLARP</span>
             <span className="text-[10px] font-mono px-1 py-0.5 bg-bg2 border border-line rounded">OS</span>
           </div>
           <button
@@ -69,8 +69,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {/* Logo */}
             <div className="mb-6">
               <Link href="/" className="flex items-center gap-2 group">
-                <span className="font-display font-bold text-lg tracking-tight text-ink group-hover:opacity-80 transition-opacity">
-                  HowToLarped
+                <span className="font-display font-bold text-2xl tracking-tight text-ink group-hover:opacity-80 transition-opacity">
+                  itsLARP
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.5 bg-black text-white rounded font-medium">
                   v1.0

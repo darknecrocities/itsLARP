@@ -9,7 +9,7 @@ const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk" }
 const jb = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jb" });
 
 export const metadata: Metadata = {
-  title: "HowToLarped — Your AI Job-Hunting Workforce",
+  title: "itsLARP — Your AI Job-Hunting Workforce",
   description: "A career operating system: Career DNA, verified resumes, and an AI workforce for your job search.",
 };
 
