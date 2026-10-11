@@ -55,7 +55,7 @@ export default function ProfilePage() {
     <>
       <PageHeader
         title="Your Career Profile"
-        sub="Your real skills, experience, and projects. The bots use this information to customize your resumes and apply for jobs."
+        sub="Your real skills, experience, and projects. The Agents use this information to customize your resumes and apply for jobs."
         action={
           <div className="flex gap-2">
             <Link href="/onboarding" className="btn text-xs">

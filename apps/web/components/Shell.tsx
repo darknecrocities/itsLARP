@@ -11,7 +11,7 @@ const NAV = [
   ["/jobs", "Jobs", "Matching openings"],
   ["/resume", "APA Resume", "Download & edit"],
   ["/apply", "Applications", "Track progress"],
-  ["/agents", "Auto-Apply Bots", "1,000 active bots"],
+  ["/agents", "Auto-Apply Agents", "1,000 active agents"],
   ["/analytics", "Analytics", "Success rates"],
   ["/integrations", "Notion Sync", "List integration"],
   ["/settings", "Settings", "Preferences"],
@@ -76,7 +76,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   v1.0
                 </span>
               </Link>
-              <p className="text-[11px] text-muted font-mono mt-1">Auto-Apply Bots</p>
+              <p className="text-[11px] text-muted font-mono mt-1">Auto-Apply Agents</p>
             </div>
 
             {/* Navigation links */}

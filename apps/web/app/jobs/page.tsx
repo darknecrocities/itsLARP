@@ -82,7 +82,7 @@ export default function JobsPage() {
               + Add Job / URL
             </button>
             <Link href="/agents" className="btn">
-              Launch Bots
+              Launch Agents
             </Link>
           </div>
         }

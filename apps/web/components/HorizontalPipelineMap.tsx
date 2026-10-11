@@ -45,7 +45,7 @@ const GRAPH_NODES: GraphNode[] = [
     title: "Your Real Profile",
     role: "100% Honest Experience",
     badge: "Never Lies",
-    desc: "You upload your resume and connect your profiles once. The bots strictly use your real experience and verified projects—they never make things up or invent fake skills.",
+    desc: "You upload your resume and connect your profiles once. The Agents strictly use your real experience and verified projects—they never make things up or invent fake skills.",
     stats: [
       { label: "Your Info", val: "Resume & Profiles" },
       { label: "Honesty", val: "Only Real Skills" },
@@ -62,11 +62,11 @@ const GRAPH_NODES: GraphNode[] = [
     label: "2: JOB FINDERS",
     title: "300 Job Finders",
     role: "Searching 24/7",
-    badge: "300 Bots",
-    desc: "300 bots constantly search LinkedIn, JobStreet, and Indeed around the clock to find job openings that match the roles, locations, and salaries you want.",
+    badge: "300 Agents",
+    desc: "300 Agents constantly search LinkedIn, JobStreet, and Indeed around the clock to find job openings that match the roles, locations, and salaries you want.",
     stats: [
       { label: "Platforms", val: "LinkedIn, JobStreet, Indeed" },
-      { label: "Bots Working", val: "300 Active Bots" },
+      { label: "Agents Working", val: "300 Active Agents" },
       { label: "Account Safety", val: "Safe & Secure" },
       { label: "Speed", val: "Finds Jobs Instantly" },
     ],
@@ -98,8 +98,8 @@ const GRAPH_NODES: GraphNode[] = [
     label: "4: RESUME MAKER",
     title: "300 Resume Makers",
     role: "Custom Resumes for Every Job",
-    badge: "300 Bots",
-    desc: "Instead of sending the same generic resume, 300 bots build a tailored APA-format resume highlighting your relevant projects for each specific role.",
+    badge: "300 Agents",
+    desc: "Instead of sending the same generic resume, 300 Agents build a tailored APA-format resume highlighting your relevant projects for each specific role.",
     stats: [
       { label: "Resume Style", val: "Clean APA Format" },
       { label: "Customization", val: "Tailored Per Job" },
@@ -116,10 +116,10 @@ const GRAPH_NODES: GraphNode[] = [
     label: "5: AUTO-APPLIER",
     title: "400 Auto-Appliers",
     role: "Fills & Prepares Applications",
-    badge: "400 Bots",
-    desc: "400 bots do the boring work: filling out repetitive application questions and forms. Everything is staged for your quick review so you stay in total control.",
+    badge: "400 Agents",
+    desc: "400 Agents do the boring work: filling out repetitive application questions and forms. Everything is staged for your quick review so you stay in total control.",
     stats: [
-      { label: "Applying Team", val: "400 Active Bots" },
+      { label: "Applying Team", val: "400 Active Agents" },
       { label: "Repetitive Forms", val: "Filled Automatically" },
       { label: "Your Control", val: "Review Before Sending" },
       { label: "Time Saved", val: "Hours Every Day" },
@@ -187,7 +187,7 @@ export function HorizontalPipelineMap({
 
     // 300 Crawlers (sample subset of 30)
     for (let i = 1; i <= 30; i++) {
-      const bid = `bot_scrape_${String(i).padStart(3, "0")}`;
+      const bid = `agent_scrape_${String(i).padStart(3, "0")}`;
       const plat = platforms[(i - 1) % platforms.length];
       list.push({
         id: bid,
@@ -212,7 +212,7 @@ export function HorizontalPipelineMap({
 
     // 300 Tailors (sample subset of 30)
     for (let i = 1; i <= 30; i++) {
-      const bid = `bot_tailor_${String(i).padStart(3, "0")}`;
+      const bid = `agent_tailor_${String(i).padStart(3, "0")}`;
       list.push({
         id: bid,
         pool: "tailor",
@@ -232,7 +232,7 @@ export function HorizontalPipelineMap({
 
     // 400 Appliers (sample subset of 40)
     for (let i = 1; i <= 40; i++) {
-      const bid = `bot_apply_${String(i).padStart(3, "0")}`;
+      const bid = `agent_apply_${String(i).padStart(3, "0")}`;
       const plat = platforms[(i - 1) % platforms.length];
       list.push({
         id: bid,
@@ -294,21 +294,21 @@ export function HorizontalPipelineMap({
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-4 mb-6 gap-3">
           <div>
-            <div className="label-xs text-neutral-500">HOW YOUR BOTS WORK TOGETHER</div>
+            <div className="label-xs text-neutral-500">HOW YOUR AGENTS WORK TOGETHER</div>
             <h3 className="text-xl font-bold font-sans tracking-tight text-black mt-0.5">
-              Interactive Bot Network
+              Interactive Agent Network
             </h3>
             <p className="text-xs text-neutral-600 font-sans mt-0.5">
-              Click any circle below to see how your bots find jobs, write resumes, and apply for you.
+              Click any circle below to see how your Agents find jobs, write resumes, and apply for you.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5 px-3 py-1 bg-neutral-100 rounded border border-neutral-300">
               <span className={`w-2 h-2 rounded-full ${running ? "bg-black animate-pulse" : "bg-neutral-400"}`} />
-              <strong className="text-black">{running ? "BOTS WORKING" : "BOTS READY"}</strong>
+              <strong className="text-black">{running ? "AGENTS WORKING" : "AGENTS READY"}</strong>
             </span>
             <span className="text-neutral-500">
-              Total: <strong className="text-black">{totalWorkers} Bots</strong>
+              Total: <strong className="text-black">{totalWorkers} Agents</strong>
             </span>
             <span className="text-neutral-500">
               Active: <strong className="text-black">{activeCount}</strong>
@@ -457,7 +457,7 @@ export function HorizontalPipelineMap({
                   className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono"
                   onClick={() => setActivePoolTab(selectedNode.poolKey)}
                 >
-                  View Bots Below ↓
+                  View Agents Below ↓
                 </button>
               </div>
             </div>
@@ -479,13 +479,13 @@ export function HorizontalPipelineMap({
         </AnimatePresence>
       </div>
 
-      {/* Bot Explorer & Matrix */}
+      {/* Agent Explorer & Matrix */}
       <div className="card p-6 bg-white text-black border border-neutral-300">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-lg font-bold font-sans">Individual Bot Explorer</h3>
+            <h3 className="text-lg font-bold font-sans">Individual Agent Explorer</h3>
             <p className="text-xs text-neutral-600 font-sans">
-              Click any bot below to see its current job search task and recent actions.
+              Click any Agent below to see its current job search task and recent actions.
             </p>
           </div>
 
@@ -499,7 +499,7 @@ export function HorizontalPipelineMap({
               }`}
               onClick={() => setActivePoolTab("all")}
             >
-              All 1,000 Bots
+              All 1,000 Agents
             </button>
             <button
               className={`px-3 py-1 rounded border transition-colors ${
@@ -547,7 +547,7 @@ export function HorizontalPipelineMap({
           </div>
         </div>
 
-        {/* Minimalist Bot Grid */}
+        {/* Minimalist Agent Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-72 overflow-y-auto p-2 bg-neutral-50 rounded border border-neutral-200">
           {filteredBots.map((bot) => {
             const isAlert = bot.status === "needs_verification" || bot.verification_challenge;
@@ -588,7 +588,7 @@ export function HorizontalPipelineMap({
           })}
         </div>
 
-        {/* Selected Bot Detailed Inspector Drawer with Motion */}
+        {/* Selected Agent Detailed Inspector Drawer with Motion */}
         <AnimatePresence>
           {inspectedBot && (
             <motion.div
@@ -645,7 +645,7 @@ export function HorizontalPipelineMap({
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <div className="label-xs text-neutral-500">WHAT THIS BOT IS DOING</div>
+                  <div className="label-xs text-neutral-500">WHAT THIS AGENT IS DOING</div>
                   <p className="font-sans text-sm font-medium text-black mt-1">
                     {inspectedBot.current_task}
                   </p>

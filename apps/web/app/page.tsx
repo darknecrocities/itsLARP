@@ -18,20 +18,20 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const DEMO_LOGS = [
-  { t: "14:10:02", id: "bot_scrape_014", msg: "LinkedIn bot found 'Lead AI Engineer' @ Anthropic Labs matching your target salary" },
-  { t: "14:10:05", id: "bot_scrape_089", msg: "JobStreet bot found 'Senior Full Stack Lead' @ FinTech Corp matching your skills" },
-  { t: "14:10:07", id: "bot_analyst_04", msg: "Checked job requirements: Python, React, FastAPI, Docker (94% match)" },
-  { t: "14:10:09", id: "bot_match_11", msg: "Match score computed: 94% · Fits your experience and preferences" },
-  { t: "14:10:12", id: "bot_tailor_042", msg: "Created custom APA resume highlighting your real project experience" },
-  { t: "14:10:15", id: "bot_apply_108", msg: "Filled application questions and staged application for your 1-tap review" },
-  { t: "14:10:18", id: "bot_notion_01", msg: "Saved to your Notion tracker: Anthropic Labs · Ready to Review · 94% Match" },
+  { t: "14:10:02", id: "agent_scrape_014", msg: "LinkedIn Agent found 'Lead AI Engineer' @ Anthropic Labs matching your target salary" },
+  { t: "14:10:05", id: "agent_scrape_089", msg: "JobStreet Agent found 'Senior Full Stack Lead' @ FinTech Corp matching your skills" },
+  { t: "14:10:07", id: "agent_analyst_04", msg: "Checked job requirements: Python, React, FastAPI, Docker (94% match)" },
+  { t: "14:10:09", id: "agent_match_11", msg: "Match score computed: 94% · Fits your experience and preferences" },
+  { t: "14:10:12", id: "agent_tailor_042", msg: "Created custom APA resume highlighting your real project experience" },
+  { t: "14:10:15", id: "agent_apply_108", msg: "Filled application questions and staged application for your 1-tap review" },
+  { t: "14:10:18", id: "agent_notion_01", msg: "Saved to your Notion tracker: Anthropic Labs · Ready to Review · 94% Match" },
 ];
 
 const PRINCIPLES = [
   {
     num: "01",
     title: "100% Honest & Accurate",
-    desc: "The bots strictly use your real experience. They never make things up, exaggerate, or invent fake skills.",
+    desc: "The Agents strictly use your real experience. They never make things up, exaggerate, or invent fake skills.",
   },
   {
     num: "02",
@@ -40,8 +40,8 @@ const PRINCIPLES = [
   },
   {
     num: "03",
-    title: "300 Bots Searching For You",
-    desc: "While you go about your day, 300 bots scan LinkedIn, JobStreet, and Indeed looking only for jobs you actually want.",
+    title: "300 Agents Searching For You",
+    desc: "While you go about your day, 300 Agents scan LinkedIn, JobStreet, and Indeed looking only for jobs you actually want.",
   },
   {
     num: "04",
@@ -50,8 +50,8 @@ const PRINCIPLES = [
   },
   {
     num: "05",
-    title: "400 Bots Applying for You",
-    desc: "400 bots do the boring form filling so you never have to re-enter your work history. You give final approval before submitting.",
+    title: "400 Agents Applying for You",
+    desc: "400 Agents do the boring form filling so you never have to re-enter your work history. You give final approval before submitting.",
   },
   {
     num: "06",
@@ -134,7 +134,7 @@ export default function LandingPage() {
 
           <FadeIn delay={0.2} distance={20}>
             <p className="text-dmuted text-lg sm:text-xl md:text-2xl mt-6 max-w-3xl leading-relaxed">
-              No need to manually apply. Upload your resume, LinkedIn, or GitHub once. Your personal team of 1,000 bots searches for jobs you love, customizes your resume for each role, and applies for you—automatically.
+              No need to manually apply. Upload your resume, LinkedIn, or GitHub once. Your personal team of 1,000 Agents searches for jobs you love, customizes your resume for each role, and applies for you—automatically.
             </p>
           </FadeIn>
 
@@ -146,7 +146,7 @@ export default function LandingPage() {
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <a href="#workforce-demo" className="btn text-base py-3 px-6">
-                Watch Bots in Action
+                Watch Agents in Action
               </a>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
@@ -166,7 +166,7 @@ export default function LandingPage() {
               <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
                 <div className="label-xs text-muted">300 JOB FINDERS</div>
                 <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                  <AnimatedCounter to={300} suffix=" Bots" />
+                  <AnimatedCounter to={300} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Searches LinkedIn & JobStreet 24/7</div>
               </CardMotion>
@@ -176,7 +176,7 @@ export default function LandingPage() {
               <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
                 <div className="label-xs text-muted">300 RESUME MAKERS</div>
                 <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                  <AnimatedCounter to={300} suffix=" Bots" />
+                  <AnimatedCounter to={300} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Custom APA resumes for every role</div>
               </CardMotion>
@@ -186,7 +186,7 @@ export default function LandingPage() {
               <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
                 <div className="label-xs text-muted">400 AUTO-APPLIERS</div>
                 <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                  <AnimatedCounter to={400} suffix=" Bots" />
+                  <AnimatedCounter to={400} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Fills forms & gets apps ready for you</div>
               </CardMotion>
@@ -206,7 +206,7 @@ export default function LandingPage() {
       {/* Infinite Looping Text Marquee Strip */}
       <InfiniteLoopMarquee
         items={[
-          "1,000 Bots in Parallel",
+          "1,000 Agents in Parallel",
           "300 Job Finders",
           "300 Resume Makers",
           "400 Auto-Appliers",
@@ -226,9 +226,9 @@ export default function LandingPage() {
           <FadeIn direction="up" distance={24} className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <div>
               <div className="label-xs">LIVE DEMO</div>
-              <h2 className="text-3xl font-bold mt-1 tracking-tight">Watch 1,000 Bots Work For You in Real Time</h2>
+              <h2 className="text-3xl font-bold mt-1 tracking-tight">Watch 1,000 Agents Work For You in Real Time</h2>
               <p className="text-muted text-sm mt-1 max-w-xl">
-                See how your bots find jobs, write tailored resumes, and prepare your applications. Click any circle in the network below to see what it does.
+                See how your Agents find jobs, write tailored resumes, and prepare your applications. Click any circle in the network below to see what it does.
               </p>
             </div>
 
@@ -245,7 +245,7 @@ export default function LandingPage() {
                 className={`btn text-xs ${demoTab === "pipeline" ? "bg-black text-white" : ""}`}
                 onClick={() => setDemoTab("pipeline")}
               >
-                Interactive Bot Network
+                Interactive Agent Network
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -396,7 +396,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <span className="text-ink font-bold flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse" />
-                LIVE BOT ACTIVITY:
+                LIVE AGENT ACTIVITY:
               </span>
               <span className="text-muted">[{DEMO_LOGS[activeLogIndex].id}]</span>
               <motion.span
@@ -421,7 +421,7 @@ export default function LandingPage() {
             <div className="label-xs">HOW IT WORKS FOR YOU</div>
             <h2 className="text-3xl font-bold mt-1 tracking-tight">6 Simple Rules That Keep You in Control</h2>
             <p className="text-muted text-sm mt-2">
-              No complicated setup. No fake skills. Here is how our bots save you hours every single day.
+              No complicated setup. No fake skills. Here is how our Agents save you hours every single day.
             </p>
           </FadeIn>
 
@@ -491,11 +491,11 @@ export default function LandingPage() {
                       <span className="font-mono text-xs font-bold px-2 py-0.5 bg-black text-white rounded">
                         STEP 02
                       </span>
-                      <span className="text-[11px] font-mono text-muted">300 Bots</span>
+                      <span className="text-[11px] font-mono text-muted">300 Agents</span>
                     </div>
-                    <h3 className="font-bold text-lg mb-2">Bots Search For You</h3>
+                    <h3 className="font-bold text-lg mb-2">Agents Search For You</h3>
                     <p className="text-muted text-xs leading-relaxed">
-                      300 bots browse LinkedIn, JobStreet, and Indeed around the clock, matching jobs based on your title, location, and salary goals.
+                      300 Agents browse LinkedIn, JobStreet, and Indeed around the clock, matching jobs based on your title, location, and salary goals.
                     </p>
                   </div>
                   <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
@@ -514,11 +514,11 @@ export default function LandingPage() {
                       <span className="font-mono text-xs font-bold px-2 py-0.5 bg-black text-white rounded">
                         STEP 03
                       </span>
-                      <span className="text-[11px] font-mono text-muted">300 Bots</span>
+                      <span className="text-[11px] font-mono text-muted">300 Agents</span>
                     </div>
                     <h3 className="font-bold text-lg mb-2">Custom Resumes Made</h3>
                     <p className="text-muted text-xs leading-relaxed">
-                      For every single job opening found, 300 bots build an individualized, clean APA-format resume highlighting your relevant real-world work.
+                      For every single job opening found, 300 Agents build an individualized, clean APA-format resume highlighting your relevant real-world work.
                     </p>
                   </div>
                   <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
@@ -537,11 +537,11 @@ export default function LandingPage() {
                       <span className="font-mono text-xs font-bold px-2 py-0.5 bg-black text-white rounded">
                         STEP 04
                       </span>
-                      <span className="text-[11px] font-mono text-muted">400 Bots</span>
+                      <span className="text-[11px] font-mono text-muted">400 Agents</span>
                     </div>
                     <h3 className="font-bold text-lg mb-2">Applied & Tracked</h3>
                     <p className="text-muted text-xs leading-relaxed">
-                      400 bots fill out the repetitive application forms. You review with one tap, and every company is organized in your Notion tracker.
+                      400 Agents fill out the repetitive application forms. You review with one tap, and every company is organized in your Notion tracker.
                     </p>
                   </div>
                   <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
@@ -565,7 +565,7 @@ export default function LandingPage() {
                         "No more copying and pasting job descriptions into applications.",
                         "No more re-entering your job history on 50 different career sites.",
                         "No more tracking job applications across messy spreadsheets.",
-                        "Just your dream job delivered on autopilot with 1,000 bots.",
+                        "Just your dream job delivered on autopilot with 1,000 Agents.",
                       ]}
                       interval={3200}
                       className="font-medium text-black"
@@ -607,7 +607,7 @@ export default function LandingPage() {
               Stop Applying to Jobs Manually.
             </h2>
             <p className="text-dmuted text-base sm:text-lg mt-4 max-w-xl mx-auto leading-relaxed">
-              Upload your resume once and let 1,000 bots do the hard work—finding matching roles, customizing resumes, and applying for you.
+              Upload your resume once and let 1,000 Agents do the hard work—finding matching roles, customizing resumes, and applying for you.
             </p>
 
             <div className="mt-8 flex justify-center gap-3">
@@ -618,7 +618,7 @@ export default function LandingPage() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
                 <Link href="/agents" className="btn text-base py-3 px-6">
-                  Open Bot Console
+                  Open Agent Console
                 </Link>
               </motion.div>
             </div>
@@ -641,7 +641,7 @@ export default function LandingPage() {
               <Link href="/dashboard" className="hover:text-ink transition-colors">Dashboard</Link>
               <Link href="/profile" className="hover:text-ink transition-colors">Profile</Link>
               <Link href="/resume" className="hover:text-ink transition-colors">APA Resume</Link>
-              <Link href="/agents" className="hover:text-ink transition-colors">1,000 Bots</Link>
+              <Link href="/agents" className="hover:text-ink transition-colors">1,000 Agents</Link>
               <Link href="/applications" className="hover:text-ink transition-colors">Applications</Link>
               <Link href="/integrations" className="hover:text-ink transition-colors">Notion</Link>
               <Link href="/settings" className="hover:text-ink transition-colors">Settings</Link>
