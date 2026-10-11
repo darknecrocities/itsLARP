@@ -7,6 +7,20 @@ export const STAGES: Stage[] = ["discovery", "analysis", "matching", "resumes", 
 
 export type AgentLog = { t: string; id: string; msg: string };
 
+export type BotTelemetry = {
+  id: string;
+  pool: "discovery" | "tailor" | "apply";
+  platform: string;
+  status: "idle" | "browsing" | "analyzing" | "tailoring" | "applying" | "completed" | "needs_verification";
+  current_task: string;
+  cpu_pct: number;
+  memory_mb: number;
+  target_company?: string;
+  target_role?: string;
+  logs: { t: string; msg: string }[];
+  verification_challenge?: { platform: string; prompt: string; created_at: number } | null;
+};
+
 export type SwarmSnapshot = {
   id: string;
   status: "running" | "completed" | "stopped";
@@ -22,6 +36,16 @@ export type SwarmSnapshot = {
   jobs: number;
   ready: number;
   blocked: number;
+  pools?: {
+    scrapers_count: number;
+    tailors_count: number;
+    appliers_count: number;
+    scrapers_active: number;
+    tailors_active: number;
+    appliers_active: number;
+  };
+  alerts?: BotTelemetry[];
+  sample_bots?: BotTelemetry[];
 };
 
 export type SwarmResultItem = {
@@ -65,10 +89,24 @@ type SwarmState = {
   readyCount: number;
   blockedCount: number;
   results: SwarmResultItem[];
-  start: (workers: number, customQueries?: string[]) => Promise<void>;
+  bots: BotTelemetry[];
+  selectedBotId: string | null;
+  pools: {
+    scrapers_count: number;
+    tailors_count: number;
+    appliers_count: number;
+    scrapers_active: number;
+    tailors_active: number;
+    appliers_active: number;
+  };
+  alerts: BotTelemetry[];
+  setSelectedBotId: (id: string | null) => void;
+  start: (workers: number, customQueries?: string[], credentials?: Record<string, string>) => Promise<void>;
   stop: () => Promise<void>;
   poll: () => Promise<void>;
   fetchResults: () => Promise<void>;
+  fetchBots: () => Promise<void>;
+  verifyBot: (botId: string, code: string) => Promise<boolean>;
 };
 
 let pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -76,7 +114,7 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 export const useSwarm = create<SwarmState>((set, get) => ({
   runId: null,
   running: false,
-  workers: 0,
+  workers: 1000,
   active: 0,
   status: "idle",
   counts: zeroCounts(),
@@ -86,8 +124,21 @@ export const useSwarm = create<SwarmState>((set, get) => ({
   readyCount: 0,
   blockedCount: 0,
   results: [],
+  bots: [],
+  selectedBotId: null,
+  pools: {
+    scrapers_count: 300,
+    tailors_count: 300,
+    appliers_count: 400,
+    scrapers_active: 0,
+    tailors_active: 0,
+    appliers_active: 0,
+  },
+  alerts: [],
 
-  start: async (workerCount: number, customQueries?: string[]) => {
+  setSelectedBotId: (id) => set({ selectedBotId: id }),
+
+  start: async (workerCount: number, customQueries?: string[], credentials?: Record<string, string>) => {
     if (pollTimer) {
       clearInterval(pollTimer);
       pollTimer = null;
@@ -96,7 +147,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     const profile = useStore.getState().profile;
     const defaultQueries = profile.headline
       ? [profile.headline]
-      : ["AI Engineer", "Software Engineer", "Backend Developer"];
+      : ["AI Engineer", "Software Engineer", "Full Stack Developer"];
     const queries = customQueries && customQueries.length > 0 ? customQueries : defaultQueries;
 
     try {
@@ -104,6 +155,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         profile,
         queries,
         workers: workerCount,
+        credentials: credentials || {},
       });
 
       set({
@@ -118,6 +170,9 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         discoveredCount: snap.jobs,
         readyCount: snap.ready,
         blockedCount: snap.blocked,
+        pools: snap.pools || get().pools,
+        alerts: snap.alerts || [],
+        bots: snap.sample_bots || [],
       });
 
       useStore.getState().setActiveSwarmId(snap.id);
@@ -150,12 +205,16 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         discoveredCount: snap.jobs,
         readyCount: snap.ready,
         blockedCount: snap.blocked,
+        pools: snap.pools || get().pools,
+        alerts: snap.alerts || [],
+        bots: snap.sample_bots?.length ? snap.sample_bots : get().bots,
       });
 
       if (!isStillRunning && pollTimer) {
         clearInterval(pollTimer);
         pollTimer = null;
         get().fetchResults();
+        get().fetchBots();
       }
     } catch (err) {
       if (pollTimer) {
@@ -179,6 +238,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     }
     set({ running: false, status: "stopped" });
     get().fetchResults();
+    get().fetchBots();
   },
 
   fetchResults: async () => {
@@ -190,5 +250,37 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     } catch (err) {
       console.error("Failed to fetch swarm results:", err);
     }
+  },
+
+  fetchBots: async () => {
+    const { runId } = get();
+    if (!runId) return;
+    try {
+      const res = await apiGet<{ bots: BotTelemetry[] }>(`/swarm/${runId}/bots`);
+      if (res && res.bots) {
+        set({ bots: res.bots });
+      }
+    } catch (err) {
+      console.error("Failed to fetch bots:", err);
+    }
+  },
+
+  verifyBot: async (botId: string, code: string) => {
+    const { runId } = get();
+    if (!runId) return false;
+    try {
+      const res = await api<{ ok: boolean }>(`/swarm/${runId}/bots/${botId}/verify`, { code });
+      if (res.ok) {
+        // Remove from alerts
+        set((s) => ({
+          alerts: s.alerts.filter((a) => a.id !== botId),
+          bots: s.bots.map((b) => (b.id === botId ? { ...b, status: "browsing", verification_challenge: null } : b)),
+        }));
+        return true;
+      }
+    } catch (err) {
+      console.error("Failed to verify bot:", err);
+    }
+    return false;
   },
 }));

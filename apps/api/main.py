@@ -7,7 +7,9 @@ from datetime import datetime
 import json
 import httpx
 
-from services import scoring, verification, dedupe, notion, jobs, tailoring, swarm, resume_parser
+from fastapi.responses import HTMLResponse, Response
+
+from services import scoring, verification, dedupe, notion, jobs, tailoring, swarm, resume_parser, apa_resume
 from services.ai_gateway import ai_gateway
 from services.database import init_db, SessionLocal, JobRecord, ApplicationRecord, ProfileRecord
 
@@ -111,6 +113,61 @@ async def parse_resume_upload(file: UploadFile = File(...)):
         raise HTTPException(400, "The uploaded file contains no readable text.")
     parsed = resume_parser.parse_resume_content(text, filename)
     return parsed
+
+
+class ExtractCandidateIn(BaseModel):
+    resume_text: str = ""
+    github_info: str = ""
+    linkedin_text: str = ""
+
+
+@app.post("/profile/extract-candidate-llm")
+async def profile_extract_candidate_llm(b: ExtractCandidateIn):
+    return await resume_parser.extract_candidate_with_llm(
+        resume_text=b.resume_text,
+        github_info=b.github_info,
+        linkedin_text=b.linkedin_text
+    )
+
+
+class APAResumeIn(BaseModel):
+    profile: dict
+
+
+@app.post("/profile/apa-resume")
+def profile_apa_resume(b: APAResumeIn):
+    text = apa_resume.generate_apa_text(b.profile)
+    html = apa_resume.generate_apa_html(b.profile)
+    return {
+        "text": text,
+        "html": html,
+        "format": "APA 7th Edition"
+    }
+
+
+@app.get("/profile/apa-resume/download")
+def profile_apa_resume_download(format: str = "html"):
+    db = SessionLocal()
+    try:
+        rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
+        p = {
+            "name": rec.name if rec else "Candidate Name",
+            "headline": rec.headline if rec else "Software Engineer",
+            "email": rec.email if rec else "",
+            "location": rec.location if rec else "Remote",
+            "years": rec.years if rec else 2,
+            "education": rec.education if rec else "Bachelor of Science in Computer Science",
+            "skills": (rec.skills or []) if rec else [],
+            "experience": (rec.experience or []) if rec else [],
+            "projects": (rec.projects or []) if rec else [],
+            "links": (rec.links or {}) if rec else {},
+            "evidence": (rec.evidence or []) if rec else [],
+        }
+        if format == "txt":
+            return Response(content=apa_resume.generate_apa_text(p), media_type="text/plain", headers={"Content-Disposition": 'attachment; filename="Resume_APA_Format.txt"'})
+        return HTMLResponse(content=apa_resume.generate_apa_html(p))
+    finally:
+        db.close()
 
 
 class ProfileIn(BaseModel):
@@ -400,6 +457,44 @@ def swarm_results(run_id: str):
     return rows[:200]
 
 
+@app.get("/swarm/{run_id}/bots")
+def swarm_bots(run_id: str):
+    run = swarm.RUNS.get(run_id)
+    if not run:
+        raise HTTPException(404, "Swarm run not found.")
+    return {
+        "run_id": run.id,
+        "status": run.status,
+        "active": run.active,
+        "bots": run.get_all_bots()
+    }
+
+
+@app.get("/swarm/{run_id}/bots/{bot_id}")
+def swarm_bot_detail(run_id: str, bot_id: str):
+    run = swarm.RUNS.get(run_id)
+    if not run:
+        raise HTTPException(404, "Swarm run not found.")
+    bot = run.get_bot(bot_id)
+    if not bot:
+        raise HTTPException(404, f"Bot {bot_id} not found in this run.")
+    return bot
+
+
+class VerifyBotIn(BaseModel):
+    code: str = ""
+
+
+@app.post("/swarm/{run_id}/bots/{bot_id}/verify")
+def swarm_bot_verify(run_id: str, bot_id: str, b: VerifyBotIn):
+    run = swarm.RUNS.get(run_id)
+    if not run:
+        raise HTTPException(404, "Swarm run not found.")
+    success = run.verify_bot(bot_id, b.code)
+    return {"ok": success, "bot_id": bot_id}
+
+
+
 # --- Analytics ---
 
 @app.get("/analytics")
@@ -473,3 +568,36 @@ async def notion_sync(b: NotionSync):
         return await notion.sync_application(b.token, b.database_id, b.application)
     except httpx.HTTPError:
         raise HTTPException(502, "Notion sync failed. Check database access permissions.")
+
+
+class NotionAutoSyncIn(BaseModel):
+    token: str = Field(min_length=10)
+    parent_page_id: Optional[str] = None
+    applications: Optional[List[dict]] = None
+
+
+@app.post("/integrations/notion/auto-create-and-sync")
+async def notion_auto_create_and_sync(b: NotionAutoSyncIn):
+    apps = b.applications
+    if apps is None:
+        db = SessionLocal()
+        try:
+            recs = db.query(ApplicationRecord).all()
+            apps = [
+                {
+                    "company": r.company,
+                    "role": r.role,
+                    "match": r.match,
+                    "status": r.status,
+                    "notes": (r.events[0]["text"] if r.events else "Applied through HowToLarped OS")
+                }
+                for r in recs
+            ]
+        finally:
+            db.close()
+
+    result = await notion.auto_create_and_sync(b.token, b.parent_page_id, apps)
+    if not result.get("ok"):
+        raise HTTPException(400, result.get("error", "Failed to auto-create Notion list"))
+    return result
+

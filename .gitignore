@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Next.js & Turbopack
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# SQLite databases & logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -6,38 +6,163 @@ import { Badge, ErrorBox, PageHeader } from "@/components/ui";
 
 export default function Integrations() {
   const { notion, setNotion, apps } = useStore();
-  const [token, setToken] = useState(notion.token); const [page, setPage] = useState("");
-  const [msg, setMsg] = useState(""); const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
-  const run = async (fn: () => Promise<void>) => { setBusy(true); setErr(""); setMsg(""); try { await fn(); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); } };
+  const [token, setToken] = useState(notion.token);
+  const [parentPage, setParentPage] = useState("");
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [dbUrl, setDbUrl] = useState("");
 
-  const connect = () => run(async () => {
-    const r = await api<{ connected: boolean; workspace?: string; error?: string }>("/integrations/notion/test", { token });
-    if (!r.connected) throw new Error(r.error ?? "Connection failed.");
-    setNotion({ token, connected: true }); setMsg(`Connected to ${r.workspace ?? "Notion"}.`);
-  });
-  const create = () => run(async () => {
-    const r = await api<{ database_id: string }>("/integrations/notion/database", { token: notion.token, parent_page_id: page.replace(/.*-/, "").replace(/\?.*/, "") });
-    setNotion({ databaseId: r.database_id }); setMsg("Database “HowToLarped Applications” created.");
-  });
-  const syncAll = () => run(async () => {
-    for (const a of apps) await api("/integrations/notion/sync", { token: notion.token, database_id: notion.databaseId, application: { company: a.company, role: a.role, match: a.match, status: a.status } });
-    setMsg(`Synced ${apps.length} applications.`);
-  });
+  const run = async (fn: () => Promise<void>) => {
+    setBusy(true);
+    setErr("");
+    setMsg("");
+    try {
+      await fn();
+    } catch (e: any) {
+      setErr(e.message || "Operation failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const autoCreateList = () =>
+    run(async () => {
+      const res = await api<{
+        ok: boolean;
+        database_id: string;
+        database_url: string;
+        synced_count: number;
+        workspace: string;
+      }>("/integrations/notion/auto-create-and-sync", {
+        token: token.trim(),
+        parent_page_id: parentPage.trim() || undefined,
+        applications: apps.map((a) => ({
+          company: a.company,
+          role: a.role,
+          match: a.match,
+          status: a.status,
+          notes: a.events?.[0]?.text || "Synced from HowToLarped",
+        })),
+      });
+
+      if (!res.ok) throw new Error("Failed to auto-create Notion database.");
+      setNotion({ token: token.trim(), databaseId: res.database_id, connected: true });
+      setDbUrl(res.database_url);
+      setMsg(
+        `✓ Success! Self-created “HowToLarped Job Applications” in Notion with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirrored ${res.synced_count} applications!`
+      );
+    });
+
+  const testConnect = () =>
+    run(async () => {
+      const r = await api<{ connected: boolean; workspace?: string; error?: string }>("/integrations/notion/test", {
+        token: token.trim(),
+      });
+      if (!r.connected) throw new Error(r.error ?? "Connection failed.");
+      setNotion({ token: token.trim(), connected: true });
+      setMsg(`Connected to ${r.workspace ?? "Notion"}.`);
+    });
+
   return (
     <>
-      <PageHeader title="Integrations" sub="Bring your own keys. PostgreSQL stays the source of truth; Notion is a mirror." />
-      <section className="card p-6 max-w-xl hover:!transform-none">
-        <div className="flex justify-between"><h2 className="text-xl font-semibold">Notion</h2><Badge tone={notion.connected ? "ok" : "n"}>{notion.connected ? "Connected" : "Not connected"}</Badge></div>
-        <ol className="text-dmuted text-sm list-decimal pl-5 mt-3 space-y-1"><li>Create an internal integration at notion.so/profile/integrations.</li><li>Share a Notion page with it, and copy that page URL.</li><li>Paste the integration token below.</li></ol>
-        <label htmlFor="nt" className="label-xs block mt-5">Integration token</label>
-        <input id="nt" type="password" autoComplete="off" className="input mt-1" value={token} onChange={(e) => setToken(e.target.value)} placeholder="ntn_… or secret_…" />
-        <p className="text-xs text-muted mt-1">Kept in this browser session only. Never stored in local storage or logged.</p>
-        <button className="btn btn-primary mt-3" disabled={busy || token.length < 10} onClick={connect}>Connect</button>
-        {notion.connected && <div className="mt-6 border-t border-line pt-5">
-          <label htmlFor="np" className="label-xs">Parent page URL</label><input id="np" className="input mt-1" value={page} onChange={(e) => setPage(e.target.value)} />
-          <div className="flex gap-2 mt-3"><button className="btn" disabled={busy || !page} onClick={create}>Create database</button><button className="btn" disabled={busy || !notion.databaseId || !apps.length} onClick={syncAll}>Sync {apps.length} applications</button></div>
-          {notion.databaseId && <p className="text-xs text-muted mt-2">Database linked.</p>}</div>}
-        {msg && <p role="status" className="text-ok mt-4">{msg}</p>}{err && <div className="mt-4"><ErrorBox msg={err} /></div>}
+      <PageHeader
+        title="Integrations & Mirrors"
+        sub="Connect external services. PostgreSQL remains the verified source of truth; Notion acts as a synchronized live mirror."
+      />
+
+      <section className="card p-6 max-w-2xl bg-bg border border-line">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold font-sans">Notion Integration</h2>
+            <Badge tone={notion.connected ? "ok" : "n"}>
+              {notion.connected ? "Connected" : "Not connected"}
+            </Badge>
+          </div>
+          {notion.databaseId && (
+            <span className="text-xs font-mono text-muted">DB: {notion.databaseId.slice(0, 8)}...</span>
+          )}
+        </div>
+
+        <p className="text-xs text-muted leading-relaxed mb-4">
+          1-click self-creating list: Generates a Notion database with fields for <strong>Company Name</strong>, <strong>Position</strong>, <strong>Platform</strong>, <strong>Applied Date</strong>, <strong>Status</strong>, <strong>Match Score</strong>, and <strong>Resume Format</strong>, and automatically populates all your applications.
+        </p>
+
+        <div className="space-y-4 font-mono text-xs">
+          <div>
+            <label htmlFor="nt" className="label-xs block mb-1">
+              Notion Internal Integration Token
+            </label>
+            <input
+              id="nt"
+              type="password"
+              autoComplete="off"
+              className="input text-xs"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="ntn_... or secret_..."
+            />
+            <p className="text-[11px] text-muted mt-1 font-sans">
+              Create an internal integration at{" "}
+              <a href="https://notion.so/profile/integrations" target="_blank" rel="noreferrer" className="underline">
+                notion.so/profile/integrations ↗
+              </a>
+              . Kept in browser session only.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="np" className="label-xs block mb-1">
+              Parent Page URL or Page ID (Optional)
+            </label>
+            <input
+              id="np"
+              className="input text-xs"
+              value={parentPage}
+              onChange={(e) => setParentPage(e.target.value)}
+              placeholder="Leave blank to auto-detect first shared page, or paste page link"
+            />
+          </div>
+
+          <div className="pt-2 flex flex-wrap gap-2">
+            <button
+              className="btn btn-primary text-xs py-2 px-4 font-semibold"
+              disabled={busy || token.length < 10}
+              onClick={autoCreateList}
+            >
+              {busy ? "Creating Database in Notion..." : "⚡ 1-Click: Self-Create List & Sync All"}
+            </button>
+            <button
+              className="btn text-xs py-2 px-3"
+              disabled={busy || token.length < 10}
+              onClick={testConnect}
+            >
+              Test Connection
+            </button>
+          </div>
+        </div>
+
+        {msg && (
+          <div className="mt-4 p-3 bg-ok/10 border border-ok/30 rounded text-ok text-xs font-mono">
+            <div>{msg}</div>
+            {dbUrl && (
+              <a
+                href={dbUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block mt-2 font-bold underline"
+              >
+                Open in Notion ↗
+              </a>
+            )}
+          </div>
+        )}
+
+        {err && (
+          <div className="mt-4">
+            <ErrorBox msg={err} />
+          </div>
+        )}
       </section>
     </>
   );

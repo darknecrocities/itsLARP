@@ -126,3 +126,95 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
         "evidence": evidence[:25],
         "raw_text": text[:5000],
     }
+
+
+async def extract_candidate_with_llm(
+    resume_text: str = "",
+    github_info: str = "",
+    linkedin_text: str = ""
+) -> Dict[str, Any]:
+    """Uses local LLM (Ollama / AI Gateway) to extract comprehensive candidate information.
+    Falls back gracefully to deterministic parsing if LLM is unavailable.
+    """
+    from .ai_gateway import ai_gateway
+    import json
+
+    # Combine input sources
+    combined_corpus = []
+    if resume_text:
+        combined_corpus.append(f"--- RESUME ---\n{resume_text[:4000]}")
+    if github_info:
+        combined_corpus.append(f"--- GITHUB PROFILE & REPOSITORIES ---\n{github_info[:2000]}")
+    if linkedin_text:
+        combined_corpus.append(f"--- LINKEDIN EXPERIENCE ---\n{linkedin_text[:2000]}")
+
+    full_text = "\n\n".join(combined_corpus)
+    base_parsed = parse_resume_content(full_text or resume_text or "Software Engineer Candidate", "Uploaded Career Data")
+
+    system_prompt = (
+        "You are an expert technical recruiter and resume intelligence parser. "
+        "Extract candidate details from the provided resume/career text. "
+        "Respond ONLY with a valid JSON object without markdown formatting or code blocks."
+    )
+
+    user_prompt = f"""Extract the candidate's profile into this EXACT JSON structure:
+{{
+  "name": "Full Name",
+  "headline": "Professional Title / Headline",
+  "email": "Email address",
+  "location": "City, Country or Remote",
+  "years": 3,
+  "education": "Degree and University",
+  "skills": ["Skill1", "Skill2"],
+  "experience": [
+    {{"company": "Company", "title": "Role", "text": "Key achievements and responsibilities"}}
+  ],
+  "projects": [
+    {{"name": "Project Name", "tech": ["Tech1", "Tech2"], "text": "What was built and key metrics"}}
+  ],
+  "target_roles": ["Desired Role 1", "Desired Role 2"],
+  "summary": "Professional summary statement"
+}}
+
+CAREER CORPUS:
+{full_text[:3500]}
+"""
+
+    try:
+        response_text = await ai_gateway.generate(user_prompt, system=system_prompt, max_tokens=1200, temperature=0.1)
+        if response_text:
+            # Clean possible markdown ticks
+            cleaned = re.sub(r"^```json\s*", "", response_text.strip(), flags=re.I)
+            cleaned = re.sub(r"^```\s*", "", cleaned)
+            cleaned = re.sub(r"\s*```$", "", cleaned)
+            data = json.loads(cleaned)
+
+            # Merge with verifiable parsed info
+            merged_skills = list(dict.fromkeys(
+                [s.lower() for s in data.get("skills", []) if isinstance(s, str)] +
+                base_parsed.get("skills", [])
+            ))
+
+            return {
+                "name": data.get("name") or base_parsed.get("name"),
+                "headline": data.get("headline") or base_parsed.get("headline"),
+                "email": data.get("email") or base_parsed.get("email"),
+                "location": data.get("location") or base_parsed.get("location"),
+                "years": data.get("years") if isinstance(data.get("years"), (int, float)) else base_parsed.get("years"),
+                "education": data.get("education") or base_parsed.get("education"),
+                "skills": merged_skills,
+                "experience": data.get("experience") or base_parsed.get("experience", []),
+                "projects": data.get("projects") or base_parsed.get("projects", []),
+                "target_roles": data.get("target_roles", ["AI Engineer", "Software Engineer"]),
+                "summary": data.get("summary", ""),
+                "links": base_parsed.get("links", {}),
+                "evidence": base_parsed.get("evidence", []),
+                "extracted_by": f"Local LLM ({ai_gateway.model})"
+            }
+    except Exception as e:
+        # Graceful fallback to deterministic parsing
+        pass
+
+    base_parsed["extracted_by"] = "Deterministic Heuristic Engine"
+    return base_parsed
+
