@@ -143,7 +143,7 @@ export default function Integrations() {
         </div>
 
         {msg && (
-          <div className="mt-4 p-3 bg-ok/10 border border-ok/30 rounded text-ok text-xs font-mono">
+          <div className="mt-4 p-3 bg-neutral-100 border border-neutral-300 rounded text-black text-xs font-mono">
             <div>{msg}</div>
             {dbUrl && (
               <a

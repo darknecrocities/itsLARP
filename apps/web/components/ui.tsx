@@ -108,11 +108,11 @@ export function Empty({
 
 export function ErrorBox({ msg, retry }: { msg: string; retry?: () => void }) {
   return (
-    <div role="alert" className="border border-err/30 bg-err/5 rounded p-4 text-xs font-mono">
-      <div className="font-semibold text-err mb-0.5">ERROR: {msg}</div>
+    <div role="alert" className="border border-black/30 bg-bg2 rounded p-4 text-xs font-mono">
+      <div className="font-semibold text-ink mb-0.5">ERROR: {msg}</div>
       <div className="text-muted">Your career data is safe in local storage & database.</div>
       {retry && (
-        <button className="btn text-xs mt-3 py-1 px-3 border-err/40" onClick={retry}>
+        <button className="btn text-xs mt-3 py-1 px-3 border-black/40" onClick={retry}>
           Retry Operation
         </button>
       )}
@@ -128,10 +128,10 @@ export function Badge({
   tone?: "n" | "ok" | "warn" | "err" | "dark";
 }) {
   const styles = {
-    n: "text-dmuted border-line bg-bg2",
-    ok: "text-ok border-ok/30 bg-ok/5 font-semibold",
-    warn: "text-warn border-warn/30 bg-warn/5 font-semibold",
-    err: "text-err border-err/30 bg-err/5 font-semibold",
+    n: "text-neutral-700 border-neutral-300 bg-neutral-100",
+    ok: "text-black border-black/40 bg-neutral-100 font-semibold",
+    warn: "text-neutral-800 border-neutral-400 bg-neutral-100 font-semibold",
+    err: "text-white border-black bg-black font-semibold",
     dark: "text-white bg-black border-black font-semibold",
   }[tone];
 

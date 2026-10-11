@@ -145,7 +145,7 @@ export default function AgentsPage() {
               </button>
             ))}
             {running ? (
-              <button className="btn btn-primary bg-err text-white" onClick={stop}>
+              <button className="btn btn-primary bg-black text-white hover:bg-neutral-800" onClick={stop}>
                 Stop Workforce
               </button>
             ) : (
@@ -301,7 +301,7 @@ export default function AgentsPage() {
           }`}
           onClick={() => setActiveTab("diagram")}
         >
-          Horizontal Swarm Diagram & Bot Matrix
+          Swarm Node Graph & Bot Matrix
         </button>
         <button
           className={`pb-2.5 font-bold border-b-2 transition-colors ${
@@ -373,7 +373,7 @@ export default function AgentsPage() {
             <h2 className="label-xs mb-3 flex items-center justify-between">
               <span className="flex items-center gap-2">
                 Live Worker Activity Stream
-                {running && <span className="inline-block w-2 h-2 rounded-full bg-ok animate-pulse" />}
+                {running && <span className="inline-block w-2 h-2 rounded-full bg-black animate-pulse" />}
               </span>
               <span className="text-xs font-mono text-muted">Elapsed: {elapsed}s</span>
             </h2>

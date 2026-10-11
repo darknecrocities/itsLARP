@@ -299,7 +299,7 @@ export default function OnboardingPage() {
                 <div className="label-xs mb-1.5">SUGGESTED TARGET ROLES</div>
                 <div className="flex flex-wrap gap-2 text-xs font-mono">
                   {extractedCandidate.target_roles.map((r: string) => (
-                    <span key={r} className="px-2 py-0.5 bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded">
+                    <span key={r} className="px-2 py-0.5 bg-neutral-100 text-black border border-neutral-300 rounded font-medium">
                       🎯 {r}
                     </span>
                   ))}

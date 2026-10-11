@@ -69,9 +69,6 @@ export default function LandingPage() {
             <Link href="/" className="font-display font-bold text-xl tracking-tight text-ink">
               itsLARP / HowToLarped
             </Link>
-            <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 bg-bg2 border border-line rounded text-muted">
-              Workforce v2.0
-            </span>
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-dmuted">
@@ -97,17 +94,6 @@ export default function LandingPage() {
       <section className="relative border-b border-line pt-20 pb-20 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-bg2 border border-line rounded text-xs font-mono mb-6 text-dmuted">
-              <span className="w-2 h-2 rounded-full bg-ok inline-block animate-pulse" />
-              <span>1,000 PARALLEL BOTS ACTIVE</span>
-              <span className="text-muted">·</span>
-              <span>LOCAL LLM (OLLAMA) FIRST</span>
-              <span className="text-muted">·</span>
-              <span>APA 7TH FORMAT ENGINE</span>
-            </div>
-          </Reveal>
-
-          <Reveal i={1}>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02] max-w-5xl">
               Your AI Job-Hunting Workforce.
             </h1>
@@ -163,9 +149,9 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <div>
               <div className="label-xs">INTERACTIVE LIVE DEMO</div>
-              <h2 className="text-3xl font-bold mt-1">Real Demo of Bots Visualizing Their Work</h2>
+              <h2 className="text-3xl font-bold mt-1">Autonomous Workforce Node Network</h2>
               <p className="text-muted text-sm mt-1 max-w-xl">
-                Watch 1,000 lightweight bots operating concurrently. Click on any node or bot card to inspect its telemetry, CPU/memory usage, and streaming logs.
+                Interactive 6-node network graph connecting candidate Career DNA, 300 platform crawlers, Local LLM extraction, 300 APA tailors, and 400 independent appliers. Click any node to inspect.
               </p>
             </div>
 
@@ -180,7 +166,7 @@ export default function LandingPage() {
                 className={`btn text-xs ${demoTab === "pipeline" ? "bg-black text-white" : ""}`}
                 onClick={() => setDemoTab("pipeline")}
               >
-                Horizontal Pipeline
+                Node Network Graph
               </button>
               <button
                 className={`btn text-xs ${demoTab === "apa" ? "bg-black text-white" : ""}`}
@@ -280,7 +266,7 @@ export default function LandingPage() {
                     <tr>
                       <td className="py-2.5 font-bold">Anthropic Labs</td>
                       <td>Staff AI Engineer</td>
-                      <td><span className="text-blue-600 font-semibold">LinkedIn</span></td>
+                      <td><span className="text-ink font-semibold">LinkedIn</span></td>
                       <td><Badge tone="ok">APPLIED</Badge></td>
                       <td>94%</td>
                       <td>APA 7th Edition</td>
@@ -288,7 +274,7 @@ export default function LandingPage() {
                     <tr>
                       <td className="py-2.5 font-bold">FinTech Systems</td>
                       <td>Senior Full Stack Lead</td>
-                      <td><span className="text-purple-600 font-semibold">JobStreet</span></td>
+                      <td><span className="text-ink font-semibold">JobStreet</span></td>
                       <td><Badge tone="n">SCREENING</Badge></td>
                       <td>88%</td>
                       <td>APA 7th Edition</td>
@@ -296,7 +282,7 @@ export default function LandingPage() {
                     <tr>
                       <td className="py-2.5 font-bold">CloudScale AI</td>
                       <td>Backend Platform Engineer</td>
-                      <td><span className="text-green-600 font-semibold">Indeed</span></td>
+                      <td><span className="text-ink font-semibold">Indeed</span></td>
                       <td><Badge tone="ok">INTERVIEW</Badge></td>
                       <td>91%</td>
                       <td>APA 7th Edition</td>
@@ -310,8 +296,8 @@ export default function LandingPage() {
           {/* Live Log Stream Strip */}
           <div className="mt-6 card p-3 bg-bg border border-line font-mono text-xs flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-ok font-bold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-ok inline-block animate-pulse" />
+              <span className="text-ink font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse" />
                 LIVE WORKFORCE FEED:
               </span>
               <span className="text-muted">[{DEMO_LOGS[activeLogIndex].id}]</span>
@@ -430,7 +416,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-2 text-muted text-[11px]">
-            <span className="w-2 h-2 rounded-full bg-ok inline-block animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse" />
             <span>Local AI First (Ollama)</span>
             <span>·</span>
             <span>GitHub Remote: darknecrocities/itsLARP</span>

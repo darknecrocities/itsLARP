@@ -10,12 +10,12 @@
   --dmuted: #3f3f46;
   --text: #09090b;
   --primary: #000000;
-  --ok: #15803d;
-  --ok-bg: #f0fdf4;
-  --warn: #b45309;
-  --warn-bg: #fffbeb;
-  --err: #b91c1c;
-  --err-bg: #fef2f2;
+  --ok: #09090b;
+  --ok-bg: #f4f4f5;
+  --warn: #27272a;
+  --warn-bg: #f4f4f5;
+  --err: #09090b;
+  --err-bg: #f4f4f5;
 }
 
 @theme inline {
@@ -106,6 +106,17 @@ h1, h2, h3, h4 {
 
 .dot-live {
   animation: pulseDot 1.4s ease-in-out infinite;
+}
+
+@keyframes flowDash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.flow-active {
+  stroke-dasharray: 6 6;
+  animation: flowDash 0.8s linear infinite;
 }
 
 /* Minimalist Swiss Grid & Borders */
