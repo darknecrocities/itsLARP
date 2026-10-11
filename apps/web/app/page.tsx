@@ -11,6 +11,9 @@ import {
   CardMotion,
   AnimatedCounter,
   TextReveal,
+  AnimatedLoopText,
+  InfiniteLoopMarquee,
+  RotatingBadgeLoop,
 } from "@/components/motion";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -115,7 +118,17 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6">
           <TextReveal delay={0.1}>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02] max-w-5xl">
-              No Need to Manually Apply to Jobs Ever Again.
+              No Need to Manually Apply to{" "}
+              <AnimatedLoopText
+                words={[
+                  "Jobs Ever Again.",
+                  "Tech Startups.",
+                  "Remote AI Roles.",
+                  "LinkedIn Openings.",
+                  "Top Companies.",
+                ]}
+                className="underline decoration-neutral-300 underline-offset-8"
+              />
             </h1>
           </TextReveal>
 
@@ -189,6 +202,23 @@ export default function LandingPage() {
           </StaggerContainer>
         </div>
       </section>
+
+      {/* Infinite Looping Text Marquee Strip */}
+      <InfiniteLoopMarquee
+        items={[
+          "1,000 Bots in Parallel",
+          "300 Job Finders",
+          "300 Resume Makers",
+          "400 Auto-Appliers",
+          "100% Honest Experience",
+          "Clean APA-Format Resumes",
+          "1-Click Notion Sync",
+          "LinkedIn, JobStreet & Indeed",
+          "Zero Spam",
+          "No More Manual Forms",
+        ]}
+        speed={28}
+      />
 
       {/* Live Interactive Workforce Demo Section */}
       <section id="workforce-demo" className="py-20 border-b border-line bg-bg2/30">
@@ -522,16 +552,25 @@ export default function LandingPage() {
             </StaggerItem>
           </StaggerContainer>
 
-          {/* Simple Takeaway Strip with Motion */}
+          {/* Simple Takeaway Strip with Dynamic Looping Text */}
           <FadeIn delay={0.25} distance={18}>
             <div className="mt-8 card p-6 bg-bg border border-line flex flex-wrap items-center justify-between gap-4 font-mono text-xs hover:border-black transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-xl">✨</span>
                 <div>
-                  <strong className="text-ink text-sm font-sans block">The Bottom Line:</strong>
-                  <span className="text-muted font-sans text-xs">
-                    No more copying and pasting job descriptions. No more re-entering your job history on 50 different career sites. Just your dream job, delivered on autopilot.
-                  </span>
+                  <strong className="text-ink text-sm font-sans block mb-0.5">The Bottom Line:</strong>
+                  <div className="text-muted font-sans text-xs">
+                    <AnimatedLoopText
+                      words={[
+                        "No more copying and pasting job descriptions into applications.",
+                        "No more re-entering your job history on 50 different career sites.",
+                        "No more tracking job applications across messy spreadsheets.",
+                        "Just your dream job delivered on autopilot with 1,000 bots.",
+                      ]}
+                      interval={3200}
+                      className="font-medium text-black"
+                    />
+                  </div>
                 </div>
               </div>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
@@ -543,6 +582,21 @@ export default function LandingPage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* Second Infinite Looping Text Marquee Strip */}
+      <InfiniteLoopMarquee
+        items={[
+          "LinkedIn Auto-Search",
+          "JobStreet Integration",
+          "Indeed Crawler",
+          "APA 7th Edition Formatting",
+          "1-Click Notion Tracking",
+          "Zero Made-Up Skills",
+          "Safe Login Verification",
+          "1-Tap Human Approval",
+        ]}
+        speed={24}
+      />
 
       {/* Call to Action with Entrance Motion */}
       <section className="py-24 bg-bg">

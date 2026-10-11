@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useSpring,
   useInView,
@@ -250,3 +251,143 @@ export function TextReveal({
     </div>
   );
 }
+
+/**
+ * AnimatedLoopText
+ * Loops through an array of words or phrases with smooth vertical slide and blur-fade transitions.
+ * Perfect for dynamic hero titles and rotating feature highlights.
+ */
+export function AnimatedLoopText({
+  words,
+  interval = 2800,
+  className = "",
+}: {
+  words: string[];
+  interval?: number;
+  className?: string;
+}) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!words || words.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % words.length);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [words, interval]);
+
+  return (
+    <span className={`inline-grid overflow-hidden align-baseline ${className}`}>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={index}
+          initial={{ y: 32, opacity: 0, filter: "blur(4px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -32, opacity: 0, filter: "blur(4px)" }}
+          transition={{
+            duration: 0.45,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          className="inline-block whitespace-nowrap"
+        >
+          {words[index]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/**
+ * InfiniteLoopMarquee
+ * Continuously scrolls text across the screen in an infinite horizontal loop without pause.
+ * Styled in pure monochrome black/white.
+ */
+export function InfiniteLoopMarquee({
+  items,
+  speed = 30,
+  className = "",
+}: {
+  items: string[];
+  speed?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative w-full overflow-hidden whitespace-nowrap flex select-none border-y border-line py-3.5 bg-bg ${className}`}
+    >
+      <motion.div
+        className="flex shrink-0 items-center gap-8 pr-8"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",
+          duration: speed,
+        }}
+      >
+        {items.map((item, idx) => (
+          <span
+            key={`a-${idx}`}
+            className="inline-flex items-center gap-8 font-mono text-xs uppercase tracking-wider text-dmuted"
+          >
+            <span className="font-bold text-ink">{item}</span>
+            <span className="text-neutral-400">✦</span>
+          </span>
+        ))}
+        {items.map((item, idx) => (
+          <span
+            key={`b-${idx}`}
+            className="inline-flex items-center gap-8 font-mono text-xs uppercase tracking-wider text-dmuted"
+          >
+            <span className="font-bold text-ink">{item}</span>
+            <span className="text-neutral-400">✦</span>
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * RotatingBadgeLoop
+ * Cycles through quick status updates or feature tags with an animated pulse dot.
+ */
+export function RotatingBadgeLoop({
+  items,
+  interval = 3200,
+  className = "",
+}: {
+  items: string[];
+  interval?: number;
+  className?: string;
+}) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!items || items.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [items, interval]);
+
+  return (
+    <div
+      className={`inline-flex items-center gap-2 px-3 py-1 bg-bg2 border border-line rounded text-xs font-mono text-dmuted ${className}`}
+    >
+      <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse shrink-0" />
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={index}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="font-medium text-ink"
+        >
+          {items[index]}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
