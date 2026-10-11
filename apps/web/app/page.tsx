@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
+import { HeroBackground } from "@/components/HeroBackground";
+import { HeroAgentMiniHUD } from "@/components/HeroAgentMiniHUD";
 import {
   ScrollProgressBar,
   FadeIn,
@@ -14,6 +16,8 @@ import {
   AnimatedLoopText,
   InfiniteLoopMarquee,
   RotatingBadgeLoop,
+  KineticTextStagger,
+  AnimatedSparkBar,
 } from "@/components/motion";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -114,49 +118,58 @@ export default function LandingPage() {
       </motion.header>
 
       {/* Hero Section with Scroll and Staggered Motion */}
-      <section className="relative border-b border-line pt-20 pb-20 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6">
-          <TextReveal delay={0.1}>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02] max-w-5xl">
-              No Need to Manually Apply to{" "}
-              <AnimatedLoopText
-                words={[
-                  "Jobs Ever Again.",
-                  "Tech Startups.",
-                  "Remote AI Roles.",
-                  "LinkedIn Openings.",
-                  "Top Companies.",
-                ]}
-                className="underline decoration-neutral-300 underline-offset-8"
-              />
-            </h1>
-          </TextReveal>
+      <section id="hero-section" className="relative border-b border-line pt-20 pb-20 overflow-hidden">
+        {/* Interactive Ambient Dot Grid & Mouse Spotlight */}
+        <HeroBackground />
 
-          <FadeIn delay={0.2} distance={20}>
-            <p className="text-dmuted text-lg sm:text-xl md:text-2xl mt-6 max-w-3xl leading-relaxed">
-              No need to manually apply. Upload your resume, LinkedIn, or GitHub once. Your personal team of 1,000 Agents searches for jobs you love, customizes your resume for each role, and applies for you—automatically.
-            </p>
-          </FadeIn>
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="lg:col-span-7">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.04]">
+                <KineticTextStagger text="No Need to Manually Apply to" />{" "}
+                <AnimatedLoopText
+                  words={[
+                    "Jobs Ever Again.",
+                    "Tech Startups.",
+                    "Remote AI Roles.",
+                    "LinkedIn Openings.",
+                    "Top Companies.",
+                  ]}
+                  className="underline decoration-neutral-300 underline-offset-8 inline-block"
+                />
+              </h1>
 
-          <FadeIn delay={0.3} distance={20} className="mt-8 flex flex-wrap gap-3">
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/onboarding" className="btn btn-primary text-base py-3 px-6 font-semibold shadow-sm">
-                Start Auto-Applying Now →
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <a href="#workforce-demo" className="btn text-base py-3 px-6">
-                Watch Agents in Action
-              </a>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/resume" className="btn text-base py-3 px-6">
-                View Sample APA Resume
-              </Link>
-            </motion.div>
-          </FadeIn>
+              <FadeIn delay={0.2} distance={20}>
+                <p className="text-dmuted text-base sm:text-lg md:text-xl mt-6 leading-relaxed">
+                  No need to manually apply. Upload your resume, LinkedIn, or GitHub once. Your personal team of 1,000 Agents searches for jobs you love, customizes your resume for each role, and applies for you—automatically.
+                </p>
+              </FadeIn>
 
-          {/* Highlights Metrics Bar with Cascading Stagger and Animated Counters */}
+              <FadeIn delay={0.3} distance={20} className="mt-8 flex flex-wrap gap-3">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Link href="/onboarding" className="btn btn-primary text-base py-3 px-6 font-semibold shadow-sm">
+                    Start Auto-Applying Now →
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <a href="#workforce-demo" className="btn text-base py-3 px-6">
+                    Watch Agents in Action
+                  </a>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Link href="/resume" className="btn text-base py-3 px-6">
+                    View Sample APA Resume
+                  </Link>
+                </motion.div>
+              </FadeIn>
+            </div>
+
+            <div className="lg:col-span-5 flex justify-center lg:justify-end">
+              <HeroAgentMiniHUD />
+            </div>
+          </div>
+
+          {/* Highlights Metrics Bar with Cascading Stagger, Animated Counters and Sparkbars */}
           <StaggerContainer
             delay={0.4}
             stagger={0.09}
@@ -169,6 +182,7 @@ export default function LandingPage() {
                   <AnimatedCounter to={300} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Searches LinkedIn & JobStreet 24/7</div>
+                <AnimatedSparkBar percentage={75} delay={0.45} />
               </CardMotion>
             </StaggerItem>
 
@@ -179,6 +193,7 @@ export default function LandingPage() {
                   <AnimatedCounter to={300} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Custom APA resumes for every role</div>
+                <AnimatedSparkBar percentage={85} delay={0.55} />
               </CardMotion>
             </StaggerItem>
 
@@ -189,6 +204,7 @@ export default function LandingPage() {
                   <AnimatedCounter to={400} suffix=" Agents" />
                 </div>
                 <div className="text-xs text-muted mt-0.5">Fills forms & gets apps ready for you</div>
+                <AnimatedSparkBar percentage={95} delay={0.65} />
               </CardMotion>
             </StaggerItem>
 
@@ -197,6 +213,7 @@ export default function LandingPage() {
                 <div className="label-xs text-muted">1-CLICK NOTION TRACKER</div>
                 <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">1 Click</div>
                 <div className="text-xs text-muted mt-0.5">Saves company, title & status in a list</div>
+                <AnimatedSparkBar percentage={100} delay={0.75} />
               </CardMotion>
             </StaggerItem>
           </StaggerContainer>

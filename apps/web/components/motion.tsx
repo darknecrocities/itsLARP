@@ -391,3 +391,73 @@ export function RotatingBadgeLoop({
   );
 }
 
+/**
+ * KineticTextStagger
+ * Breaks a phrase into individual words, revealing each with a spring-loaded mask.
+ */
+export function KineticTextStagger({
+  text,
+  delay = 0.05,
+  stagger = 0.05,
+  className = "",
+}: {
+  text: string;
+  delay?: number;
+  stagger?: number;
+  className?: string;
+}) {
+  const words = text.split(" ");
+
+  return (
+    <span className={`inline-flex flex-wrap gap-x-[0.28em] ${className}`}>
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden py-1 -my-1">
+          <motion.span
+            initial={{ y: "115%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            transition={{
+              duration: 0.7,
+              delay: delay + i * stagger,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="inline-block"
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * AnimatedSparkBar
+ * A sleek monochrome progress/spark indicator that fills smoothly when scrolled into view.
+ */
+export function AnimatedSparkBar({
+  percentage = 100,
+  delay = 0.3,
+  className = "",
+}: {
+  percentage?: number;
+  delay?: number;
+  className?: string;
+}) {
+  return (
+    <div className={`w-full h-1 bg-neutral-200 rounded-full overflow-hidden mt-3 ${className}`}>
+      <motion.div
+        initial={{ width: "0%" }}
+        whileInView={{ width: `${percentage}%` }}
+        viewport={{ once: true }}
+        transition={{
+          duration: 1.1,
+          delay,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        className="h-full bg-black rounded-full"
+      />
+    </div>
+  );
+}
+
+
