@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { type BotTelemetry } from "@/lib/swarm";
 import { Badge } from "./ui";
 
@@ -365,9 +366,13 @@ export function HorizontalPipelineMap({
               {GRAPH_NODES.map((n) => {
                 const isSelected = selectedNodeId === n.id;
                 return (
-                  <g
+                  <motion.g
                     key={n.id}
                     className="cursor-pointer group"
+                    style={{ transformOrigin: `${n.x}px ${n.y}px` }}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     onClick={() => setSelectedNodeId(n.id)}
                   >
                     {/* Outer Selection Ring */}
@@ -421,48 +426,57 @@ export function HorizontalPipelineMap({
                     >
                       {n.label}
                     </text>
-                  </g>
+                  </motion.g>
                 );
               })}
             </g>
           </svg>
         </div>
 
-        {/* Selected Node Details Card */}
-        <div className="mt-6 p-5 bg-neutral-100 border border-neutral-300 rounded font-sans">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-4 font-mono">
-            <div className="flex items-center gap-2.5">
-              <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded">
-                STEP {selectedNode.id}
-              </span>
-              <h4 className="text-base font-bold text-black font-sans">{selectedNode.title}</h4>
-              <span className="text-xs text-neutral-600 font-sans">({selectedNode.role})</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <Badge tone="dark">{selectedNode.badge}</Badge>
-              <button
-                className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono"
-                onClick={() => setActivePoolTab(selectedNode.poolKey)}
-              >
-                View Bots Below ↓
-              </button>
-            </div>
-          </div>
-
-          <p className="text-xs text-neutral-700 leading-relaxed max-w-4xl mb-4 font-sans">
-            {selectedNode.desc}
-          </p>
-
-          {/* Simple Step Highlights Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-            {selectedNode.stats.map((s, idx) => (
-              <div key={idx} className="p-2.5 bg-white rounded border border-neutral-300">
-                <div className="text-[10px] text-neutral-500 uppercase">{s.label}</div>
-                <div className="font-bold text-sm text-black mt-0.5">{s.val}</div>
+        {/* Selected Node Details Card with Smooth Motion Transition */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedNode.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-6 p-5 bg-neutral-100 border border-neutral-300 rounded font-sans"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-4 font-mono">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded">
+                  STEP {selectedNode.id}
+                </span>
+                <h4 className="text-base font-bold text-black font-sans">{selectedNode.title}</h4>
+                <span className="text-xs text-neutral-600 font-sans">({selectedNode.role})</span>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Badge tone="dark">{selectedNode.badge}</Badge>
+                <button
+                  className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono"
+                  onClick={() => setActivePoolTab(selectedNode.poolKey)}
+                >
+                  View Bots Below ↓
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-neutral-700 leading-relaxed max-w-4xl mb-4 font-sans">
+              {selectedNode.desc}
+            </p>
+
+            {/* Simple Step Highlights Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+              {selectedNode.stats.map((s, idx) => (
+                <div key={idx} className="p-2.5 bg-white rounded border border-neutral-300">
+                  <div className="text-[10px] text-neutral-500 uppercase">{s.label}</div>
+                  <div className="font-bold text-sm text-black mt-0.5">{s.val}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Bot Explorer & Matrix */}
@@ -574,87 +588,96 @@ export function HorizontalPipelineMap({
           })}
         </div>
 
-        {/* Selected Bot Detailed Inspector Drawer */}
-        {inspectedBot && (
-          <div className="mt-6 p-5 bg-white border-2 border-black rounded shadow-lg font-mono text-xs">
-            <div className="flex flex-wrap items-center justify-between border-b border-neutral-300 pb-3 mb-4">
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-base text-black">[{inspectedBot.id}]</span>
-                <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded text-neutral-800">
-                  {inspectedBot.platform}
-                </span>
-                <Badge tone={inspectedBot.status === "needs_verification" ? "dark" : "ok"}>
-                  {inspectedBot.status.toUpperCase()}
-                </Badge>
-              </div>
-              <button
-                className="text-neutral-500 hover:text-black text-sm font-sans"
-                onClick={() => setInspectedBot(null)}
-              >
-                ✕ Close
-              </button>
-            </div>
-
-            {/* Verification Challenge Handler */}
-            {(inspectedBot.status === "needs_verification" || inspectedBot.verification_challenge) && (
-              <div className="p-4 mb-4 bg-neutral-100 border border-black rounded text-black">
-                <div className="flex items-center gap-2 font-bold mb-1">
-                  <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-                  Verification Required on {inspectedBot.platform}
+        {/* Selected Bot Detailed Inspector Drawer with Motion */}
+        <AnimatePresence>
+          {inspectedBot && (
+            <motion.div
+              key={inspectedBot.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-6 p-5 bg-white border-2 border-black rounded shadow-lg font-mono text-xs"
+            >
+              <div className="flex flex-wrap items-center justify-between border-b border-neutral-300 pb-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-base text-black">[{inspectedBot.id}]</span>
+                  <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded text-neutral-800">
+                    {inspectedBot.platform}
+                  </span>
+                  <Badge tone={inspectedBot.status === "needs_verification" ? "dark" : "ok"}>
+                    {inspectedBot.status.toUpperCase()}
+                  </Badge>
                 </div>
-                <p className="text-neutral-700 text-xs font-sans mb-3">
-                  {inspectedBot.verification_challenge?.prompt ||
-                    `The job platform (${inspectedBot.platform}) has requested a login confirmation or 2FA code. Enter the code below to resume.`}
-                </p>
-                <form onSubmit={handleVerifySubmit} className="flex gap-2 max-w-md">
-                  <input
-                    type="text"
-                    className="input text-xs"
-                    placeholder="Enter Code (e.g. 123456)"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                  />
-                  <button type="submit" className="btn btn-primary text-xs" disabled={verifying}>
-                    {verifying ? "Checking..." : "Confirm & Resume"}
-                  </button>
-                </form>
+                <button
+                  className="text-neutral-500 hover:text-black text-sm font-sans"
+                  onClick={() => setInspectedBot(null)}
+                >
+                  ✕ Close
+                </button>
               </div>
-            )}
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <div className="label-xs text-neutral-500">WHAT THIS BOT IS DOING</div>
-                <p className="font-sans text-sm font-medium text-black mt-1">
-                  {inspectedBot.current_task}
-                </p>
-
-                {inspectedBot.target_company && (
-                  <div className="mt-3 p-2 bg-neutral-50 rounded border border-neutral-200 text-xs font-sans">
-                    <span className="label-xs text-neutral-500 block mb-0.5">TARGET OPPORTUNITY</span>
-                    <strong>{inspectedBot.target_role}</strong> at{" "}
-                    <span className="text-neutral-600">{inspectedBot.target_company}</span>
+              {/* Verification Challenge Handler */}
+              {(inspectedBot.status === "needs_verification" || inspectedBot.verification_challenge) && (
+                <div className="p-4 mb-4 bg-neutral-100 border border-black rounded text-black">
+                  <div className="flex items-center gap-2 font-bold mb-1">
+                    <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                    Verification Required on {inspectedBot.platform}
                   </div>
-                )}
-              </div>
+                  <p className="text-neutral-700 text-xs font-sans mb-3">
+                    {inspectedBot.verification_challenge?.prompt ||
+                      `The job platform (${inspectedBot.platform}) has requested a login confirmation or 2FA code. Enter the code below to resume.`}
+                  </p>
+                  <form onSubmit={handleVerifySubmit} className="flex gap-2 max-w-md">
+                    <input
+                      type="text"
+                      className="input text-xs"
+                      placeholder="Enter Code (e.g. 123456)"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                    />
+                    <button type="submit" className="btn btn-primary text-xs" disabled={verifying}>
+                      {verifying ? "Checking..." : "Confirm & Resume"}
+                    </button>
+                  </form>
+                </div>
+              )}
 
-              <div>
-                <div className="label-xs text-neutral-500 mb-2">RECENT ACTIONS</div>
-                <div className="p-3 bg-neutral-50 rounded border border-neutral-200 space-y-1.5 max-h-40 overflow-y-auto text-[11px]">
-                  {inspectedBot.logs && inspectedBot.logs.length > 0 ? (
-                    inspectedBot.logs.map((l, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="text-neutral-500 shrink-0">{l.t}</span>
-                        <span className="text-neutral-800">{l.msg}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-neutral-500">Waiting for next action...</div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="label-xs text-neutral-500">WHAT THIS BOT IS DOING</div>
+                  <p className="font-sans text-sm font-medium text-black mt-1">
+                    {inspectedBot.current_task}
+                  </p>
+
+                  {inspectedBot.target_company && (
+                    <div className="mt-3 p-2 bg-neutral-50 rounded border border-neutral-200 text-xs font-sans">
+                      <span className="label-xs text-neutral-500 block mb-0.5">TARGET OPPORTUNITY</span>
+                      <strong>{inspectedBot.target_role}</strong> at{" "}
+                      <span className="text-neutral-600">{inspectedBot.target_company}</span>
+                    </div>
                   )}
                 </div>
+
+                <div>
+                  <div className="label-xs text-neutral-500 mb-2">RECENT ACTIONS</div>
+                  <div className="p-3 bg-neutral-50 rounded border border-neutral-200 space-y-1.5 max-h-40 overflow-y-auto text-[11px]">
+                    {inspectedBot.logs && inspectedBot.logs.length > 0 ? (
+                      inspectedBot.logs.map((l, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-neutral-500 shrink-0">{l.t}</span>
+                          <span className="text-neutral-800">{l.msg}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-neutral-500">Waiting for next action...</div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
