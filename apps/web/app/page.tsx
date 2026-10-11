@@ -113,15 +113,6 @@ export default function LandingPage() {
       {/* Hero Section with Scroll and Staggered Motion */}
       <section className="relative border-b border-line pt-20 pb-20 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6">
-          <FadeIn direction="down" delay={0.05} distance={14}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-bg2 border border-line rounded text-xs font-mono mb-6 text-dmuted">
-              <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse" />
-              <span>AUTO-APPLY BOT WORKFORCE</span>
-              <span className="text-muted">·</span>
-              <span>100% PRIVATE & ON-DEVICE</span>
-            </div>
-          </FadeIn>
-
           <TextReveal delay={0.1}>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02] max-w-5xl">
               No Need to Manually Apply to Jobs Ever Again.
