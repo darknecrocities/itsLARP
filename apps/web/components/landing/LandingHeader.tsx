@@ -1,0 +1,41 @@
+"use client";
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+export function LandingHeader() {
+  return (
+    <motion.header
+      initial={{ y: -16, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="border-b border-line bg-bg/80 backdrop-blur sticky top-0 z-40"
+    >
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="font-display font-bold text-2xl tracking-tight text-ink group flex items-center gap-2">
+            <span>itsLARP</span>
+          </Link>
+        </div>
+
+        <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-dmuted">
+          <a href="#workforce-demo" className="hover:text-ink transition-colors">How It Works</a>
+          <a href="#apa-format" className="hover:text-ink transition-colors">APA Resume</a>
+          <a href="#principles" className="hover:text-ink transition-colors">Guarantees</a>
+          <a href="#architecture" className="hover:text-ink transition-colors">4 Simple Steps</a>
+          <Link href="/jobs" className="hover:text-ink transition-colors">Live Jobs</Link>
+        </nav>
+
+        <div className="flex items-center gap-2.5">
+          <Link href="/login" className="btn text-xs py-1.5 px-3">
+            Sign In
+          </Link>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Link href="/onboarding" className="btn btn-primary text-xs py-1.5 px-4 font-semibold">
+              Start Auto-Applying →
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </motion.header>
+  );
+}
