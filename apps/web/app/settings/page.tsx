@@ -101,8 +101,9 @@ export default function SettingsPage() {
 
           <div className="mt-4 p-3 bg-bg2 rounded text-xs text-muted">
             {data?.connected ? (
-              <span className="text-ok font-medium">
-                ● Local Ollama is connected. {data.models.length} models detected.
+              <span className="text-ok font-medium inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-ok shrink-0 animate-pulse" />
+                <span>Local Ollama is connected. {data.models.length} models detected.</span>
               </span>
             ) : (
               <span>

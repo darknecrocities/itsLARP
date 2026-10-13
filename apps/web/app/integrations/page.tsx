@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { Badge, ErrorBox, PageHeader } from "@/components/ui";
+import { Check, Zap, ExternalLink } from "lucide-react";
 
 export default function Integrations() {
   const { notion, setNotion, apps } = useStore();
@@ -50,7 +51,7 @@ export default function Integrations() {
       setNotion({ token: token.trim(), databaseId: res.database_id, connected: true });
       setDbUrl(res.database_url);
       setMsg(
-        `✓ Success! Self-created “itsLARP Job Applications” in Notion with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirrored ${res.synced_count} applications!`
+        `Success! Self-created “itsLARP Job Applications” in Notion with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirrored ${res.synced_count} applications!`
       );
     });
 
@@ -104,8 +105,9 @@ export default function Integrations() {
             />
             <p className="text-[11px] text-muted mt-1 font-sans">
               Create an internal integration at{" "}
-              <a href="https://notion.so/profile/integrations" target="_blank" rel="noreferrer" className="underline">
-                notion.so/profile/integrations ↗
+              <a href="https://notion.so/profile/integrations" target="_blank" rel="noreferrer" className="underline inline-flex items-center gap-0.5">
+                <span>notion.so/profile/integrations</span>
+                <ExternalLink className="w-3 h-3" />
               </a>
               . Kept in browser session only.
             </p>
@@ -126,11 +128,12 @@ export default function Integrations() {
 
           <div className="pt-2 flex flex-wrap gap-2">
             <button
-              className="btn btn-primary text-xs py-2 px-4 font-semibold"
+              className="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center gap-1.5"
               disabled={busy || token.length < 10}
               onClick={autoCreateList}
             >
-              {busy ? "Creating Database in Notion..." : "⚡ 1-Click: Self-Create List & Sync All"}
+              <Zap className="w-3.5 h-3.5" />
+              <span>{busy ? "Creating Database in Notion..." : "1-Click: Self-Create List & Sync All"}</span>
             </button>
             <button
               className="btn text-xs py-2 px-3"
@@ -143,18 +146,22 @@ export default function Integrations() {
         </div>
 
         {msg && (
-          <div className="mt-4 p-3 bg-neutral-100 border border-neutral-300 rounded text-black text-xs font-mono">
-            <div>{msg}</div>
-            {dbUrl && (
-              <a
-                href={dbUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-block mt-2 font-bold underline"
-              >
-                Open in Notion ↗
-              </a>
-            )}
+          <div className="mt-4 p-3 bg-neutral-100 border border-neutral-300 rounded text-black text-xs font-mono flex items-start gap-2">
+            <Check className="w-4 h-4 text-ok shrink-0 mt-0.5" />
+            <div>
+              <div>{msg}</div>
+              {dbUrl && (
+                <a
+                  href={dbUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 mt-2 font-bold underline"
+                >
+                  <span>Open in Notion</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
         )}
 

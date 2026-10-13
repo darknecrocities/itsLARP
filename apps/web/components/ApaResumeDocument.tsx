@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { Check, Copy, Download, Printer } from "lucide-react";
 
 export interface ApaCandidateData {
   name?: string;
@@ -9,6 +10,7 @@ export interface ApaCandidateData {
   years?: number;
   education?: string;
   skills?: string[];
+  experience?: Array<{ company: string; title: string; text: string; period?: string }>;
   projects?: Array<{ name: string; tech?: string[]; text: string }>;
   evidence?: Array<{ source: string; text: string }>;
   links?: { github?: string; linkedin?: string; portfolio?: string };
@@ -50,6 +52,15 @@ export function ApaResumeDocument({ candidate: c, showToolbar = true }: ApaResum
 
     lines.push("Technical Competencies & Specializations\n" + "-".repeat(72));
     lines.push(`Core Frameworks: ${(c.skills || []).join(", ")}\n`);
+
+    if (c.experience && c.experience.length > 0) {
+      lines.push("Professional Experience & Appointments\n" + "-".repeat(72));
+      c.experience.forEach((exp) => {
+        lines.push(`${exp.title}${exp.company ? ` | ${exp.company}` : ""}${exp.period ? ` (${exp.period})` : ""}`);
+        if (exp.text) lines.push(`    ${exp.text}`);
+        lines.push("");
+      });
+    }
 
     lines.push("Software Artifacts & Project Contributions (APA 7th Format)\n" + "-".repeat(72));
     (c.projects || []).forEach((proj) => {
@@ -158,7 +169,29 @@ export function ApaResumeDocument({ candidate: c, showToolbar = true }: ApaResum
         </div>
       </div>
 
-      {/* Section 4: Software Artifacts (APA Citations) */}
+      {/* Section 4: Professional Experience */}
+      {c.experience && c.experience.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-3 tracking-wider">
+            Professional Experience &amp; Appointments
+          </h2>
+          <div className="space-y-4 text-sm">
+            {c.experience.map((exp, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="flex justify-between items-baseline font-bold text-black">
+                  <span>
+                    {exp.title} {exp.company && <span className="font-normal italic">&mdash; {exp.company}</span>}
+                  </span>
+                  {exp.period && <span className="text-xs font-mono text-neutral-600">{exp.period}</span>}
+                </div>
+                {exp.text && <p className="text-xs text-neutral-700 leading-relaxed pl-4">{exp.text}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Section 5: Software Artifacts (APA Citations) */}
       {c.projects && c.projects.length > 0 && (
         <div className="mb-6">
           <h2 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-3 tracking-wider">
@@ -182,7 +215,7 @@ export function ApaResumeDocument({ candidate: c, showToolbar = true }: ApaResum
         </div>
       )}
 
-      {/* Section 5: Verifiable Evidence Index */}
+      {/* Section 6: Verifiable Evidence Index */}
       {c.evidence && c.evidence.length > 0 && (
         <div className="mb-6">
           <h2 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-3 tracking-wider">
@@ -205,22 +238,34 @@ export function ApaResumeDocument({ candidate: c, showToolbar = true }: ApaResum
           <span>APA 7th Standard &bull; Verified via itsLARP</span>
           <div className="flex flex-wrap gap-2">
             <button
-              className="btn text-xs py-1 px-3 bg-black text-white hover:bg-neutral-800"
+              className="btn text-xs py-1 px-3 bg-black text-white hover:bg-neutral-800 flex items-center gap-1.5"
               onClick={handleCopy}
             >
-              {copied ? "✓ Copied!" : "📋 Copy Plaintext"}
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Plaintext</span>
+                </>
+              )}
             </button>
             <button
-              className="btn text-xs py-1 px-3 bg-white border border-neutral-300 text-black hover:border-black"
+              className="btn text-xs py-1 px-3 bg-white border border-neutral-300 text-black hover:border-black flex items-center gap-1.5"
               onClick={handleDownload}
             >
-              📥 Download .txt
+              <Download className="w-3.5 h-3.5" />
+              <span>Download .txt</span>
             </button>
             <button
-              className="btn text-xs py-1 px-3 bg-white border border-neutral-300 text-black hover:border-black"
+              className="btn text-xs py-1 px-3 bg-white border border-neutral-300 text-black hover:border-black flex items-center gap-1.5"
               onClick={handlePrint}
             >
-              🖨️ Print / PDF
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print / PDF</span>
             </button>
           </div>
         </div>

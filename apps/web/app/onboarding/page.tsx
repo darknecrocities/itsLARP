@@ -6,6 +6,7 @@ import { apiUpload, api } from "@/lib/api";
 import { evidenceFromText, importGithub } from "@/lib/profile";
 import { ErrorBox, Badge } from "@/components/ui";
 import { ApaResumeDocument } from "@/components/ApaResumeDocument";
+import { Check, Zap, Layers, FileText, Edit3, Target, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -118,6 +119,7 @@ export default function OnboardingPage() {
         projects: extractedCandidate.projects?.length ? extractedCandidate.projects : profile.projects,
         experience: extractedCandidate.experience?.length ? extractedCandidate.experience : profile.experience,
         links,
+        target_roles: extractedCandidate.target_roles || profile.target_roles || [],
       };
 
       setProfile(up);
@@ -167,8 +169,9 @@ export default function OnboardingPage() {
               onChange={(e) => onFile(e.target.files?.[0])}
             />
             {resumeFileName && (
-              <p className="text-xs text-ok mt-2 font-mono">
-                ✓ Loaded: {resumeFileName} ({resumeText.length} characters extracted)
+              <p className="text-xs text-ok mt-2 font-mono flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-ok" />
+                Loaded: {resumeFileName} ({resumeText.length} characters extracted)
               </p>
             )}
             <p className="text-xs text-muted mt-2">
@@ -240,19 +243,22 @@ export default function OnboardingPage() {
           {status.length > 0 && (
             <ul className="font-mono text-xs text-dmuted space-y-1 p-3 bg-bg2 rounded border border-line" aria-live="polite">
               {status.map((s, i) => (
-                <li key={i} className="feed-in">
-                  ✓ {s}
+                <li key={i} className="feed-in flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-ok shrink-0" />
+                  <span>{s}</span>
                 </li>
               ))}
             </ul>
           )}
 
           <button
-            className="btn btn-primary w-full py-3 text-center justify-center font-semibold text-sm sm:text-base shadow-sm"
+            className="btn btn-primary w-full py-3 text-center justify-center font-semibold text-sm sm:text-base shadow-sm flex items-center gap-2"
             disabled={busy || (!resumeText && !github && !liText)}
             onClick={runLocalLLMExtraction}
           >
-            {busy ? "Reading Your Experience with AI..." : "⚡ Build My Profile with AI →"}
+            <Zap className="w-4 h-4" />
+            <span>{busy ? "Reading Your Experience with AI..." : "Build My Profile with AI"}</span>
+            {!busy && <ArrowRight className="w-4 h-4" />}
           </button>
         </div>
       ) : (
@@ -309,36 +315,48 @@ export default function OnboardingPage() {
                 <div className="bg-bg2 p-1 rounded border border-line flex items-center gap-1 text-xs font-mono">
                   <button
                     type="button"
-                    className={`px-3 py-1.5 rounded transition-colors font-medium ${
+                    className={`px-3 py-1.5 rounded transition-colors font-medium flex items-center gap-1.5 ${
                       previewTab === "dna"
                         ? "bg-black text-white shadow-sm"
                         : "text-muted hover:text-ink"
                     }`}
                     onClick={() => setPreviewTab("dna")}
                   >
-                    🗂️ Career DNA
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Career DNA</span>
                   </button>
                   <button
                     type="button"
-                    className={`px-3 py-1.5 rounded transition-colors font-medium ${
+                    className={`px-3 py-1.5 rounded transition-colors font-medium flex items-center gap-1.5 ${
                       previewTab === "apa"
                         ? "bg-black text-white shadow-sm"
                         : "text-muted hover:text-ink"
                     }`}
                     onClick={() => setPreviewTab("apa")}
                   >
-                    📄 APA 7th Resume
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>APA 7th Resume</span>
                   </button>
                 </div>
 
                 <button
                   type="button"
-                  className={`btn text-xs py-1.5 px-3 font-mono border ${
+                  className={`btn text-xs py-1.5 px-3 font-mono border flex items-center gap-1.5 ${
                     isEditing ? "bg-black text-white border-black" : "bg-bg2 border-line text-ink"
                   }`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  {isEditing ? "✓ Save Edit" : "✎ Edit Details"}
+                  {isEditing ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Save Edit</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit Details</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -443,8 +461,9 @@ export default function OnboardingPage() {
                     <div className="label-xs mb-1.5">SUGGESTED TARGET ROLES</div>
                     <div className="flex flex-wrap gap-2 text-xs font-mono">
                       {extractedCandidate.target_roles.map((r: string) => (
-                        <span key={r} className="px-2.5 py-1 bg-neutral-100 text-black border border-neutral-300 rounded font-medium">
-                          🎯 {r}
+                        <span key={r} className="px-2.5 py-1 bg-neutral-100 text-black border border-neutral-300 rounded font-medium flex items-center gap-1.5">
+                          <Target className="w-3.5 h-3.5 text-neutral-600" />
+                          <span>{r}</span>
                         </span>
                       ))}
                     </div>
@@ -478,7 +497,10 @@ export default function OnboardingPage() {
               <div className="mb-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-muted">
                   <span>Standard APA 7th Edition Paper Output Generated Live From Your Uploaded Data</span>
-                  <span className="text-ok font-semibold">✓ 100% Real Projects &middot; Zero Hallucinations</span>
+                  <span className="text-ok font-semibold flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5 text-ok" />
+                    <span>100% Real Projects &middot; Zero Hallucinations</span>
+                  </span>
                 </div>
                 <ApaResumeDocument candidate={extractedCandidate} />
               </div>
@@ -488,38 +510,43 @@ export default function OnboardingPage() {
             <div className="flex flex-wrap justify-between items-center gap-3 pt-5 mt-6 border-t border-line">
               <button
                 type="button"
-                className="btn text-xs py-2 px-4"
+                className="btn text-xs py-2 px-4 flex items-center gap-1.5"
                 onClick={() => setExtractedCandidate(null)}
               >
-                ← Back to Uploads
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Uploads</span>
               </button>
 
               <div className="flex items-center gap-2">
                 {previewTab === "dna" ? (
                   <button
                     type="button"
-                    className="btn text-xs py-2 px-3 font-mono bg-bg2 border border-line text-ink hover:border-black"
+                    className="btn text-xs py-2 px-3 font-mono bg-bg2 border border-line text-ink hover:border-black flex items-center gap-1.5"
                     onClick={() => setPreviewTab("apa")}
                   >
-                    View APA Resume →
+                    <span>View APA Resume</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 ) : (
                   <button
                     type="button"
-                    className="btn text-xs py-2 px-3 font-mono bg-bg2 border border-line text-ink hover:border-black"
+                    className="btn text-xs py-2 px-3 font-mono bg-bg2 border border-line text-ink hover:border-black flex items-center gap-1.5"
                     onClick={() => setPreviewTab("dna")}
                   >
-                    ← Review Career DNA
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Review Career DNA</span>
                   </button>
                 )}
 
                 <button
                   type="button"
-                  className="btn btn-primary text-sm py-2 px-6 font-semibold shadow-sm"
+                  className="btn btn-primary text-sm py-2 px-6 font-semibold shadow-sm flex items-center gap-2"
                   disabled={busy}
                   onClick={saveCandidateInfo}
                 >
-                  {busy ? "Saving Career DNA..." : "✓ Confirm & Save to Career DNA →"}
+                  <Check className="w-4 h-4" />
+                  <span>{busy ? "Saving Career DNA..." : "Confirm & Save to Career DNA"}</span>
+                  {!busy && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
             </div>

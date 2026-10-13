@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 export function LandingHeader() {
   return (
@@ -30,8 +31,9 @@ export function LandingHeader() {
             Sign In
           </Link>
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-            <Link href="/onboarding" className="btn btn-primary text-xs py-1.5 px-4 font-semibold">
-              Start Auto-Applying →
+            <Link href="/onboarding" className="btn btn-primary text-xs py-1.5 px-4 font-semibold inline-flex items-center gap-1.5">
+              <span>Start Auto-Applying</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </motion.div>
         </div>

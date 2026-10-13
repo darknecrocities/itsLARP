@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { Badge, PageHeader, Stat, Reveal, ErrorBox } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { api } from "@/lib/api";
+import { Key, Zap, X } from "lucide-react";
 
 const STAGE_LABELS: Record<Stage, string> = {
   discovery: "300 Discovery Agents (LinkedIn, JobStreet, Indeed, Glassdoor)",
@@ -123,16 +124,18 @@ export default function AgentsPage() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button
-              className="btn text-xs"
+              className="btn text-xs flex items-center gap-1.5"
               onClick={() => setShowCreds(true)}
             >
-              🔑 Platform Logins
+              <Key className="w-3.5 h-3.5" />
+              <span>Platform Logins</span>
             </button>
             <button
-              className="btn text-xs bg-bg2 border border-line"
+              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
               onClick={() => setShowNotionModal(true)}
             >
-              ⚡ Notion 1-Click Sync
+              <Zap className="w-3.5 h-3.5" />
+              <span>Notion 1-Click Sync</span>
             </button>
             {[100, 500, 1000].map((n) => (
               <button
@@ -185,8 +188,8 @@ export default function AgentsPage() {
           <div className="card max-w-md w-full p-6 bg-bg border border-line shadow-2xl rise">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Platform Accounts & 2FA Setup</h3>
-              <button className="text-muted hover:text-ink text-sm" onClick={() => setShowCreds(false)}>
-                ✕
+              <button className="text-muted hover:text-ink text-sm p-1 rounded" onClick={() => setShowCreds(false)} aria-label="Close">
+                <X className="w-4 h-4" />
               </button>
             </div>
             <p className="text-xs text-muted mb-4 font-sans">
@@ -244,8 +247,8 @@ export default function AgentsPage() {
           <div className="card max-w-lg w-full p-6 bg-bg border border-line shadow-2xl rise">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Notion 1-Click Self-Create List</h3>
-              <button className="text-muted hover:text-ink text-sm" onClick={() => setShowNotionModal(false)}>
-                ✕
+              <button className="text-muted hover:text-ink text-sm p-1 rounded" onClick={() => setShowNotionModal(false)} aria-label="Close">
+                <X className="w-4 h-4" />
               </button>
             </div>
             <p className="text-xs text-muted mb-4">
@@ -272,11 +275,12 @@ export default function AgentsPage() {
                   Close
                 </button>
                 <button
-                  className="btn btn-primary text-xs"
+                  className="btn btn-primary text-xs flex items-center gap-1.5"
                   disabled={notionBusy || !notionToken.trim()}
                   onClick={handleNotionAutoSync}
                 >
-                  {notionBusy ? "Creating Database & Mirroring..." : "⚡ Connect & Auto-Create List"}
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>{notionBusy ? "Creating Database & Mirroring..." : "Connect & Auto-Create List"}</span>
                 </button>
               </div>
             </div>
@@ -405,10 +409,11 @@ export default function AgentsPage() {
             </div>
             <div className="flex gap-2">
               <button
-                className="btn text-xs bg-bg2 border border-line"
+                className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
                 onClick={() => setShowNotionModal(true)}
               >
-                ⚡ Mirror to Notion
+                <Zap className="w-3.5 h-3.5" />
+                <span>Mirror to Notion</span>
               </button>
               <button className="btn text-xs" onClick={fetchResults}>
                 Refresh Results

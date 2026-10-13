@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/motion";
+import { ArrowRight } from "lucide-react";
 
 export function CtaSection() {
   return (
@@ -18,8 +19,9 @@ export function CtaSection() {
 
           <div className="mt-8 flex justify-center gap-3">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/onboarding" className="btn btn-primary text-base py-3 px-8 font-semibold shadow-sm">
-                Upload Your Resume & Start →
+              <Link href="/onboarding" className="btn btn-primary text-base py-3 px-8 font-semibold shadow-sm inline-flex items-center gap-2">
+                <span>Upload Your Resume & Start</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "../ui";
 import { type BotTelemetry } from "@/lib/swarm";
+import { X } from "lucide-react";
 
 interface AgentInspectorDrawerProps {
   bot: BotTelemetry | null;
@@ -56,10 +57,12 @@ export function AgentInspectorDrawer({
               </Badge>
             </div>
             <button
-              className="text-neutral-500 hover:text-black text-sm font-sans"
+              className="text-neutral-500 hover:text-black text-sm font-sans flex items-center gap-1 p-1 rounded"
               onClick={onClose}
+              aria-label="Close drawer"
             >
-              ✕ Close
+              <X className="w-3.5 h-3.5" />
+              <span>Close</span>
             </button>
           </div>
 
