@@ -29,24 +29,43 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
     clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
     full_lower = text.lower()
 
-    # Name extraction heuristic: first non-empty line that isn't email/link
-    name = ""
-    for line in clean_lines[:5]:
-        if len(line) < 45 and not re.search(r"[@/\\:|]", line) and not any(k in line.lower() for k in ["curriculum", "resume", "cv", "page"]):
-            name = line
-            break
+    DISQUALIFIED_NAME_WORDS = [
+        "curriculum", "resume", "cv", "page", "website", "websites", "portfolio", "portfolios",
+        "profile", "profiles", "contact", "contacts", "summary", "about", "experience", "education",
+        "skills", "projects", "links", "phone", "email", "address", "github", "linkedin", "social",
+        "references", "work", "history", "objective", "technical", "engine"
+    ]
 
     # Email
     email_match = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text)
     email = email_match.group(0) if email_match else ""
 
+    # Name extraction heuristic: find actual personal name, skipping section titles and comma lists
+    name = ""
+    for line in clean_lines[:10]:
+        line_clean = line.strip()
+        lower_line = line_clean.lower()
+        if re.search(r"[@/\\:|0-9]", line_clean) or line_clean.count(",") > 0:
+            continue
+        if 2 < len(line_clean) < 40 and not any(k in lower_line for k in DISQUALIFIED_NAME_WORDS):
+            words = line_clean.split()
+            if 1 <= len(words) <= 4:
+                name = line_clean
+                break
+
     # Location heuristic (e.g. "Manila, Philippines", "San Francisco, CA", "Remote")
     location = ""
     for loc_match in re.finditer(r"\b([A-Z][a-zA-Z\s]+,\s*[A-Z]{2,}|Remote|[A-Za-z\s]+Philippines|[A-Za-z\s]+Singapore|[A-Za-z\s]+USA|[A-Za-z\s]+Canada)\b", text):
         candidate_loc = loc_match.group(0).strip()
-        if len(candidate_loc) < 40 and not any(w in candidate_loc.lower() for w in ["university", "college", "experience", "education"]):
+        lower_loc = candidate_loc.lower()
+        if len(candidate_loc) < 40 and not any(w in lower_loc for w in ["university", "college", "experience", "education", "dynamic", "systems", "ai", "llm", "engineer", "developer"]):
             location = candidate_loc
             break
+    if not location:
+        if "philippines" in full_lower:
+            location = "Manila, Philippines"
+        else:
+            location = "Remote"
 
     # Headline
     headline = ""
