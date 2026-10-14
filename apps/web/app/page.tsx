@@ -3,6 +3,7 @@ import { ScrollProgressBar, InfiniteLoopMarquee } from "@/components/motion";
 import {
   LandingHeader,
   HeroSection,
+  BrandLogoCarousel,
   AppDemosSection,
   WorkforceDemoSection,
   PrinciplesSection,
@@ -23,20 +24,23 @@ export default function LandingPage() {
       {/* Hero Section */}
       <HeroSection />
 
+      {/* Brand Logo Carousel (Carousell, LinkedIn, JobStreet, Indeed, Notion, etc.) */}
+      <BrandLogoCarousel />
+
       {/* Real Demo Screen Recordings Showcase */}
       <AppDemosSection />
 
       {/* Infinite Looping Text Marquee Strip */}
       <InfiniteLoopMarquee
         items={[
-          "1,000 Agents in Parallel",
+          "1,000 AI Assistants Active",
           "300 Job Finders",
-          "300 Resume Makers",
-          "400 Auto-Appliers",
+          "300 Resume Tailors",
+          "400 Application Fillers",
           "100% Honest Experience",
-          "Clean APA-Format Resumes",
+          "Custom Resumes for Every Job",
           "1-Click Notion Sync",
-          "LinkedIn, JobStreet & Indeed",
+          "Carousell, LinkedIn, JobStreet & Indeed",
           "Zero Spam",
           "No More Manual Forms",
         ]}
@@ -55,14 +59,14 @@ export default function LandingPage() {
       {/* Second Infinite Looping Text Marquee Strip */}
       <InfiniteLoopMarquee
         items={[
+          "Carousell Jobs Search",
           "LinkedIn Auto-Search",
           "JobStreet Integration",
-          "Indeed Crawler",
-          "APA 7th Edition Formatting",
+          "Indeed Job Matching",
+          "Tailored Resume Creation",
           "1-Click Notion Tracking",
-          "Zero Made-Up Skills",
-          "Safe Login Verification",
-          "1-Tap Human Approval",
+          "Zero Fake Skills",
+          "1-Tap Review & Approval",
         ]}
         speed={24}
       />

@@ -26,14 +26,13 @@ export function WorkforceDemoSection() {
       <div className="max-w-6xl mx-auto px-6">
         <FadeIn direction="up" distance={24} className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
-            <div className="label-xs">LIVE DEMO</div>
-            <h2 className="text-3xl font-bold mt-1 tracking-tight">Watch 1,000 Agents Work For You in Real Time</h2>
+            <h2 className="text-3xl font-bold tracking-tight">How Your AI Team Works Together</h2>
             <p className="text-muted text-sm mt-1 max-w-xl">
-              See how your Agents find jobs, write tailored resumes, and prepare your applications. Click any circle in the network below to see what it does.
+              See how your AI assistants find job openings, write tailored resumes, and prepare your applications in the background.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs font-mono">
+          <div className="flex flex-wrap gap-2 text-xs">
             <motion.button
               whileTap={{ scale: 0.96 }}
               className={`btn text-xs ${simRunning ? "bg-black text-white" : ""}`}
@@ -56,21 +55,21 @@ export function WorkforceDemoSection() {
               className={`btn text-xs ${demoTab === "pipeline" ? "bg-black text-white" : ""}`}
               onClick={() => setDemoTab("pipeline")}
             >
-              Interactive Agent Network
+              Team Workflow
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.96 }}
               className={`btn text-xs ${demoTab === "apa" ? "bg-black text-white" : ""}`}
               onClick={() => setDemoTab("apa")}
             >
-              Sample APA Resume
+              Tailored Resume
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.96 }}
               className={`btn text-xs ${demoTab === "notion" ? "bg-black text-white" : ""}`}
               onClick={() => setDemoTab("notion")}
             >
-              Notion Application List
+              Notion Board
             </motion.button>
           </div>
         </FadeIn>
@@ -109,7 +108,7 @@ export function WorkforceDemoSection() {
               className="card p-8 bg-white text-black border border-line shadow-lg font-serif max-w-3xl mx-auto"
             >
               <div className="flex justify-between items-center text-xs text-neutral-500 font-mono border-b border-neutral-300 pb-2 mb-6">
-                <span>RUNNING HEAD: SAMPLE / CURRICULUM VITAE</span>
+                <span>JANE DOE · RESUME PREVIEW</span>
                 <span>Page 1</span>
               </div>
               <div className="text-center mb-6">
@@ -129,17 +128,17 @@ export function WorkforceDemoSection() {
               </div>
               <div className="mb-4">
                 <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider">
-                  Verified Project Work (APA 7th Format)
+                  Verified Project Work
                 </h4>
                 <p className="text-xs leading-snug pl-4 -indent-4">
-                  <strong>Doe, J.</strong> (2026). <em>Autonomous Task Engine</em> [Software project / Python, React, FastAPI].
+                  <strong>Autonomous Task Runner</strong> (2026) · <em>Python, React, FastAPI</em>
                 </p>
                 <p className="text-[11px] text-neutral-600 pl-4 mt-0.5">
                   High-speed background runner processing thousands of tasks in parallel with 100% verified accuracy.
                 </p>
               </div>
-              <div className="pt-4 border-t border-neutral-300 flex justify-between items-center text-xs font-mono">
-                <span className="text-neutral-500">Standard APA 7th Edition Output</span>
+              <div className="pt-4 border-t border-neutral-300 flex justify-between items-center text-xs">
+                <span className="text-neutral-500">Clean, Professional Formatting</span>
                 <Link href="/resume" className="btn text-xs py-1 px-3 bg-black text-white inline-flex items-center gap-1.5">
                   <span>Open Resume Studio</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -153,12 +152,12 @@ export function WorkforceDemoSection() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="card p-6 bg-bg border border-line font-mono text-xs"
+              className="card p-6 bg-bg border border-line text-xs"
             >
               <div className="flex justify-between items-center border-b border-line pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold font-sans">Your Auto-Created Notion Tracker</span>
-                  <Badge tone="ok">Auto-Organized</Badge>
+                  <span className="text-base font-bold">Your Notion Tracker</span>
+                  <span className="text-xs text-emerald-600 font-medium">Synced in Real Time</span>
                 </div>
                 <Link href="/integrations" className="btn text-xs py-1 px-2.5 inline-flex items-center gap-1.5">
                   <span>Connect Your Notion</span>
@@ -167,21 +166,21 @@ export function WorkforceDemoSection() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                  <thead className="label-xs border-b border-line">
+                  <thead className="text-[11px] font-semibold text-muted uppercase tracking-wider border-b border-line">
                     <tr>
-                      <th scope="col" className="py-2">Company Name</th>
-                      <th scope="col">Position</th>
-                      <th scope="col">Platform</th>
+                      <th scope="col" className="py-2">Company</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Job Board</th>
                       <th scope="col">Status</th>
                       <th scope="col">Match</th>
-                      <th scope="col">Resume Format</th>
+                      <th scope="col">Resume</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
                     {[
-                      { company: "Anthropic Labs", role: "Staff AI Engineer", platform: "LinkedIn", status: "APPLIED", match: "94%" },
-                      { company: "FinTech Systems", role: "Senior Full Stack Lead", platform: "JobStreet", status: "READY TO REVIEW", match: "88%" },
-                      { company: "CloudScale AI", role: "Backend Engineer", platform: "Indeed", status: "INTERVIEW", match: "91%" },
+                      { company: "Anthropic Labs", role: "Staff AI Engineer", platform: "LinkedIn", status: "Applied", match: "94%" },
+                      { company: "FinTech Systems", role: "Senior Full Stack Lead", platform: "JobStreet", status: "Ready to Submit", match: "88%" },
+                      { company: "CloudScale AI", role: "Backend Engineer", platform: "Indeed", status: "Interview", match: "91%" },
                     ].map((row, idx) => (
                       <motion.tr
                         key={row.company}
@@ -192,9 +191,19 @@ export function WorkforceDemoSection() {
                         <td className="py-2.5 font-bold">{row.company}</td>
                         <td>{row.role}</td>
                         <td><span className="text-ink font-semibold">{row.platform}</span></td>
-                        <td><Badge tone={row.status === "READY TO REVIEW" ? "n" : "ok"}>{row.status}</Badge></td>
+                        <td>
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                            row.status === "Interview"
+                              ? "bg-purple-100 text-purple-800"
+                              : row.status === "Applied"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-neutral-100 text-neutral-800"
+                          }`}>
+                            {row.status}
+                          </span>
+                        </td>
                         <td>{row.match}</td>
-                        <td>APA 7th Edition</td>
+                        <td>Tailored</td>
                       </motion.tr>
                     ))}
                   </tbody>

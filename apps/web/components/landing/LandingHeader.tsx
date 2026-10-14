@@ -22,12 +22,11 @@ export function LandingHeader() {
         <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-dmuted">
           <a href="#app-demos" className="text-ink font-semibold flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Live Demos
+            Watch Demos
           </a>
           <a href="#workforce-demo" className="hover:text-ink transition-colors">How It Works</a>
-          <a href="#apa-format" className="hover:text-ink transition-colors">APA Resume</a>
-          <a href="#principles" className="hover:text-ink transition-colors">Guarantees</a>
-          <a href="#architecture" className="hover:text-ink transition-colors">4 Simple Steps</a>
+          <a href="#principles" className="hover:text-ink transition-colors">Why itsLARP</a>
+          <a href="#architecture" className="hover:text-ink transition-colors">4 Easy Steps</a>
           <Link href="/jobs" className="hover:text-ink transition-colors">Live Jobs</Link>
         </nav>
 

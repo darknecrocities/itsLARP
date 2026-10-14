@@ -3,6 +3,7 @@ export * from "./LandingHeader";
 export * from "./HeroSection";
 export * from "./WorkforceDemoSection";
 export * from "./AppDemosSection";
+export * from "./BrandLogoCarousel";
 export * from "./PrinciplesSection";
 export * from "./ProcessStepsSection";
 export * from "./CtaSection";

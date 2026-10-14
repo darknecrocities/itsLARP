@@ -40,7 +40,7 @@ export function HeroSection() {
 
             <FadeIn delay={0.2} distance={20}>
               <p className="text-dmuted text-base sm:text-lg md:text-xl mt-6 leading-relaxed">
-                No need to manually apply. Upload your resume, LinkedIn, or GitHub once. Your personal team of 1,000 Agents searches for jobs you love, customizes your resume for each role, and applies for you—automatically.
+                Upload your resume or LinkedIn once. Your personal team of AI assistants searches for jobs you love across LinkedIn, JobStreet, Indeed, and Carousell, customizes your resume for each opening, and applies for you—automatically.
               </p>
             </FadeIn>
 
@@ -59,7 +59,7 @@ export function HeroSection() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                 <Link href="/resume" className="btn text-base py-3 px-6">
-                  View Sample APA Resume
+                  View Sample Resume
                 </Link>
               </motion.div>
             </FadeIn>
@@ -74,46 +74,46 @@ export function HeroSection() {
         <StaggerContainer
           delay={0.4}
           stagger={0.09}
-          className="mt-14 pt-8 border-t border-line grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-xs"
+          className="mt-14 pt-8 border-t border-line grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs"
         >
           <StaggerItem>
             <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="label-xs text-muted">300 JOB FINDERS</div>
+              <div className="text-xs font-semibold text-muted uppercase">300 Job Finders</div>
               <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={300} suffix=" Agents" />
+                <AnimatedCounter to={300} suffix=" Assistants" />
               </div>
-              <div className="text-xs text-muted mt-0.5">Searches LinkedIn & JobStreet 24/7</div>
+              <div className="text-xs text-muted mt-0.5">LinkedIn, JobStreet, Indeed & Carousell</div>
               <AnimatedSparkBar percentage={75} delay={0.45} />
             </CardMotion>
           </StaggerItem>
 
           <StaggerItem>
             <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="label-xs text-muted">300 RESUME MAKERS</div>
+              <div className="text-xs font-semibold text-muted uppercase">300 Resume Tailors</div>
               <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={300} suffix=" Agents" />
+                <AnimatedCounter to={300} suffix=" Assistants" />
               </div>
-              <div className="text-xs text-muted mt-0.5">Custom APA resumes for every role</div>
+              <div className="text-xs text-muted mt-0.5">Custom resumes tailored for every opening</div>
               <AnimatedSparkBar percentage={85} delay={0.55} />
             </CardMotion>
           </StaggerItem>
 
           <StaggerItem>
             <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="label-xs text-muted">400 AUTO-APPLIERS</div>
+              <div className="text-xs font-semibold text-muted uppercase">400 Application Fillers</div>
               <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={400} suffix=" Agents" />
+                <AnimatedCounter to={400} suffix=" Assistants" />
               </div>
-              <div className="text-xs text-muted mt-0.5">Fills forms & gets apps ready for you</div>
+              <div className="text-xs text-muted mt-0.5">Fills forms and prepares submissions</div>
               <AnimatedSparkBar percentage={95} delay={0.65} />
             </CardMotion>
           </StaggerItem>
 
           <StaggerItem>
             <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="label-xs text-muted">1-CLICK NOTION TRACKER</div>
+              <div className="text-xs font-semibold text-muted uppercase">Notion Tracking</div>
               <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">1 Click</div>
-              <div className="text-xs text-muted mt-0.5">Saves company, title & status in a list</div>
+              <div className="text-xs text-muted mt-0.5">Saves every job & interview on your board</div>
               <AnimatedSparkBar percentage={100} delay={0.75} />
             </CardMotion>
           </StaggerItem>

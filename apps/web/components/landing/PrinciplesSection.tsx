@@ -7,10 +7,9 @@ export function PrinciplesSection() {
     <section id="principles" className="py-20 border-b border-line">
       <div className="max-w-6xl mx-auto px-6">
         <FadeIn distance={24} className="max-w-2xl mb-12">
-          <div className="label-xs">HOW IT WORKS FOR YOU</div>
-          <h2 className="text-3xl font-bold mt-1 tracking-tight">6 Simple Rules That Keep You in Control</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Why Job Seekers Love itsLARP</h2>
           <p className="text-muted text-sm mt-2">
-            No complicated setup. No fake skills. Here is how our Agents save you hours every single day.
+            Built to save you hundreds of hours while keeping you completely honest and in control.
           </p>
         </FadeIn>
 

@@ -71,11 +71,6 @@ export function BrandLogo({
           <span className={`font-display font-bold tracking-tight text-ink group-hover:opacity-90 transition-opacity ${textSizes[size]}`}>
             its<span className="font-extrabold">LARP</span>
           </span>
-          {showBadge && (
-            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-black text-white rounded font-semibold tracking-wide">
-              OS
-            </span>
-          )}
         </div>
       )}
     </div>
