@@ -13,6 +13,7 @@ from routers import (
     swarm_router,
     analytics_router,
     notion_router,
+    notifications_router,
 )
 
 init_db()
@@ -83,3 +84,4 @@ app.include_router(applications_router)
 app.include_router(swarm_router)
 app.include_router(analytics_router)
 app.include_router(notion_router)
+app.include_router(notifications_router)

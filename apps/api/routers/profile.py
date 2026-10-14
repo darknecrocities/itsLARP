@@ -102,9 +102,14 @@ def profile_save(b: ProfileIn):
         rec.name = p.get("name", "")
         rec.headline = p.get("headline", "")
         rec.email = p.get("email", "")
+        rec.phone = p.get("phone", "")
         rec.location = p.get("location", "")
         rec.years = p.get("years", 0)
         rec.education = p.get("education", "")
+        rec.summary = p.get("summary", "")
+        rec.target_roles = p.get("target_roles", ["all"])
+        rec.target_companies = p.get("target_companies", ["all"])
+        rec.work_types = p.get("work_types", ["fulltime", "remote"])
         rec.skills = p.get("skills", [])
         rec.experience = p.get("experience", [])
         rec.projects = p.get("projects", [])
@@ -128,9 +133,14 @@ def profile_get():
                 "name": rec.name,
                 "headline": rec.headline,
                 "email": rec.email,
+                "phone": rec.phone or "",
                 "location": rec.location,
-                "years": rec.years,
-                "education": rec.education,
+                "years": rec.years or 0,
+                "education": rec.education or "",
+                "summary": rec.summary or "",
+                "target_roles": rec.target_roles or ["all"],
+                "target_companies": rec.target_companies or ["all"],
+                "work_types": rec.work_types or ["fulltime", "remote"],
                 "skills": rec.skills or [],
                 "experience": rec.experience or [],
                 "projects": rec.projects or [],

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from services import swarm
@@ -8,12 +9,26 @@ router = APIRouter(prefix="/swarm", tags=["swarm"])
 class SwarmIn(BaseModel):
     profile: dict
     queries: list[str] = Field(min_length=1, max_length=10)
-    workers: int = Field(ge=1, le=1000)
+    workers: int = Field(ge=1, le=50000, default=1000)
+    credentials: Optional[dict] = None
+    target_jobs: int = Field(ge=1, le=50000, default=100)
+    target_roles: Optional[list[str]] = None
+    target_companies: Optional[list[str]] = None
+    work_types: Optional[list[str]] = None
 
 
 @router.post("/start")
 def swarm_start(b: SwarmIn):
-    run = swarm.Run(b.profile, [q[:80] for q in b.queries], b.workers)
+    run = swarm.Run(
+        b.profile,
+        [q[:80] for q in b.queries],
+        workers=b.workers,
+        credentials=b.credentials,
+        target_jobs=b.target_jobs,
+        target_roles=b.target_roles,
+        target_companies=b.target_companies,
+        work_types=b.work_types
+    )
     swarm.RUNS[run.id] = run
     run.start()
     return run.snapshot()

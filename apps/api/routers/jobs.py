@@ -48,3 +48,22 @@ def job_get(job_id: str):
     if not j:
         raise HTTPException(404, "Job not found. Search again to refresh listings.")
     return j
+
+
+class StreamTargetJobsIn(BaseModel):
+    target_count: int = 100
+    queries: list[str] | None = None
+    target_companies: list[str] | None = None
+    work_types: list[str] | None = None
+    min_years: int = 0
+
+
+@router.post("/stream-target-jobs")
+def stream_target_jobs_endpoint(b: StreamTargetJobsIn):
+    return jobs.stream_target_jobs(
+        target_count=b.target_count,
+        queries=b.queries,
+        target_companies=b.target_companies,
+        work_types=b.work_types,
+        min_years=b.min_years
+    )

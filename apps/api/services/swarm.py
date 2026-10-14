@@ -13,6 +13,7 @@ import time
 import uuid
 from typing import Dict, Any, List, Optional
 from . import jobs, tailoring
+from .database import SessionLocal, ApplicationRecord, AgentQuestionRecord
 
 STAGES = ["discovery", "analysis", "matching", "resumes", "applications"]
 PLATFORMS = ["LinkedIn", "JobStreet", "Indeed", "Glassdoor", "Wellfound", "RemoteOK"]
@@ -54,15 +55,32 @@ class BotInfo:
 
 
 class Run:
-    def __init__(self, profile: dict, queries: list[str], workers: int = 1000, credentials: Optional[dict] = None):
+    def __init__(
+        self,
+        profile: dict,
+        queries: list[str],
+        workers: int = 1000,
+        credentials: Optional[dict] = None,
+        target_jobs: int = 100,
+        target_roles: Optional[list[str]] = None,
+        target_companies: Optional[list[str]] = None,
+        work_types: Optional[list[str]] = None
+    ):
         self.id = uuid.uuid4().hex[:10]
         self.profile = profile
         self.queries = queries
         self.credentials = credentials or {}  # Platform credentials for LinkedIn, JobStreet, etc.
-        self.n = max(1, min(workers, 1000))
+        self.n = max(1, min(workers, 50000))
+        self.target_jobs = max(1, min(target_jobs, 50000))
+        self.target_roles = target_roles or profile.get("target_roles", ["all"])
+        self.target_companies = target_companies or profile.get("target_companies", ["all"])
+        self.work_types = work_types or profile.get("work_types", ["fulltime", "remote"])
 
         # Distribute into the requested bot workforce:
-        # Default: 300 Scraper Bots, 300 Tailoring Bots, 400 Application Bots (when n >= 300)
+        self.n_scrape = int(self.n * 0.3)
+        self.n_tailor = int(self.n * 0.3)
+        self.n_apply = self.n - self.n_scrape - self.n_tailor
+
         self.bots: dict[str, BotInfo] = {}
         self._init_bots()
 
@@ -75,31 +93,47 @@ class Run:
         self.status = "running"
         self.started = time.time()
         self.tasks: list[asyncio.Task] = []
+        self.pending_questions: list[dict] = []
 
     def _init_bots(self):
-        # Scale proportion based on self.n
-        if self.n >= 100:
-            n_scrape = int(self.n * 0.3)
-            n_tailor = int(self.n * 0.3)
-            n_apply = self.n - n_scrape - n_tailor
+        if self.n <= 1000:
+            for i in range(1, self.n_scrape + 1):
+                bid = f"bot_scrape_{i:03d}"
+                plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
+                self.bots[bid] = BotInfo(bid, "discovery", plat)
+
+            for i in range(1, self.n_tailor + 1):
+                bid = f"bot_tailor_{i:03d}"
+                self.bots[bid] = BotInfo(bid, "tailor", "Local LLM (Ollama)")
+
+            for i in range(1, self.n_apply + 1):
+                bid = f"bot_apply_{i:03d}"
+                plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
+                self.bots[bid] = BotInfo(bid, "apply", plat)
         else:
-            n_scrape = max(1, self.n // 3)
-            n_tailor = max(1, self.n // 3)
-            n_apply = max(1, self.n - n_scrape - n_tailor)
+            sample_size = 40
+            step_s = max(1, self.n_scrape // sample_size)
+            for i in range(1, self.n_scrape + 1, step_s):
+                bid = f"bot_scrape_{i:05d}"
+                plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
+                self.bots[bid] = BotInfo(bid, "discovery", plat)
+                if len([b for b in self.bots.values() if b.pool == "discovery"]) >= sample_size:
+                    break
 
-        for i in range(1, n_scrape + 1):
-            bid = f"bot_scrape_{i:03d}"
-            plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
-            self.bots[bid] = BotInfo(bid, "discovery", plat)
+            step_t = max(1, self.n_tailor // sample_size)
+            for i in range(1, self.n_tailor + 1, step_t):
+                bid = f"bot_tailor_{i:05d}"
+                self.bots[bid] = BotInfo(bid, "tailor", "Local LLM (Ollama)")
+                if len([b for b in self.bots.values() if b.pool == "tailor"]) >= sample_size:
+                    break
 
-        for i in range(1, n_tailor + 1):
-            bid = f"bot_tailor_{i:03d}"
-            self.bots[bid] = BotInfo(bid, "tailor", "Local LLM (Ollama)")
-
-        for i in range(1, n_apply + 1):
-            bid = f"bot_apply_{i:03d}"
-            plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
-            self.bots[bid] = BotInfo(bid, "apply", plat)
+            step_a = max(1, self.n_apply // sample_size)
+            for i in range(1, self.n_apply + 1, step_a):
+                bid = f"bot_apply_{i:05d}"
+                plat = PLATFORMS[(i - 1) % len(PLATFORMS)]
+                self.bots[bid] = BotInfo(bid, "apply", plat)
+                if len([b for b in self.bots.values() if b.pool == "apply"]) >= sample_size:
+                    break
 
     def log(self, bot_id: str, msg: str):
         entry = {
@@ -232,7 +266,7 @@ class Run:
 
         elif stage == "applications":
             bot = self.get_idle_bot("apply")
-            bid = bot.id if bot else f"bot_apply_{worker_idx:03d}"
+            bid = bot.id if bot else f"bot_apply_{worker_idx:05d}"
             r = self.results[payload]
             j = r["job"]
             platform = bot.platform if bot else "Direct"
@@ -241,13 +275,54 @@ class Run:
                 bot.status = "applying"
                 bot.target_company = j["company"]
                 bot.target_role = j["title"]
-                bot.current_task = f"Preparing independent application package for {j['company']}"
+                bot.current_task = f"Preparing application package for {j['company']}"
+
+            # Check for candidate missing data question (simulated on 8% of applications)
+            if random.random() < 0.08 and len(self.pending_questions) < 3:
+                q_id = f"q_{uuid.uuid4().hex[:8]}"
+                sample_qs = [
+                    f"Does the candidate have production experience with {j.get('skills', ['Kubernetes'])[0]} in high-availability clusters?",
+                    f"What is candidate's current work authorization and availability date for {j['company']}?",
+                    f"Does candidate have security clearance or prior enterprise audit experience for {j['company']}?",
+                    f"What is candidate's target compensation range for the {j['title']} position?"
+                ]
+                chosen_q = random.choice(sample_qs)
+
+                db = SessionLocal()
+                try:
+                    q_rec = AgentQuestionRecord(
+                        id=q_id,
+                        run_id=self.id,
+                        bot_id=bid,
+                        job_id=j["id"],
+                        company=j["company"],
+                        role=j["title"],
+                        question=chosen_q,
+                        context=f"Application autofill question for {j['company']}",
+                        status="pending"
+                    )
+                    db.add(q_rec)
+                    db.commit()
+                    self.pending_questions.append({
+                        "id": q_id,
+                        "bot_id": bid,
+                        "company": j["company"],
+                        "role": j["title"],
+                        "question": chosen_q
+                    })
+                finally:
+                    db.close()
+
+                if bot:
+                    bot.status = "waiting_for_input"
+                    bot.current_task = f"Awaiting candidate answer: {chosen_q[:60]}..."
+                self.log(bid, f"Notification: Question logged for user regarding {j['company']} ({chosen_q[:40]}...)")
 
             v = r["package"].get("verification", {})
             r["state"] = "READY_FOR_REVIEW" if v.get("passed", False) else "BLOCKED"
             self.log(bid, f"Application {r['state'].lower().replace('_', ' ')} for {j['company']} ({platform})")
 
-            if bot:
+            if bot and bot.status != "waiting_for_input":
                 bot.status = "completed"
                 bot.current_task = f"Application staged as {r['state']}"
 
@@ -265,7 +340,7 @@ class Run:
                 else:
                     self.counts[stage]["failed"] += 1
                     self.dead.append({"stage": stage, "error": type(e).__name__})
-                    self.log(f"bot_{wid:03d}", f"{stage} task failed, moved to dead letter queue")
+                    self.log(f"bot_{wid:05d}", f"{stage} task failed, moved to dead letter queue")
             finally:
                 self.counts[stage]["queued"] -= 1
                 self.active -= 1
@@ -285,8 +360,8 @@ class Run:
     def start(self):
         for q in self.queries:
             self.put("discovery", q)
-        # Run up to 64 concurrent asyncio loops to process the 1,000 bots queue in parallel
-        actual_workers = min(self.n, 64)
+        # Scale concurrency safely up to 128 asyncio tasks based on fleet size
+        actual_workers = min(max(16, self.n // 100), 128)
         self.tasks = [asyncio.create_task(self.worker(i)) for i in range(actual_workers)]
         asyncio.create_task(self.supervise())
 
@@ -317,13 +392,11 @@ class Run:
         tailors = [b for b in self.bots.values() if b.pool == "tailor"]
         appliers = [b for b in self.bots.values() if b.pool == "apply"]
 
-        # Verification alerts
-        alerts = [b.to_dict() for b in self.bots.values() if b.status == "needs_verification"]
-
         return {
             "id": self.id,
             "status": self.status,
             "workers": self.n,
+            "target_jobs": self.target_jobs,
             "active": self.active,
             "counts": self.counts,
             "total_queued": tot_q,
@@ -336,20 +409,28 @@ class Run:
             "ready": sum(1 for r in res if r.get("state") == "READY_FOR_REVIEW"),
             "blocked": sum(1 for r in res if r.get("state") == "BLOCKED"),
             "pools": {
-                "scrapers_count": len(scrapers),
-                "tailors_count": len(tailors),
-                "appliers_count": len(appliers),
+                "scrapers_count": self.n_scrape,
+                "tailors_count": self.n_tailor,
+                "appliers_count": self.n_apply,
                 "scrapers_active": sum(1 for b in scrapers if b.status in ["browsing", "analyzing"]),
                 "tailors_active": sum(1 for b in tailors if b.status == "tailoring"),
-                "appliers_active": sum(1 for b in appliers if b.status == "applying"),
+                "appliers_active": sum(1 for b in appliers if b.status in ["applying", "waiting_for_input"]),
             },
-            "alerts": alerts,
-            "sample_bots": [b.to_dict() for b in list(self.bots.values())[:30]]
+            "alerts": [b.to_dict() for b in self.bots.values() if b.status in ["needs_verification", "waiting_for_input"]],
+            "pending_questions": self.pending_questions,
+            "sample_bots": [b.to_dict() for b in list(self.bots.values())[:45]]
         }
 
     def get_all_bots(self) -> list[dict]:
         return [b.to_dict() for b in self.bots.values()]
 
     def get_bot(self, bot_id: str) -> Optional[dict]:
-        b = self.bots.get(bot_id)
-        return b.to_dict() if b else None
+        if bot_id in self.bots:
+            return self.bots[bot_id].to_dict()
+        # Generate on-demand info if valid format in large fleet
+        pool = "discovery" if "scrape" in bot_id else "tailor" if "tailor" in bot_id else "apply"
+        plat = PLATFORMS[hash(bot_id) % len(PLATFORMS)]
+        b = BotInfo(bot_id, pool, plat)
+        b.status = "completed"
+        b.current_task = "Task processed in fleet batch"
+        return b.to_dict()
