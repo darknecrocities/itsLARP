@@ -19,7 +19,7 @@ async function verify() {
 
     // Screenshot Tab 1: 1,000-Bot Workforce Swarm
     await page.screenshot({ path: path.resolve(__dirname, '../apps/web/public/branding/verify-tab-swarm.png') });
-    console.log('✓ Tab 1 (Swarm) screenshot captured.');
+    console.log('[OK] Tab 1 (Swarm) screenshot captured.');
 
     // Click Tab 2: APA 7th Resume Studio
     const tab2 = page.locator('button:has-text("APA 7th Resume Studio")');
@@ -27,7 +27,7 @@ async function verify() {
       await tab2.click();
       await page.waitForTimeout(2000);
       await page.screenshot({ path: path.resolve(__dirname, '../apps/web/public/branding/verify-tab-resume.png') });
-      console.log('✓ Tab 2 (APA Resume) screenshot captured.');
+      console.log('[OK] Tab 2 (APA Resume) screenshot captured.');
     }
 
     // Click Tab 3: Applications & Notion Sync
@@ -36,10 +36,10 @@ async function verify() {
       await tab3.click();
       await page.waitForTimeout(2000);
       await page.screenshot({ path: path.resolve(__dirname, '../apps/web/public/branding/verify-tab-notion.png') });
-      console.log('✓ Tab 3 (Notion Sync) screenshot captured.');
+      console.log('[OK] Tab 3 (Notion Sync) screenshot captured.');
     }
 
-    console.log('✓ All 3 video demo tabs visually verified.');
+    console.log('[OK] All 3 video demo tabs visually verified.');
   } finally {
     await browser.close();
   }
