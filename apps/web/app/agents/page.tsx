@@ -77,7 +77,7 @@ export default function AgentsPage() {
     <>
       <PageHeader
         title="Your Auto-Apply Agents"
-        sub="1,000 Agents working together for you: 300 searching LinkedIn & JobStreet, 300 writing tailored resumes, and 400 preparing your applications."
+        sub="Parallel dynamic workforce scaling up to 50,000 agents: high-speed discovery, Local LLM tailoring, independent application staging, and real Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -94,14 +94,14 @@ export default function AgentsPage() {
               <Zap className="w-3.5 h-3.5" />
               <span>Notion 1-Click Sync</span>
             </button>
-            {[100, 500, 1000].map((n) => (
+            {[100, 1000, 5000, 10000, 50000].map((n) => (
               <button
                 key={n}
                 className={`btn text-xs ${selectedWorkers === n ? "bg-black text-white" : ""}`}
                 disabled={running}
                 onClick={() => setSelectedWorkers(n)}
               >
-                {n.toLocaleString()} Agents
+                {n >= 1000 ? `${n / 1000}k` : n} Agents
               </button>
             ))}
             {running ? (

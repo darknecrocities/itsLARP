@@ -1,44 +1,75 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { api } from "./api";
+import { api, apiGet } from "./api";
 
 export type Evidence = { source: string; text: string };
+
+export type ExperienceItem = {
+  company: string;
+  title: string;
+  start_date?: string;
+  end_date?: string;
+  text: string;
+  metrics?: string;
+};
+
+export type ProjectItem = {
+  name: string;
+  tech: string[];
+  text: string;
+  url?: string;
+};
+
 export type Profile = {
   name: string;
   headline: string;
   email: string;
+  phone: string;
   location: string;
   years: number;
-  skills: string[];
-  experience: { company: string; title: string; text: string; period?: string }[];
-  projects: { name: string; tech: string[]; text: string }[];
   education: string;
+  summary: string;
+  target_roles: string[];
+  target_companies: string[];
+  work_types: string[];
+  skills: string[];
+  experience: ExperienceItem[];
+  projects: ProjectItem[];
   links: { github?: string; linkedin?: string; portfolio?: string };
   evidence: Evidence[];
-  target_roles?: string[];
 };
 
 export const EMPTY: Profile = {
   name: "",
   headline: "",
   email: "",
+  phone: "",
   location: "",
   years: 0,
+  education: "",
+  summary: "",
+  target_roles: ["all"],
+  target_companies: ["all"],
+  work_types: ["fulltime", "remote"],
   skills: [],
   experience: [],
   projects: [],
-  education: "",
   links: {},
   evidence: [],
-  target_roles: [],
 };
 
 export const DEFAULT_PROFILE: Profile = {
   name: "Jane Doe",
   headline: "Lead AI Systems & Full Stack Engineer",
   email: "jane.doe@example.com",
+  phone: "+1 (555) 234-5678",
   location: "San Francisco, CA (Remote)",
   years: 5,
+  education: "B.S. in Computer Science, Stanford University",
+  summary: "Empirical technical practitioner with 5+ years contributing to scalable software systems and artificial intelligence.",
+  target_roles: ["Lead AI Engineer", "Senior Full Stack Engineer"],
+  target_companies: ["all"],
+  work_types: ["fulltime", "remote"],
   skills: [
     "Python",
     "FastAPI",
@@ -49,7 +80,6 @@ export const DEFAULT_PROFILE: Profile = {
     "PyTorch",
     "Tailwind CSS",
   ],
-  education: "B.S. in Computer Science, Stanford University",
   experience: [
     {
       company: "Anthropic Labs",
@@ -88,7 +118,6 @@ export const DEFAULT_PROFILE: Profile = {
       text: "0% hallucination verification gate preventing exaggeration or fabrication of skills.",
     },
   ],
-  target_roles: ["Lead AI Engineer", "Senior Full Stack Engineer"],
 };
 
 export type App = {
@@ -112,6 +141,19 @@ export type App = {
   isOngoing?: boolean;
 };
 
+export type AgentQuestion = {
+  id: string;
+  run_id?: string;
+  bot_id?: string;
+  job_id?: string;
+  company: string;
+  role: string;
+  question: string;
+  context?: string;
+  status: string;
+  created_at?: string;
+};
+
 type S = {
   profile: Profile;
   setProfile: (p: Partial<Profile>) => void;
@@ -121,6 +163,11 @@ type S = {
   setApps: (apps: App[]) => void;
   upsertApp: (a: App) => void;
   fetchApps: () => Promise<void>;
+  questions: AgentQuestion[];
+  setQuestions: (q: AgentQuestion[]) => void;
+  fetchQuestions: () => Promise<void>;
+  answerQuestion: (id: string, answer: string) => Promise<boolean>;
+  dismissQuestion: (id: string) => Promise<boolean>;
   activeSwarmId: string | null;
   setActiveSwarmId: (id: string | null) => void;
   notion: {
@@ -171,6 +218,41 @@ export const useStore = create<S>()(
             set({ apps: res });
           }
         } catch {}
+      },
+      questions: [],
+      setQuestions: (questions) => set({ questions }),
+      fetchQuestions: async () => {
+        try {
+          const qs = await apiGet<AgentQuestion[]>("/notifications/questions");
+          if (Array.isArray(qs)) {
+            set({ questions: qs });
+          }
+        } catch {}
+      },
+      answerQuestion: async (id: string, answer: string) => {
+        try {
+          const res = await api<{ ok: boolean }>(`/notifications/questions/${id}/answer`, { answer });
+          if (res.ok) {
+            set((s) => ({
+              questions: s.questions.filter((q) => q.id !== id),
+            }));
+            apiGet<{ profile: Profile }>("/profile")
+              .then((pData) => {
+                if (pData?.profile) set({ profile: { ...get().profile, ...pData.profile } });
+              })
+              .catch(() => {});
+            return true;
+          }
+        } catch {}
+        return false;
+      },
+      dismissQuestion: async (id: string) => {
+        try {
+          await api(`/notifications/questions/${id}/dismiss`, {});
+          set((s) => ({ questions: s.questions.filter((q) => q.id !== id) }));
+          return true;
+        } catch {}
+        return false;
       },
       activeSwarmId: null,
       setActiveSwarmId: (id) => set({ activeSwarmId: id }),

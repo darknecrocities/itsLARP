@@ -157,6 +157,10 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         queries,
         workers: workerCount,
         credentials: credentials || {},
+        target_jobs: workerCount,
+        target_roles: profile.target_roles || ["all"],
+        target_companies: profile.target_companies || ["all"],
+        work_types: profile.work_types || ["fulltime", "remote"],
       });
 
       set({

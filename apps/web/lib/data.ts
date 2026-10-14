@@ -5,6 +5,7 @@ export type Job = {
   location: string;
   remote: boolean;
   salary: string;
+  employment_type?: string;
   source: string;
   url?: string;
   domain: string;
