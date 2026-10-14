@@ -7,17 +7,13 @@ import { FIELDS, type Job } from "@/lib/data";
 import { type Change } from "@/lib/profile";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, ErrorBox, PageHeader } from "@/components/ui";
-import { Check, X, ExternalLink } from "lucide-react";
+import { Check, X, ExternalLink, RotateCcw, AlertCircle, ShieldAlert } from "lucide-react";
+import { ClaimVerificationTable, type ClaimItem } from "@/components/apply/ClaimVerificationTable";
 
 type VerificationResult = {
   passed: boolean;
   blocked: number;
-  claims: {
-    claim: string;
-    source: string | null;
-    confidence: number;
-    status: string;
-  }[];
+  claims: ClaimItem[];
 };
 
 type PrepareResponse = {
@@ -37,11 +33,21 @@ type PrepareResponse = {
 
 type Phase = "idle" | "running" | "verifying" | "done" | "failed";
 
+type DuplicateCheckInfo = {
+  has_application: boolean;
+  app_id?: string;
+  status?: string;
+  is_ongoing?: boolean;
+  is_terminal?: boolean;
+  can_reapply?: boolean;
+  applied_date?: string;
+  message?: string;
+};
+
 export default function ApplyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { profile, upsertApp, notion } = useStore();
 
-  // Dynamically fetch the real job from backend API
   const {
     data: job,
     isLoading: jobLoading,
@@ -60,11 +66,20 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
   const [phase, setPhase] = useState<Phase>("idle");
   const [err, setErr] = useState("");
   const [approved, setApproved] = useState(false);
+  const [dupInfo, setDupInfo] = useState<DuplicateCheckInfo | null>(null);
+  const [forceReapply, setForceReapply] = useState(false);
 
-  // Initialize match if already present on job
+  // Check duplicate status whenever job is loaded
   useEffect(() => {
-    if (job?.match) {
-      setMatchData(job.match);
+    if (job) {
+      if (job.match) setMatchData(job.match);
+      apiGet<DuplicateCheckInfo>(
+        `/applications/check?job_id=${encodeURIComponent(job.id)}&company=${encodeURIComponent(job.company)}&role=${encodeURIComponent(job.title)}`
+      )
+        .then((res) => {
+          if (res) setDupInfo(res);
+        })
+        .catch(() => {});
     }
   }, [job]);
 
@@ -109,7 +124,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
     const tailoredResume = accepted.map((c) => `${c.section}:\n${c.proposed}`).join("\n\n");
 
     try {
-      await api("/applications/approve", {
+      const res = await api<{ ok: boolean; duplicate?: boolean; message?: string }>("/applications/approve", {
         job_id: job.id,
         company: job.company,
         role: job.title,
@@ -118,8 +133,15 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
         cover,
         answers,
         verified: ver?.passed ?? true,
+        force_reapply: forceReapply,
       });
-    } catch (e) {
+
+      if (res && res.duplicate) {
+        setErr(res.message || "Duplicate application prevented.");
+        setApproved(false);
+        return;
+      }
+    } catch (e: any) {
       console.warn("Approve API notice:", e);
     }
 
@@ -134,44 +156,35 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
       resume: tailoredResume,
       cover,
       answers,
-      events: [{ at: new Date().toISOString(), text: "Approved by candidate and recorded in tracker" }],
+      events: [
+        {
+          at: new Date().toISOString(),
+          text: forceReapply
+            ? `Re-applied to position after previous ${dupInfo?.status || "attempt"}`
+            : "Approved by candidate and recorded in tracker",
+        },
+      ],
     });
 
-    if (notion.connected && notion.databaseId && notion.token) {
-      try {
-        await api("/integrations/notion/sync", {
-          token: notion.token,
-          database_id: notion.databaseId,
-          application: {
-            company: job.company,
-            role: job.title,
-            match: matchData?.score,
-            status: "APPLIED",
-            location: job.location,
-            salary: job.salary,
-            url: job.url,
-          },
-        });
-      } catch {
-        /* Notion mirror is optional */
-      }
-    }
+    setDupInfo({
+      has_application: true,
+      status: "APPLIED",
+      is_ongoing: true,
+      is_terminal: false,
+      can_reapply: false,
+      applied_date: new Date().toISOString().split("T")[0],
+      message: `Application submitted & tracked for ${job.company}.`,
+    });
   }
 
   if (jobLoading) {
-    return (
-      <div className="py-20 text-center font-mono text-xs text-muted">
-        Loading job intelligence...
-      </div>
-    );
+    return <div className="py-20 text-center font-mono text-xs text-muted">Loading job intelligence...</div>;
   }
 
   if (jobError || !job) {
     return (
       <Empty title="Job not found" hint="This job listing may have been moved or updated.">
-        <Link href="/jobs" className="btn">
-          Back to jobs
-        </Link>
+        <Link href="/jobs" className="btn">Back to jobs</Link>
       </Empty>
     );
   }
@@ -179,9 +192,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
   if (!profile.skills.length) {
     return (
       <Empty title="Career DNA required" hint="Upload your resume or connect GitHub first to unlock tailoring.">
-        <Link href="/onboarding" className="btn btn-primary">
-          Build Career DNA
-        </Link>
+        <Link href="/onboarding" className="btn btn-primary">Build Career DNA</Link>
       </Empty>
     );
   }
@@ -192,7 +203,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
         title={`${job.title} — ${job.company}`}
         sub={`${job.location} · ${job.salary || "Salary not listed"} · Source: ${job.source}`}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {job.url && (
               <a
                 href={job.url}
@@ -205,7 +216,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
               </a>
             )}
             <button
-              className="btn btn-primary"
+              className="btn btn-primary text-xs"
               disabled={phase === "running" || phase === "verifying"}
               onClick={prepare}
             >
@@ -215,68 +226,104 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
         }
       />
 
+      {/* Duplicate Application Guard Notification */}
+      {dupInfo?.has_application && dupInfo.is_ongoing && !forceReapply && (
+        <div className="card p-4 mb-6 bg-neutral-100 border border-neutral-300 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <ShieldAlert className="w-5 h-5 text-black shrink-0" />
+            <div>
+              <div className="font-bold text-black text-sm">
+                Already Applied · Status: {dupInfo.status}
+              </div>
+              <div className="text-neutral-600 font-sans text-xs mt-0.5">
+                You already have an active application for {job.company} submitted on {dupInfo.applied_date}. Duplicate application submission is prevented.
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/applications" className="btn text-xs bg-white border border-neutral-300 hover:border-black">
+              View Tracker
+            </Link>
+            <button
+              className="btn text-xs bg-black text-white hover:bg-neutral-800 flex items-center gap-1"
+              onClick={() => setForceReapply(true)}
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Allow Re-Apply</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Previously Rejected Notice */}
+      {dupInfo?.has_application && (dupInfo.is_terminal || dupInfo.status === "REJECTED") && (
+        <div className="card p-4 mb-6 bg-neutral-50 border border-neutral-300 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-5 h-5 text-neutral-700 shrink-0" />
+            <div>
+              <div className="font-bold text-black text-sm">
+                Prior Application Outcome: {dupInfo.status}
+              </div>
+              <div className="text-neutral-600 font-sans text-xs mt-0.5">
+                Your past application to {job.company} was marked as {dupInfo.status} ({dupInfo.applied_date}). You are eligible to submit a fresh tailored re-application.
+              </div>
+            </div>
+          </div>
+          <button
+            className="btn text-xs bg-black text-white hover:bg-neutral-800 flex items-center gap-1"
+            onClick={() => {
+              setForceReapply(true);
+              prepare();
+            }}
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Re-Apply with Fresh Tailored Resume</span>
+          </button>
+        </div>
+      )}
+
       {/* Match breakdown metrics */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 font-mono text-xs">
         <div className="card p-4">
           <div className="label-xs">Compatibility Score</div>
-          <div className="font-display text-2xl mt-1">
+          <div className="text-xl font-bold mt-1">
             {matchData ? (
               <Badge tone={matchData.score >= 80 ? "ok" : matchData.score >= 60 ? "n" : "warn"}>
                 {matchData.score}% · {matchData.label}
               </Badge>
-            ) : (
-              "—"
-            )}
+            ) : "—"}
           </div>
         </div>
-
         <div className="card p-4">
           <div className="label-xs">Matching Skills</div>
-          <p className="mt-1 text-sm font-medium text-ok truncate">
+          <p className="mt-1 text-xs font-semibold text-ok truncate">
             {matchData?.strong?.length ? matchData.strong.join(", ") : "Analyzing..."}
           </p>
         </div>
-
         <div className="card p-4">
           <div className="label-xs">Missing Skills</div>
-          <p className="mt-1 text-sm font-medium text-warn truncate">
+          <p className="mt-1 text-xs font-semibold text-warn truncate">
             {matchData?.missing?.length ? matchData.missing.join(", ") : "None detected"}
           </p>
         </div>
-
         <div className="card p-4">
           <div className="label-xs">Candidate Evidence</div>
-          <p className="mt-1 text-sm font-medium text-dmuted">
+          <p className="mt-1 text-xs font-semibold text-neutral-800">
             {profile.evidence.length} verified records
           </p>
         </div>
       </section>
 
-      {/* Match Breakdown weights */}
-      {matchData?.breakdown && (
-        <div className="card p-4 mb-6 bg-bg2/40">
-          <div className="label-xs mb-2">Deterministic Scoring Formula</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
-            <div>Technical Skills (35%): <span className="font-mono font-medium">{matchData.breakdown.skills}%</span></div>
-            <div>Experience (25%): <span className="font-mono font-medium">{matchData.breakdown.experience}%</span></div>
-            <div>Projects (15%): <span className="font-mono font-medium">{matchData.breakdown.projects}%</span></div>
-            <div>Education (10%): <span className="font-mono font-medium">{matchData.breakdown.education}%</span></div>
-            <div>Domain (10%): <span className="font-mono font-medium">{matchData.breakdown.domain}%</span></div>
-            <div>Location (5%): <span className="font-mono font-medium">{matchData.breakdown.location}%</span></div>
-          </div>
-        </div>
-      )}
-
       {/* Job Description */}
-      <div className="card p-4 mb-8">
+      <div className="card p-4 mb-6">
         <h3 className="label-xs mb-2">Job Description</h3>
-        <p className="text-dmuted text-sm whitespace-pre-line max-h-60 overflow-y-auto font-sans leading-relaxed">
+        <p className="text-neutral-700 text-xs whitespace-pre-line max-h-48 overflow-y-auto font-sans leading-relaxed">
           {job.description}
         </p>
       </div>
 
       {phase !== "idle" && (
-        <div role="status" className="font-mono text-xs mb-6 p-2 bg-bg2 border border-line rounded">
+        <div role="status" className="font-mono text-xs mb-6 p-2 bg-neutral-100 border border-line rounded">
           {
             {
               running: "RUNNING · Extracting requirements & tailoring from Career DNA evidence",
@@ -295,33 +342,33 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
       {changes.length > 0 && (
         <>
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-semibold">Tailored Resume Changes</h2>
+            <h2 className="text-lg font-bold">Tailored Resume Changes</h2>
             <button className="btn text-xs py-1" onClick={acceptAll}>
               Accept All Changes
             </button>
           </div>
 
-          <div className="space-y-3 mb-10">
+          <div className="space-y-3 mb-8">
             {changes.map((c, i) => (
-              <div key={i} className="card p-4">
-                <div className="flex justify-between items-center">
+              <div key={i} className="card p-4 font-sans">
+                <div className="flex justify-between items-center font-mono">
                   <span className="label-xs">{c.section}</span>
                   <Badge tone={c.status === "accepted" ? "ok" : c.status === "rejected" ? "err" : "warn"}>
                     {c.status}
                   </Badge>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4 mt-2">
+                <div className="grid md:grid-cols-2 gap-4 mt-2 text-xs">
                   <div>
                     <div className="label-xs text-muted">Original</div>
-                    <p className="text-dmuted text-sm">{c.original || "—"}</p>
+                    <p className="text-neutral-600 mt-0.5">{c.original || "—"}</p>
                   </div>
                   <div>
                     <div className="label-xs text-ok">Proposed (Tailored)</div>
-                    <p className="text-sm font-medium">{c.proposed}</p>
+                    <p className="font-medium mt-0.5">{c.proposed}</p>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-xs text-muted mt-3 pt-2 border-t border-line">
-                  <span>Rationale: {c.why} · <strong className="text-fg">Evidence:</strong> {c.evidence}</span>
+                <div className="flex justify-between items-center text-xs text-muted mt-3 pt-2 border-t border-line font-mono">
+                  <span>Rationale: {c.why} · <strong>Evidence:</strong> {c.evidence}</span>
                   <div className="flex gap-2">
                     <button
                       className={`btn text-xs py-0.5 px-2 ${c.status === "accepted" ? "bg-black text-white" : ""}`}
@@ -330,7 +377,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
                       Accept
                     </button>
                     <button
-                      className={`btn text-xs py-0.5 px-2 ${c.status === "rejected" ? "bg-line" : ""}`}
+                      className={`btn text-xs py-0.5 px-2 ${c.status === "rejected" ? "bg-neutral-200" : ""}`}
                       onClick={() => setStatus(i, "rejected")}
                     >
                       Reject
@@ -342,109 +389,56 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* Cover Letter */}
-          <h2 className="text-xl font-semibold mb-3">Tailored Cover Letter</h2>
-          <label htmlFor="cl" className="sr-only">
-            Cover letter
-          </label>
+          <h2 className="text-lg font-bold mb-2">Tailored Cover Letter</h2>
           <textarea
             id="cl"
-            rows={8}
-            className="input mb-10 font-sans text-sm leading-relaxed"
+            rows={6}
+            className="input mb-8 font-sans text-xs leading-relaxed"
             value={cover}
             onChange={(e) => setCover(e.target.value)}
           />
 
           {/* Auto-filled Application Questions */}
-          <h2 className="text-xl font-semibold mb-3">Application Questions (Auto-filled)</h2>
-          <div className="grid md:grid-cols-2 gap-4 mb-10">
+          <h2 className="text-lg font-bold mb-2">Application Questions (Auto-filled)</h2>
+          <div className="grid md:grid-cols-2 gap-3 mb-8 text-xs font-mono">
             {FIELDS.map((f) => (
-              <div key={f}>
-                <label htmlFor={f} className="label-xs block mb-1">
-                  {f}
-                </label>
+              <div key={f} className="card p-3">
+                <label htmlFor={f} className="label-xs block mb-1">{f}</label>
                 {f.startsWith("Why") ? (
                   <textarea
                     id={f}
-                    rows={3}
-                    className="input"
+                    rows={2}
+                    className="input text-xs"
                     value={answers[f] ?? ""}
                     onChange={(e) => setAnswers({ ...answers, [f]: e.target.value })}
                   />
                 ) : (
                   <input
                     id={f}
-                    className="input"
+                    className="input text-xs"
                     value={answers[f] ?? ""}
                     onChange={(e) => setAnswers({ ...answers, [f]: e.target.value })}
                   />
                 )}
-                {!answers[f] && <span className="text-xs text-warn">Missing in Career DNA</span>}
               </div>
             ))}
           </div>
         </>
       )}
 
-      {/* Claim Verification Gate */}
-      {ver && (
-        <section aria-label="Verification" className="mb-10 card p-5">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-semibold">Evidence Claim Verification</h2>
-            {ver.passed ? (
-              <Badge tone="ok">PASS · No Hallucinated Claims</Badge>
-            ) : (
-              <Badge tone="err">{ver.blocked} CLAIMS BLOCKED</Badge>
-            )}
-          </div>
-          <p className="text-xs text-muted mb-4">
-            Principle 03: Evidence before generation. Every statement in the generated application must map back to candidate evidence or be blocked.
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="label-xs border-b border-line">
-                <tr>
-                  <th scope="col" className="py-2">Claim in Application</th>
-                  <th scope="col">Evidence Source</th>
-                  <th scope="col">Match Conf.</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ver.claims.slice(0, 10).map((c, i) => (
-                  <tr key={i} className="border-b border-line text-xs">
-                    <td className="py-2.5 pr-3 font-mono">{c.claim}</td>
-                    <td className="text-muted">{c.source ?? "No evidence found"}</td>
-                    <td>{Math.round(c.confidence * 100)}%</td>
-                    <td>
-                      <Badge tone={c.status === "VERIFIED" ? "ok" : "err"}>
-                        {c.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {!ver.passed && (
-            <p className="text-xs text-warn mt-3">
-              Blocked claims have insufficient supporting evidence. Please add evidence to your Career DNA or edit the proposal.
-            </p>
-          )}
-        </section>
-      )}
+      {/* Claim Verification Gate Component */}
+      {ver && <ClaimVerificationTable passed={ver.passed} blocked={ver.blocked} claims={ver.claims} />}
 
       {/* Human Approval Gate */}
       {phase === "done" && (
-        <section className="card p-6 border-2 border-black/80">
+        <section className="card p-6 border-2 border-black font-sans">
           <div className="flex justify-between items-center">
             <div>
-              <div className="label-xs">SAFETY BOUNDARY · HUMAN APPROVAL</div>
-              <div className="font-display text-2xl mt-1">
-                {job.title} at {job.company}
-              </div>
+              <div className="label-xs font-mono">SAFETY BOUNDARY · HUMAN APPROVAL</div>
+              <div className="text-xl font-bold mt-1">{job.title} at {job.company}</div>
             </div>
             {approved ? (
-              <Badge tone="ok">APPROVED & TRACKED</Badge>
+              <Badge tone="ok">APPROVED & SUBMITTED</Badge>
             ) : (
               <Badge tone={ready ? "ok" : "warn"}>
                 {ready ? "Ready for Submission Approval" : "Review Required"}
@@ -452,81 +446,31 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
             )}
           </div>
 
-          <div className="grid sm:grid-cols-4 gap-3 my-4 py-3 border-y border-line text-xs">
-            <div className="flex items-center gap-1.5">
-              <span>Resume:</span>
-              {accepted.length ? (
-                <span className="text-ok font-medium inline-flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 text-ok" />
-                  {accepted.length} accepted
-                </span>
-              ) : (
-                <span className="text-muted">— accept at least 1 change</span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>Cover letter:</span>
-              {cover ? (
-                <span className="text-ok font-medium inline-flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 text-ok" />
-                  Completed
-                </span>
-              ) : (
-                <span className="text-muted">— Missing</span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>Form answers:</span>
-              {FIELDS.every((f) => answers[f]) ? (
-                <span className="text-ok font-medium inline-flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 text-ok" />
-                  Completed
-                </span>
-              ) : (
-                <span className="text-muted">— Incomplete</span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>Verification:</span>
-              {ver?.passed ? (
-                <span className="text-ok font-medium inline-flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 text-ok" />
-                  All claims verified
-                </span>
-              ) : (
-                <span className="text-critical font-medium inline-flex items-center gap-1">
-                  <X className="w-3.5 h-3.5 text-critical" />
-                  Blocked claims
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mt-4">
+          <div className="flex items-center gap-3 mt-5">
             {approved ? (
               <div className="flex items-center gap-3">
-                <span className="text-ok text-sm font-medium inline-flex items-center gap-1.5">
+                <span className="text-ok text-xs font-semibold inline-flex items-center gap-1.5 font-mono">
                   <Check className="w-4 h-4 text-ok" />
-                  Application recorded and tracked.
+                  Application recorded and tracked in your database.
                 </span>
-                <Link href="/applications" className="btn btn-primary">
+                <Link href="/applications" className="btn btn-primary text-xs">
                   View Tracker
                 </Link>
               </div>
             ) : (
               <button
-                className="btn btn-primary text-base py-2 px-6"
-                disabled={!ready}
+                className="btn btn-primary text-sm py-2 px-5 font-mono"
+                disabled={!ready || (dupInfo?.has_application && dupInfo.is_ongoing && !forceReapply)}
                 onClick={approve}
               >
-                [ APPROVE & SUBMIT APPLICATION ]
+                {dupInfo?.has_application && dupInfo.is_ongoing && !forceReapply
+                  ? `[ ALREADY APPLIED · PREVENTING DUPLICATE ]`
+                  : forceReapply
+                  ? `[ APPROVE & SUBMIT RE-APPLICATION ]`
+                  : `[ APPROVE & SUBMIT APPLICATION ]`}
               </button>
             )}
           </div>
-
-          <p className="text-xs text-muted mt-3">
-            In compliance with Principle 05: The AI workforce prepares the application, but you remain the human decision maker.
-          </p>
         </section>
       )}
     </>

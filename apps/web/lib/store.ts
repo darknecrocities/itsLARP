@@ -98,11 +98,18 @@ export type App = {
   role: string;
   match: number;
   status: string;
+  platform?: string;
+  url?: string;
+  notionPageId?: string;
+  notionDatabaseId?: string;
+  appliedDate?: string;
   resume?: string;
   cover?: string;
   answers?: Record<string, string>;
   verified?: boolean;
   events: { at: string; text: string }[];
+  canReapply?: boolean;
+  isOngoing?: boolean;
 };
 
 type S = {
@@ -116,61 +123,18 @@ type S = {
   fetchApps: () => Promise<void>;
   activeSwarmId: string | null;
   setActiveSwarmId: (id: string | null) => void;
-  notion: { token: string; databaseId: string; connected: boolean };
+  notion: {
+    token: string;
+    databaseId: string;
+    databaseName?: string;
+    databaseUrl?: string;
+    connected: boolean;
+    lastSyncedAt?: string;
+    syncedCount?: number;
+  };
   setNotion: (n: Partial<S["notion"]>) => void;
+  fetchNotionStatus: () => Promise<void>;
 };
-
-export const DEFAULT_APPS: App[] = [
-  {
-    id: "app_demo_001",
-    jobId: "job_anthropic_01",
-    company: "Anthropic Labs",
-    role: "Lead AI Engineer",
-    match: 94,
-    status: "APPLIED",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Applied via 400 Independent Application Bots (staged review approved)" },
-      { at: new Date(Date.now() - 3600000).toISOString(), text: "APA 7th resume tailored with 0% hallucinations" },
-    ],
-  },
-  {
-    id: "app_demo_002",
-    jobId: "job_fintech_02",
-    company: "FinTech Systems",
-    role: "Senior Full Stack Lead",
-    match: 88,
-    status: "READY",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Application questions autofilled by Agent #214 · Ready to Submit" },
-    ],
-  },
-  {
-    id: "app_demo_003",
-    jobId: "job_cloudscale_03",
-    company: "CloudScale AI",
-    role: "Staff Backend Engineer",
-    match: 91,
-    status: "INTERVIEW",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Interview invitation synced to Notion tracker" },
-    ],
-  },
-  {
-    id: "app_demo_004",
-    jobId: "job_tomo_04",
-    company: "TomoCredit",
-    role: "Senior Distributed Systems Engineer",
-    match: 95,
-    status: "APPLIED",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Applied via LinkedIn bot pool with 2FA verification pass" },
-    ],
-  },
-];
 
 export const useStore = create<S>()(
   persist(
@@ -179,7 +143,6 @@ export const useStore = create<S>()(
       setProfile: (p) => {
         const next = { ...get().profile, ...p };
         set({ profile: next });
-        // Background sync to backend database
         api("/profile/save", { profile: next }).catch(() => {});
       },
       addEvidence: (e) => {
@@ -195,7 +158,7 @@ export const useStore = create<S>()(
           }
         } catch {}
       },
-      apps: DEFAULT_APPS,
+      apps: [],
       setApps: (apps) => set({ apps }),
       upsertApp: (a) => {
         const existing = get().apps.filter((x) => x.id !== a.id);
@@ -213,6 +176,31 @@ export const useStore = create<S>()(
       setActiveSwarmId: (id) => set({ activeSwarmId: id }),
       notion: { token: "", databaseId: "", connected: false },
       setNotion: (n) => set((s) => ({ notion: { ...s.notion, ...n } })),
+      fetchNotionStatus: async () => {
+        try {
+          const res = await api<{
+            connected: boolean;
+            database_id: string;
+            database_name: string;
+            database_url: string;
+            last_synced_at?: string;
+            synced_count?: number;
+          }>("/integrations/notion/status");
+          if (res) {
+            set((s) => ({
+              notion: {
+                ...s.notion,
+                connected: res.connected,
+                databaseId: res.database_id,
+                databaseName: res.database_name,
+                databaseUrl: res.database_url,
+                lastSyncedAt: res.last_synced_at,
+                syncedCount: res.synced_count,
+              },
+            }));
+          }
+        } catch {}
+      },
     }),
     {
       name: "howtolarped_state",
@@ -227,3 +215,4 @@ export const useStore = create<S>()(
     }
   )
 );
+

@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import { useStore, type App } from "@/lib/store";
 import { api, apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Stat } from "@/components/ui";
+import { NotionSyncModal } from "@/components/NotionSyncModal";
+import {
+  RefreshCw,
+  ExternalLink,
+  Zap,
+  RotateCcw,
+  CheckCircle,
+  Database,
+  Search,
+} from "lucide-react";
 
 const STATUSES = [
   "SAVED",
@@ -19,22 +29,54 @@ const STATUSES = [
 ];
 
 export default function ApplicationsPage() {
-  const { apps, setApps, upsertApp } = useStore();
+  const { apps, setApps, upsertApp, notion, setNotion, fetchNotionStatus } = useStore();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [showNotionModal, setShowNotionModal] = useState(false);
+  const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const data = await apiGet<App[]>("/applications");
+      if (Array.isArray(data)) {
+        setApps(data);
+      }
+    } catch {}
+    try {
+      await fetchNotionStatus();
+    } catch {}
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setLoading(true);
-    apiGet<App[]>("/applications")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setApps(data);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [setApps]);
+    loadData();
+  }, []);
+
+  const handleSyncNotion = async () => {
+    setSyncing(true);
+    try {
+      const res = await api<{
+        ok: boolean;
+        pull?: { imported: number; updated: number; total: number };
+        push?: { pushed: number };
+      }>("/integrations/notion/sync", {});
+      if (res.ok) {
+        setBannerNotice(
+          `Synced with Notion! ${res.pull?.imported || 0} imported, ${res.pull?.updated || 0} updated.`
+        );
+        setTimeout(() => setBannerNotice(null), 5000);
+        await loadData();
+      }
+    } catch (e: any) {
+      setBannerNotice(e.message || "Failed to sync with Notion.");
+      setTimeout(() => setBannerNotice(null), 5000);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleStatusChange = async (app: App, newStatus: string) => {
     try {
@@ -44,11 +86,42 @@ export default function ApplicationsPage() {
     upsertApp({
       ...app,
       status: newStatus,
+      canReapply: newStatus === "REJECTED" || newStatus === "WITHDRAWN",
       events: [
         { at: new Date().toISOString(), text: `Status updated to ${newStatus}` },
         ...app.events,
       ],
     });
+  };
+
+  const handleReapply = async (app: App) => {
+    try {
+      const res = await api<{ ok: boolean; status: string; message: string }>(
+        `/applications/${app.id}/reapply`,
+        {}
+      );
+      if (res.ok) {
+        upsertApp({
+          ...app,
+          status: "READY",
+          canReapply: false,
+          events: [
+            {
+              at: new Date().toISOString(),
+              text: `Re-application initiated by user (previous: ${app.status})`,
+            },
+            ...app.events,
+          ],
+        });
+        setBannerNotice(
+          `Re-application initiated for ${app.company}! You can now review and submit in Studio.`
+        );
+        setTimeout(() => setBannerNotice(null), 6000);
+      }
+    } catch (e: any) {
+      setBannerNotice(e.message || "Could not re-apply.");
+      setTimeout(() => setBannerNotice(null), 5000);
+    }
   };
 
   const rows = apps.filter(
@@ -58,26 +131,102 @@ export default function ApplicationsPage() {
   );
 
   const appliedCount = apps.filter((a) => a.status === "APPLIED").length;
-  const screeningCount = apps.filter((a) => a.status === "SCREENING").length;
   const interviewCount = apps.filter((a) => a.status === "INTERVIEW").length;
   const offerCount = apps.filter((a) => a.status === "OFFER").length;
+  const rejectedCount = apps.filter((a) => a.status === "REJECTED").length;
 
   return (
     <>
       <PageHeader
         title="Application Tracker"
-        sub="Track every job application, interview, and offer in real time. Automatically synced with your Notion list."
+        sub="Track every job application, interview, and offer in real time. Directly linked to your Notion database."
         action={
-          <div className="flex gap-2">
-            <Link href="/jobs" className="btn btn-primary">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="btn text-xs bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
+              onClick={() => setShowNotionModal(true)}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>{notion.connected ? "Notion Settings" : "Link Notion"}</span>
+            </button>
+            <Link href="/jobs" className="btn btn-primary text-xs">
               Discover More Jobs
             </Link>
           </div>
         }
       />
 
+      {/* Notion Connection & Sync Bar */}
+      <div className="card p-3 mb-6 bg-neutral-50 border border-neutral-300 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`w-2.5 h-2.5 rounded-full ${
+              notion.connected ? "bg-black animate-pulse" : "bg-neutral-400"
+            }`}
+          />
+          <div>
+            <span className="font-semibold text-black">
+              {notion.connected
+                ? `Connected to Notion: ${notion.databaseName || "Job Tracker"}`
+                : "Notion Integration: Not Connected"}
+            </span>
+            <span className="text-neutral-500 text-[11px] ml-2">
+              {notion.connected && notion.lastSyncedAt
+                ? `Last synchronized: ${new Date(notion.lastSyncedAt).toLocaleTimeString()}`
+                : "Connect your real Notion database to keep everything in sync"}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {notion.connected ? (
+            <>
+              <button
+                className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
+                disabled={syncing}
+                onClick={handleSyncNotion}
+              >
+                <RefreshCw className={`w-3 h-3 ${syncing ? "animate-spin" : ""}`} />
+                <span>{syncing ? "Syncing..." : "Sync from Notion"}</span>
+              </button>
+              {notion.databaseUrl && (
+                <a
+                  href={notion.databaseUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 hover:border-black flex items-center gap-1"
+                >
+                  <span>Open in Notion</span>
+                  <ExternalLink className="w-3 h-3 text-neutral-500" />
+                </a>
+              )}
+            </>
+          ) : (
+            <button
+              className="btn btn-primary text-xs py-1 px-3 flex items-center gap-1.5"
+              onClick={() => setShowNotionModal(true)}
+            >
+              <Zap className="w-3 h-3" />
+              <span>Connect Notion Database</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {bannerNotice && (
+        <div className="p-3 mb-6 bg-black text-white text-xs font-mono rounded flex items-center justify-between">
+          <span>{bannerNotice}</span>
+          <button
+            onClick={() => setBannerNotice(null)}
+            className="text-neutral-400 hover:text-white"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Summary Pipeline Stats */}
-      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Stat label="Total Tracked" value={apps.length} />
         <Stat label="Applied" value={appliedCount} i={1} />
         <Stat label="In Interviews" value={interviewCount} i={2} />
@@ -87,28 +236,38 @@ export default function ApplicationsPage() {
       {apps.length === 0 && !loading ? (
         <Empty
           title="No applications tracked yet"
-          hint="Select any opportunity from Jobs and click 'Approve & Submit' to start tracking."
+          hint="Sync from your Notion database or discover opportunities to prepare and submit applications."
         >
-          <Link href="/jobs" className="btn btn-primary">
-            Browse Opportunities
-          </Link>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <button
+              className="btn text-xs bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
+              onClick={() => setShowNotionModal(true)}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Link Notion Database</span>
+            </button>
+            <Link href="/jobs" className="btn btn-primary text-xs">
+              Browse Opportunities
+            </Link>
+          </div>
         </Empty>
       ) : (
         <>
-          <div className="flex flex-wrap gap-3 mb-6">
-            <label className="sr-only" htmlFor="aq">Search</label>
-            <input
-              id="aq"
-              className="input max-w-xs"
-              placeholder="Search by company or role..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
+          <div className="flex flex-wrap gap-3 mb-6 font-mono text-xs">
+            <div className="relative max-w-xs w-full">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-neutral-400" />
+              <input
+                id="aq"
+                className="input pl-9"
+                placeholder="Search company or role..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
 
-            <label className="sr-only" htmlFor="af">Status</label>
             <select
               id="af"
-              className="input max-w-[180px]"
+              className="input max-w-[190px]"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -124,75 +283,141 @@ export default function ApplicationsPage() {
             </select>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="label-xs border-b border-line">
+          <div className="overflow-x-auto border border-line rounded">
+            <table className="w-full text-left font-sans text-xs">
+              <thead className="label-xs border-b border-line bg-neutral-100 font-mono">
                 <tr>
-                  <th scope="col" className="py-2.5">Role</th>
-                  <th scope="col">Company</th>
-                  <th scope="col">Compatibility</th>
-                  <th scope="col">Application Status</th>
-                  <th scope="col">Last Event</th>
-                  <th scope="col" className="text-right">Action</th>
+                  <th scope="col" className="py-2.5 px-3">Role</th>
+                  <th scope="col" className="px-3">Company</th>
+                  <th scope="col" className="px-3">Platform</th>
+                  <th scope="col" className="px-3">Match</th>
+                  <th scope="col" className="px-3">Application Status</th>
+                  <th scope="col" className="px-3">Last Activity</th>
+                  <th scope="col" className="px-3">Notion</th>
+                  <th scope="col" className="text-right px-3">Action</th>
                 </tr>
               </thead>
-              <tbody>
-                {rows.map((a) => (
-                  <tr key={a.id} className="border-b border-line hover:bg-bg2 transition-colors">
-                    <td className="py-3 font-semibold">
-                      <Link href={`/apply/${a.jobId}`} className="hover:underline">
-                        {a.role}
-                      </Link>
-                    </td>
-                    <td className="text-dmuted">{a.company}</td>
-                    <td>
-                      <Badge tone={a.match >= 80 ? "ok" : a.match >= 60 ? "n" : "warn"}>
-                        {a.match}%
-                      </Badge>
-                    </td>
-                    <td>
-                      <label className="sr-only" htmlFor={`s-${a.id}`}>
-                        Status for {a.role}
-                      </label>
-                      <select
-                        id={`s-${a.id}`}
-                        className="input !w-auto text-xs py-1"
-                        value={a.status}
-                        onChange={(e) => handleStatusChange(a, e.target.value)}
-                      >
-                        {STATUSES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="text-muted text-xs">
-                      <div>{a.events?.[0]?.text || "Application recorded"}</div>
-                      {a.events?.[0]?.at && (
-                        <div className="text-[10px] text-muted">
-                          {new Date(a.events[0].at).toLocaleDateString()}
+              <tbody className="divide-y divide-line">
+                {rows.map((a) => {
+                  const isRejected = a.status === "REJECTED" || a.status === "WITHDRAWN";
+                  const isOngoing =
+                    a.status === "APPLIED" ||
+                    a.status === "SCREENING" ||
+                    a.status === "INTERVIEW" ||
+                    a.status === "OFFER";
+
+                  return (
+                    <tr
+                      key={a.id}
+                      className={`hover:bg-neutral-50 transition-colors ${
+                        isRejected ? "bg-neutral-50/50" : ""
+                      }`}
+                    >
+                      <td className="py-3 px-3 font-semibold">
+                        <Link href={`/apply/${a.jobId}`} className="hover:underline">
+                          {a.role}
+                        </Link>
+                        {isRejected && (
+                          <div className="text-[10px] text-neutral-500 font-mono">
+                            Previous attempt ended ({a.status})
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 text-neutral-700 font-medium">{a.company}</td>
+                      <td className="px-3 font-mono text-[11px] text-neutral-500">
+                        {a.platform || "Direct"}
+                      </td>
+                      <td className="px-3">
+                        <Badge tone={a.match >= 80 ? "ok" : a.match >= 60 ? "n" : "warn"}>
+                          {a.match}%
+                        </Badge>
+                      </td>
+                      <td className="px-3">
+                        <select
+                          className="input !w-auto text-xs py-1 font-mono"
+                          value={a.status}
+                          onChange={(e) => handleStatusChange(a, e.target.value)}
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-3 text-neutral-500 text-[11px] max-w-xs">
+                        <div className="truncate">{a.events?.[0]?.text || "Recorded"}</div>
+                        {a.events?.[0]?.at && (
+                          <div className="text-[10px] text-neutral-400 font-mono">
+                            {new Date(a.events[0].at).toLocaleDateString()}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3">
+                        {a.notionPageId ? (
+                          <a
+                            href={`https://notion.so/${a.notionPageId.replace(/-/g, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-mono text-neutral-600 hover:text-black underline"
+                          >
+                            <span>Synced</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        ) : (
+                          <span className="text-neutral-400 font-mono text-[11px]">—</span>
+                        )}
+                      </td>
+                      <td className="text-right px-3 py-3">
+                        <div className="inline-flex items-center gap-1.5">
+                          {isRejected && (
+                            <button
+                              className="btn text-xs py-1 px-2.5 bg-black text-white hover:bg-neutral-800 flex items-center gap-1 font-mono"
+                              onClick={() => handleReapply(a)}
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                              <span>Re-Apply</span>
+                            </button>
+                          )}
+                          <Link
+                            href={`/apply/${a.jobId}`}
+                            className="btn text-xs py-1 px-2.5 border border-neutral-300 hover:border-black font-mono"
+                          >
+                            Studio
+                          </Link>
                         </div>
-                      )}
-                    </td>
-                    <td className="text-right">
-                      <Link href={`/apply/${a.jobId}`} className="btn text-xs py-1 px-2.5">
-                        View Studio
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           {rows.length === 0 && (
-            <p className="text-muted py-8 text-center text-sm">
+            <p className="text-neutral-500 py-8 text-center text-xs font-mono">
               No applications match your search filter.
             </p>
           )}
         </>
       )}
+
+      {/* Notion Connect / Select Modal */}
+      <NotionSyncModal
+        show={showNotionModal}
+        onClose={() => setShowNotionModal(false)}
+        onSuccess={(data) => {
+          setNotion({
+            connected: true,
+            databaseId: data.database_id,
+            databaseName: data.database_name,
+            databaseUrl: data.database_url,
+          });
+          setBannerNotice(`Successfully linked Notion database: ${data.database_name}`);
+          setTimeout(() => setBannerNotice(null), 5000);
+          loadData();
+        }}
+      />
     </>
   );
 }

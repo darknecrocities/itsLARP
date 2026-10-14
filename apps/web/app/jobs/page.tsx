@@ -248,6 +248,15 @@ export default function JobsPage() {
               {rows.map((j) => {
                 const m = j.match;
                 const score = m?.score ?? 0;
+                const existing = apps.find(
+                  (a) =>
+                    a.jobId === j.id ||
+                    (a.company.toLowerCase() === j.company.toLowerCase() &&
+                      a.role.toLowerCase() === j.title.toLowerCase())
+                );
+                const isRejected = existing && (existing.status === "REJECTED" || existing.status === "WITHDRAWN");
+                const isOngoing = existing && !isRejected;
+
                 return (
                   <tr key={j.id} className="border-b border-line hover:bg-bg2 transition-colors">
                     <td className="py-3 font-medium">
@@ -257,6 +266,11 @@ export default function JobsPage() {
                       >
                         {j.title}
                       </Link>
+                      {existing && (
+                        <span className="ml-2 font-mono text-[10px] text-neutral-500">
+                          {isRejected ? "· Previously Rejected (Can Re-Apply)" : `· Ongoing: ${existing.status}`}
+                        </span>
+                      )}
                       {j.skills && j.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {j.skills.slice(0, 4).map((s) => (
@@ -283,6 +297,10 @@ export default function JobsPage() {
                     <td>
                       {isLoading ? (
                         <span className="text-muted">…</span>
+                      ) : existing ? (
+                        <Badge tone={isRejected ? "warn" : "ok"}>
+                          {existing.status}
+                        </Badge>
                       ) : m ? (
                         <Badge tone={score >= 80 ? "ok" : score >= 60 ? "n" : "warn"}>
                           {score}% · {m.label}
@@ -292,13 +310,23 @@ export default function JobsPage() {
                       )}
                     </td>
                     <td className="text-right">
-                      <Link href={`/apply/${j.id}`} className="btn text-xs py-1 px-2.5">
-                        Prepare App
+                      <Link
+                        href={`/apply/${j.id}`}
+                        className={`btn text-xs py-1 px-2.5 ${
+                          isRejected
+                            ? "bg-black text-white hover:bg-neutral-800"
+                            : isOngoing
+                            ? "bg-neutral-100 border-neutral-300"
+                            : ""
+                        }`}
+                      >
+                        {isRejected ? "Re-Apply" : isOngoing ? "View Status" : "Prepare App"}
                       </Link>
                     </td>
                   </tr>
                 );
               })}
+
             </tbody>
           </table>
 

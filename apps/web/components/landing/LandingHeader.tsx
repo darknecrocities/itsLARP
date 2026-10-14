@@ -14,9 +14,7 @@ export function LandingHeader() {
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="group flex items-center">
-            <BrandLogo size="md" variant="full" />
-          </Link>
+          <BrandLogo size="md" variant="full" className="group flex items-center" />
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-dmuted">

@@ -7,7 +7,7 @@ interface BrandLogoProps {
   variant?: "mark" | "full" | "minimal";
   size?: "sm" | "md" | "lg" | "xl";
   showBadge?: boolean;
-  href?: string;
+  href?: string | null | false;
   className?: string;
 }
 
@@ -76,9 +76,12 @@ export function BrandLogo({
     </div>
   );
 
-  if (href) {
+  if (typeof href === "string" && href.trim().length > 0) {
     return (
-      <Link href={href} className="inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg">
+      <Link
+        href={href}
+        className={`inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg ${className}`}
+      >
         {content}
       </Link>
     );
