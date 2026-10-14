@@ -1,0 +1,7 @@
+<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.5" y="0.5" width="179" height="47" rx="8" fill="#09090B" stroke="#27272A" />
+  <circle cx="24" cy="24" r="10" fill="#18181B" stroke="#10B981" stroke-width="1.5" />
+  <circle cx="24" cy="24" r="3" fill="#10B981" />
+  <text x="44" y="22" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#FFFFFF" letter-spacing="0.05em">300 CRAWLERS</text>
+  <text x="44" y="34" font-family="-apple-system, sans-serif" font-size="9" fill="#A1A1AA">LinkedIn &amp; JobStreet</text>
+</svg>

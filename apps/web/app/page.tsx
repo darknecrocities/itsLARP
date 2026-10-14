@@ -20,6 +20,8 @@ import {
   AnimatedSparkBar,
 } from "@/components/motion";
 import { motion, AnimatePresence } from "framer-motion";
+import { BrandLogo } from "@/components/BrandLogo";
+import { DemoVideoPlayer } from "@/components/DemoVideoPlayer";
 
 const DEMO_LOGS = [
   { t: "14:10:02", id: "agent_scrape_014", msg: "LinkedIn Agent found 'Lead AI Engineer' @ Anthropic Labs matching your target salary" },
@@ -67,7 +69,8 @@ const PRINCIPLES = [
 export default function LandingPage() {
   const [activeLogIndex, setActiveLogIndex] = useState(DEMO_LOGS.length - 1);
   const [simRunning, setSimRunning] = useState(true);
-  const [demoTab, setDemoTab] = useState<"pipeline" | "apa" | "notion">("pipeline");
+  const [demoTab, setDemoTab] = useState<"video" | "pipeline" | "apa" | "notion">("video");
+  const [videoTab, setVideoTab] = useState<"swarm" | "resume" | "notion">("swarm");
 
   useEffect(() => {
     if (!simRunning) return;
@@ -91,12 +94,14 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="font-display font-bold text-2xl tracking-tight text-ink group flex items-center gap-2">
-              <span>itsLARP</span>
-            </Link>
+            <BrandLogo size="md" />
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-dmuted">
+            <a href="#app-demos" className="hover:text-ink transition-colors flex items-center gap-1.5 font-semibold text-ink">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              Live Demos
+            </a>
             <a href="#workforce-demo" className="hover:text-ink transition-colors">How It Works</a>
             <a href="#apa-format" className="hover:text-ink transition-colors">APA Resume</a>
             <a href="#principles" className="hover:text-ink transition-colors">Guarantees</a>
@@ -152,13 +157,19 @@ export default function LandingPage() {
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <a href="#app-demos" className="btn text-base py-3 px-6 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    Watch 3 Live Demos
+                  </a>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                   <a href="#workforce-demo" className="btn text-base py-3 px-6">
-                    Watch Agents in Action
+                    Interactive Swarm
                   </a>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                   <Link href="/resume" className="btn text-base py-3 px-6">
-                    View Sample APA Resume
+                    Sample APA Resume
                   </Link>
                 </motion.div>
               </FadeIn>
@@ -237,6 +248,106 @@ export default function LandingPage() {
         speed={28}
       />
 
+      {/* 3 Real Product Walkthroughs / Video Theater Section */}
+      <section id="app-demos" className="py-20 border-b border-line bg-bg">
+        <div className="max-w-6xl mx-auto px-6">
+          <FadeIn distance={24} className="flex flex-wrap items-end justify-between gap-4 mb-8">
+            <div>
+              <div className="label-xs flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                AUTHENTIC SYSTEM RECORDINGS
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold mt-1 tracking-tight">
+                See itsLARP in Action: 3 Real Application Demos
+              </h2>
+              <p className="text-muted text-sm mt-2 max-w-2xl leading-relaxed">
+                Watch actual high-definition screen recordings of itsLARP in operation. See how 1,000 bots coordinate, how APA 7th resumes are verified with zero hallucinations, and how applications auto-mirror directly into Notion.
+              </p>
+            </div>
+
+            {/* Video switcher tabs */}
+            <div className="flex flex-wrap gap-2 text-xs font-mono">
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                className={`btn text-xs ${videoTab === "swarm" ? "bg-black text-white" : ""}`}
+                onClick={() => setVideoTab("swarm")}
+              >
+                1. 1,000-Bot Workforce Swarm
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                className={`btn text-xs ${videoTab === "resume" ? "bg-black text-white" : ""}`}
+                onClick={() => setVideoTab("resume")}
+              >
+                2. APA 7th Resume Studio
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                className={`btn text-xs ${videoTab === "notion" ? "bg-black text-white" : ""}`}
+                onClick={() => setVideoTab("notion")}
+              >
+                3. Applications & Notion Sync
+              </motion.button>
+            </div>
+          </FadeIn>
+
+          <AnimatePresence mode="wait">
+            {videoTab === "swarm" ? (
+              <motion.div
+                key="swarm-vid"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <DemoVideoPlayer
+                  title="1,000 Autonomous Agents Swarm in Action"
+                  urlBar="itslarp.local/agents"
+                  mp4Src="/demos/workforce-swarm-demo.mp4"
+                  webmSrc="/demos/workforce-swarm-demo.webm"
+                  posterSrc="/demos/workforce-swarm-demo-poster.jpg"
+                  caption="Real capture: 300 Discovery Crawlers scanning LinkedIn/JobStreet, 300 Resume Tailors, and 400 Appliers with live 2FA OTP prompt handling."
+                />
+              </motion.div>
+            ) : videoTab === "resume" ? (
+              <motion.div
+                key="resume-vid"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <DemoVideoPlayer
+                  title="APA 7th Edition Resume Studio & Tailoring"
+                  urlBar="itslarp.local/resume"
+                  mp4Src="/demos/apa-resume-demo.mp4"
+                  webmSrc="/demos/apa-resume-demo.webm"
+                  posterSrc="/demos/apa-resume-demo-poster.jpg"
+                  caption="Real capture: Generating academic running heads, formal software project citations, and tailoring skill diffs with 0% hallucinations."
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="notion-vid"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <DemoVideoPlayer
+                  title="Applications Pipeline & 1-Click Notion Auto-List"
+                  urlBar="itslarp.local/applications"
+                  mp4Src="/demos/notion-pipeline-demo.mp4"
+                  webmSrc="/demos/notion-pipeline-demo.webm"
+                  posterSrc="/demos/notion-pipeline-demo-poster.jpg"
+                  caption="Real capture: Reviewing staged application answers, tracking live applications, and 1-click database synchronization to Notion."
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
       {/* Live Interactive Workforce Demo Section */}
       <section id="workforce-demo" className="py-20 border-b border-line bg-bg2/30">
         <div className="max-w-6xl mx-auto px-6">
@@ -245,7 +356,7 @@ export default function LandingPage() {
               <div className="label-xs">LIVE DEMO</div>
               <h2 className="text-3xl font-bold mt-1 tracking-tight">Watch 1,000 Agents Work For You in Real Time</h2>
               <p className="text-muted text-sm mt-1 max-w-xl">
-                See how your Agents find jobs, write tailored resumes, and prepare your applications. Click any circle in the network below to see what it does.
+                See how your Agents find jobs, write tailored resumes, and prepare your applications. Toggle between the live system recording, interactive network, APA resume, and Notion database.
               </p>
             </div>
 
@@ -256,6 +367,13 @@ export default function LandingPage() {
                 onClick={() => setSimRunning(!simRunning)}
               >
                 {simRunning ? "⏸ Pause Demo" : "▶ Resume Demo"}
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                className={`btn text-xs ${demoTab === "video" ? "bg-black text-white" : ""}`}
+                onClick={() => setDemoTab("video")}
+              >
+                🎬 Real Swarm Video
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -282,7 +400,24 @@ export default function LandingPage() {
           </FadeIn>
 
           <AnimatePresence mode="wait">
-            {demoTab === "pipeline" ? (
+            {demoTab === "video" ? (
+              <motion.div
+                key="workforce-video"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <DemoVideoPlayer
+                  title="1,000-Agent Swarm Real Recording"
+                  urlBar="itslarp.local/agents"
+                  mp4Src="/demos/workforce-swarm-demo.mp4"
+                  webmSrc="/demos/workforce-swarm-demo.webm"
+                  posterSrc="/demos/workforce-swarm-demo-poster.jpg"
+                  caption="Full real-time recording: 300 Crawlers on LinkedIn/JobStreet, 300 Tailors, and 400 Appliers executing parallel jobs."
+                />
+              </motion.div>
+            ) : demoTab === "pipeline" ? (
               <motion.div
                 key="pipeline"
                 initial={{ opacity: 0, y: 16 }}
@@ -648,10 +783,8 @@ export default function LandingPage() {
         <FadeIn distance={14}>
           <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6">
             <div>
-              <div className="font-display font-bold text-base tracking-tight text-ink">
-                itsLARP
-              </div>
-              <p className="text-muted text-[11px] mt-0.5">Your AI Job-Hunting Team · No Manual Applications Needed</p>
+              <BrandLogo size="sm" />
+              <p className="text-muted text-[11px] mt-1">Your AI Job-Hunting Team · No Manual Applications Needed</p>
             </div>
 
             <div className="flex flex-wrap gap-6 text-muted">

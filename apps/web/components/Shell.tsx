@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const NAV = [
   ["/dashboard", "Dashboard", "Overview"],
@@ -43,10 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen md:flex bg-bg">
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between border-b border-line px-4 py-3 bg-bg">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-xl tracking-tight text-ink">itsLARP</span>
-            <span className="text-[10px] font-mono px-1 py-0.5 bg-bg2 border border-line rounded">OS</span>
-          </div>
+          <BrandLogo size="sm" />
           <button
             className="btn text-xs py-1 px-2.5"
             aria-expanded={open}
@@ -68,15 +66,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div>
             {/* Logo */}
             <div className="mb-6">
-              <Link href="/" className="flex items-center gap-2 group">
-                <span className="font-display font-bold text-2xl tracking-tight text-ink group-hover:opacity-80 transition-opacity">
-                  itsLARP
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-black text-white rounded font-medium">
-                  v1.0
-                </span>
-              </Link>
-              <p className="text-[11px] text-muted font-mono mt-1">Auto-Apply Agents</p>
+              <BrandLogo size="md" />
+              <p className="text-[11px] text-muted font-mono mt-1 pl-0.5">1,000 Auto-Apply Agents</p>
             </div>
 
             {/* Navigation links */}
