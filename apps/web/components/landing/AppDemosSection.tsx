@@ -65,11 +65,11 @@ export function AppDemosSection() {
           {videoTab === "swarm" && (
             <div>
               <DemoVideoPlayer
-                srcMp4="/demos/workforce-swarm-demo.mp4"
-                srcWebm="/demos/workforce-swarm-demo.webm"
-                poster="/demos/workforce-swarm-demo-poster.jpg"
+                mp4Src="/demos/workforce-swarm-demo.mp4"
+                webmSrc="/demos/workforce-swarm-demo.webm"
+                posterSrc="/demos/workforce-swarm-demo-poster.jpg"
                 title="itsLARP — 1,000 Concurrent Autonomous Bot Swarm (Live Matrix & 2FA Handler)"
-                simulatedUrl="https://itslarp.local/agents"
+                urlBar="https://itslarp.local/agents"
                 autoPlay={true}
               />
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-muted px-1">
@@ -85,11 +85,11 @@ export function AppDemosSection() {
           {videoTab === "resume" && (
             <div>
               <DemoVideoPlayer
-                srcMp4="/demos/apa-resume-demo.mp4"
-                srcWebm="/demos/apa-resume-demo.webm"
-                poster="/demos/apa-resume-demo-poster.jpg"
+                mp4Src="/demos/apa-resume-demo.mp4"
+                webmSrc="/demos/apa-resume-demo.webm"
+                posterSrc="/demos/apa-resume-demo-poster.jpg"
                 title="itsLARP — APA 7th Edition Resume Studio & Tailoring Diff Viewer"
-                simulatedUrl="https://itslarp.local/resume"
+                urlBar="https://itslarp.local/resume"
                 autoPlay={true}
               />
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-muted px-1">
@@ -105,11 +105,11 @@ export function AppDemosSection() {
           {videoTab === "notion" && (
             <div>
               <DemoVideoPlayer
-                srcMp4="/demos/notion-pipeline-demo.mp4"
-                srcWebm="/demos/notion-pipeline-demo.webm"
-                poster="/demos/notion-pipeline-demo-poster.jpg"
+                mp4Src="/demos/notion-pipeline-demo.mp4"
+                webmSrc="/demos/notion-pipeline-demo.webm"
+                posterSrc="/demos/notion-pipeline-demo-poster.jpg"
                 title="itsLARP — Live Application Tracker & 1-Click Notion Mirror Database"
-                simulatedUrl="https://itslarp.local/applications"
+                urlBar="https://itslarp.local/applications"
                 autoPlay={true}
               />
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-muted px-1">
