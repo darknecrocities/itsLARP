@@ -44,6 +44,11 @@ class ApplicationRecord(Base):
     answers = Column(JSON, default=dict)
     verified = Column(Boolean, default=True)
     events = Column(JSON, default=list)
+    platform = Column(String(64), default="Direct")
+    url = Column(String(1024), default="")
+    notion_page_id = Column(String(128), nullable=True, index=True)
+    notion_database_id = Column(String(128), nullable=True)
+    applied_date = Column(String(64), default="")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -65,5 +70,45 @@ class ProfileRecord(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class IntegrationRecord(Base):
+    __tablename__ = "integrations"
+    id = Column(String(64), primary_key=True)  # e.g. "notion"
+    token = Column(String(512), default="")
+    database_id = Column(String(128), default="")
+    database_name = Column(String(255), default="")
+    database_url = Column(String(1024), default="")
+    workspace = Column(String(255), default="")
+    connected = Column(Boolean, default=False)
+    last_synced_at = Column(DateTime, nullable=True)
+    synced_count = Column(Integer, default=0)
+    settings = Column(JSON, default=dict)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Safe SQLite column migration for existing tables
+    if DATABASE_URL.startswith("sqlite"):
+        import sqlite3
+        db_file = DATABASE_URL.replace("sqlite:///", "")
+        if os.path.exists(db_file):
+            try:
+                conn = sqlite3.connect(db_file)
+                cur = conn.cursor()
+                cur.execute("PRAGMA table_info(applications);")
+                existing_cols = {col[1] for col in cur.fetchall()}
+                new_cols = [
+                    ("platform", "VARCHAR(64) DEFAULT 'Direct'"),
+                    ("url", "VARCHAR(1024) DEFAULT ''"),
+                    ("notion_page_id", "VARCHAR(128)"),
+                    ("notion_database_id", "VARCHAR(128)"),
+                    ("applied_date", "VARCHAR(64) DEFAULT ''"),
+                ]
+                for col_name, col_type in new_cols:
+                    if col_name not in existing_cols:
+                        cur.execute(f"ALTER TABLE applications ADD COLUMN {col_name} {col_type};")
+                conn.commit()
+                conn.close()
+            except Exception:
+                pass
+

@@ -174,9 +174,34 @@ class Run:
         elif stage == "matching":
             bid = f"bot_match_{worker_idx:03d}"
             r = self.results[payload]
-            r["match"] = tailoring.match(self.profile, r["job"])
+            j = r["job"]
+            r["match"] = tailoring.match(self.profile, j)
             score = r["match"]["score"]
-            self.log(bid, f"Match score: {score}% · {r['job']['company']} ({r['job']['title']})")
+            self.log(bid, f"Match score: {score}% · {j['company']} ({j['title']})")
+
+            # Duplicate Application Guard: Check if user already applied
+            from .database import SessionLocal, ApplicationRecord
+            db_s = SessionLocal()
+            existing_app = None
+            try:
+                existing_app = db_s.query(ApplicationRecord).filter(
+                    (ApplicationRecord.job_id == j["id"]) |
+                    ((ApplicationRecord.company == j["company"]) & (ApplicationRecord.role == j["title"]))
+                ).first()
+            finally:
+                db_s.close()
+
+            if existing_app:
+                if existing_app.status in ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "READY"]:
+                    r["state"] = "DUPLICATE_PREVENTED"
+                    r["duplicate_status"] = existing_app.status
+                    self.log(bid, f"Duplicate prevented: Already applied to {j['company']} (Status: {existing_app.status}). Skipping.")
+                    return
+                elif existing_app.status in ["REJECTED", "WITHDRAWN"]:
+                    r["state"] = "PREVIOUSLY_REJECTED"
+                    r["can_reapply"] = True
+                    self.log(bid, f"Prior status: {existing_app.status} from {j['company']}. Re-application eligible.")
+
             if score >= 50:  # User liking compatibility filter
                 self.put("resumes", payload)
             else:
@@ -203,6 +228,7 @@ class Run:
                 bot.current_task = f"Tailored package ready for {j['company']}"
 
             self.put("applications", payload)
+
 
         elif stage == "applications":
             bot = self.get_idle_bot("apply")
