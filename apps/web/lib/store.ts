@@ -1,44 +1,75 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { api } from "./api";
+import { api, apiGet } from "./api";
 
 export type Evidence = { source: string; text: string };
+
+export type ExperienceItem = {
+  company: string;
+  title: string;
+  start_date?: string;
+  end_date?: string;
+  text: string;
+  metrics?: string;
+};
+
+export type ProjectItem = {
+  name: string;
+  tech: string[];
+  text: string;
+  url?: string;
+};
+
 export type Profile = {
   name: string;
   headline: string;
   email: string;
+  phone: string;
   location: string;
   years: number;
-  skills: string[];
-  experience: { company: string; title: string; text: string; period?: string }[];
-  projects: { name: string; tech: string[]; text: string }[];
   education: string;
+  summary: string;
+  target_roles: string[];
+  target_companies: string[];
+  work_types: string[];
+  skills: string[];
+  experience: ExperienceItem[];
+  projects: ProjectItem[];
   links: { github?: string; linkedin?: string; portfolio?: string };
   evidence: Evidence[];
-  target_roles?: string[];
 };
 
 export const EMPTY: Profile = {
   name: "",
   headline: "",
   email: "",
+  phone: "",
   location: "",
   years: 0,
+  education: "",
+  summary: "",
+  target_roles: ["all"],
+  target_companies: ["all"],
+  work_types: ["fulltime", "remote"],
   skills: [],
   experience: [],
   projects: [],
-  education: "",
   links: {},
   evidence: [],
-  target_roles: [],
 };
 
 export const DEFAULT_PROFILE: Profile = {
   name: "Jane Doe",
   headline: "Lead AI Systems & Full Stack Engineer",
   email: "jane.doe@example.com",
+  phone: "+1 (555) 234-5678",
   location: "San Francisco, CA (Remote)",
   years: 5,
+  education: "B.S. in Computer Science, Stanford University",
+  summary: "Empirical technical practitioner with 5+ years contributing to scalable software systems and artificial intelligence.",
+  target_roles: ["Lead AI Engineer", "Senior Full Stack Engineer"],
+  target_companies: ["all"],
+  work_types: ["fulltime", "remote"],
   skills: [
     "Python",
     "FastAPI",
@@ -49,7 +80,6 @@ export const DEFAULT_PROFILE: Profile = {
     "PyTorch",
     "Tailwind CSS",
   ],
-  education: "B.S. in Computer Science, Stanford University",
   experience: [
     {
       company: "Anthropic Labs",
@@ -88,7 +118,6 @@ export const DEFAULT_PROFILE: Profile = {
       text: "0% hallucination verification gate preventing exaggeration or fabrication of skills.",
     },
   ],
-  target_roles: ["Lead AI Engineer", "Senior Full Stack Engineer"],
 };
 
 export type App = {
@@ -98,11 +127,31 @@ export type App = {
   role: string;
   match: number;
   status: string;
+  platform?: string;
+  url?: string;
+  notionPageId?: string;
+  notionDatabaseId?: string;
+  appliedDate?: string;
   resume?: string;
   cover?: string;
   answers?: Record<string, string>;
   verified?: boolean;
   events: { at: string; text: string }[];
+  canReapply?: boolean;
+  isOngoing?: boolean;
+};
+
+export type AgentQuestion = {
+  id: string;
+  run_id?: string;
+  bot_id?: string;
+  job_id?: string;
+  company: string;
+  role: string;
+  question: string;
+  context?: string;
+  status: string;
+  created_at?: string;
 };
 
 type S = {
@@ -114,63 +163,25 @@ type S = {
   setApps: (apps: App[]) => void;
   upsertApp: (a: App) => void;
   fetchApps: () => Promise<void>;
+  questions: AgentQuestion[];
+  setQuestions: (q: AgentQuestion[]) => void;
+  fetchQuestions: () => Promise<void>;
+  answerQuestion: (id: string, answer: string) => Promise<boolean>;
+  dismissQuestion: (id: string) => Promise<boolean>;
   activeSwarmId: string | null;
   setActiveSwarmId: (id: string | null) => void;
-  notion: { token: string; databaseId: string; connected: boolean };
+  notion: {
+    token: string;
+    databaseId: string;
+    databaseName?: string;
+    databaseUrl?: string;
+    connected: boolean;
+    lastSyncedAt?: string;
+    syncedCount?: number;
+  };
   setNotion: (n: Partial<S["notion"]>) => void;
+  fetchNotionStatus: () => Promise<void>;
 };
-
-export const DEFAULT_APPS: App[] = [
-  {
-    id: "app_demo_001",
-    jobId: "job_anthropic_01",
-    company: "Anthropic Labs",
-    role: "Lead AI Engineer",
-    match: 94,
-    status: "APPLIED",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Applied via 400 Independent Application Bots (staged review approved)" },
-      { at: new Date(Date.now() - 3600000).toISOString(), text: "APA 7th resume tailored with 0% hallucinations" },
-    ],
-  },
-  {
-    id: "app_demo_002",
-    jobId: "job_fintech_02",
-    company: "FinTech Systems",
-    role: "Senior Full Stack Lead",
-    match: 88,
-    status: "READY",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Application questions autofilled by Agent #214 · Ready to Submit" },
-    ],
-  },
-  {
-    id: "app_demo_003",
-    jobId: "job_cloudscale_03",
-    company: "CloudScale AI",
-    role: "Staff Backend Engineer",
-    match: 91,
-    status: "INTERVIEW",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Interview invitation synced to Notion tracker" },
-    ],
-  },
-  {
-    id: "app_demo_004",
-    jobId: "job_tomo_04",
-    company: "TomoCredit",
-    role: "Senior Distributed Systems Engineer",
-    match: 95,
-    status: "APPLIED",
-    verified: true,
-    events: [
-      { at: new Date().toISOString(), text: "Applied via LinkedIn bot pool with 2FA verification pass" },
-    ],
-  },
-];
 
 export const useStore = create<S>()(
   persist(
@@ -179,7 +190,6 @@ export const useStore = create<S>()(
       setProfile: (p) => {
         const next = { ...get().profile, ...p };
         set({ profile: next });
-        // Background sync to backend database
         api("/profile/save", { profile: next }).catch(() => {});
       },
       addEvidence: (e) => {
@@ -195,7 +205,7 @@ export const useStore = create<S>()(
           }
         } catch {}
       },
-      apps: DEFAULT_APPS,
+      apps: [],
       setApps: (apps) => set({ apps }),
       upsertApp: (a) => {
         const existing = get().apps.filter((x) => x.id !== a.id);
@@ -209,10 +219,70 @@ export const useStore = create<S>()(
           }
         } catch {}
       },
+      questions: [],
+      setQuestions: (questions) => set({ questions }),
+      fetchQuestions: async () => {
+        try {
+          const qs = await apiGet<AgentQuestion[]>("/notifications/questions");
+          if (Array.isArray(qs)) {
+            set({ questions: qs });
+          }
+        } catch {}
+      },
+      answerQuestion: async (id: string, answer: string) => {
+        try {
+          const res = await api<{ ok: boolean }>(`/notifications/questions/${id}/answer`, { answer });
+          if (res.ok) {
+            set((s) => ({
+              questions: s.questions.filter((q) => q.id !== id),
+            }));
+            apiGet<{ profile: Profile }>("/profile")
+              .then((pData) => {
+                if (pData?.profile) set({ profile: { ...get().profile, ...pData.profile } });
+              })
+              .catch(() => {});
+            return true;
+          }
+        } catch {}
+        return false;
+      },
+      dismissQuestion: async (id: string) => {
+        try {
+          await api(`/notifications/questions/${id}/dismiss`, {});
+          set((s) => ({ questions: s.questions.filter((q) => q.id !== id) }));
+          return true;
+        } catch {}
+        return false;
+      },
       activeSwarmId: null,
       setActiveSwarmId: (id) => set({ activeSwarmId: id }),
       notion: { token: "", databaseId: "", connected: false },
       setNotion: (n) => set((s) => ({ notion: { ...s.notion, ...n } })),
+      fetchNotionStatus: async () => {
+        try {
+          const res = await api<{
+            connected: boolean;
+            database_id: string;
+            database_name: string;
+            database_url: string;
+            last_synced_at?: string;
+            synced_count?: number;
+          }>("/integrations/notion/status");
+          if (res) {
+            set((s) => ({
+              notion: {
+                ...s.notion,
+                connected: res.connected,
+                databaseId: res.database_id,
+                databaseName: res.database_name,
+                databaseUrl: res.database_url,
+                lastSyncedAt: res.last_synced_at,
+                syncedCount: res.synced_count,
+              },
+            }));
+          }
+        } catch {}
+      },
     }),
     {
       name: "howtolarped_state",
@@ -227,3 +297,4 @@ export const useStore = create<S>()(
     }
   )
 );
+

@@ -9,8 +9,9 @@ export type AgentLog = { t: string; id: string; msg: string };
 
 export type BotTelemetry = {
   id: string;
-  pool: "discovery" | "tailor" | "apply";
+  pool: "discovery" | "tailor" | "apply" | "notion";
   platform: string;
+
   status: "idle" | "browsing" | "analyzing" | "tailoring" | "applying" | "completed" | "needs_verification";
   current_task: string;
   cpu_pct: number;
@@ -156,6 +157,10 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         queries,
         workers: workerCount,
         credentials: credentials || {},
+        target_jobs: workerCount,
+        target_roles: profile.target_roles || ["all"],
+        target_companies: profile.target_companies || ["all"],
+        work_types: profile.work_types || ["fulltime", "remote"],
       });
 
       set({

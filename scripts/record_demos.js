@@ -74,7 +74,7 @@ function processVideo(rawWebmPath, baseName) {
     { stdio: 'inherit' }
   );
 
-  console.log(`✓ Generated ${baseName}.mp4, ${baseName}.webm, and ${baseName}-poster.jpg`);
+  console.log(`[OK] Generated ${baseName}.mp4, ${baseName}.webm, and ${baseName}-poster.jpg`);
 }
 
 // Helper to seed rich career profile into localStorage
@@ -398,7 +398,7 @@ async function runRecordings() {
     processVideo(video3Path, 'notion-pipeline-demo');
 
     console.log('\n======================================================');
-    console.log('✓ All 3 Real Application Demos successfully recorded!');
+    console.log('[OK] All 3 Real Application Demos successfully recorded!');
     console.log('  1. workforce-swarm-demo.mp4 (Swarm & 1,000 Agents)');
     console.log('  2. apa-resume-demo.mp4 (APA 7th Resume Engine)');
     console.log('  3. notion-pipeline-demo.mp4 (Applications & Notion Sync)');

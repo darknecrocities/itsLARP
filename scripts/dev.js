@@ -32,7 +32,7 @@ if (!fs.existsSync(venvUvicorn)) {
     execSync("python3 -m venv .venv", { cwd: API_DIR, stdio: "inherit" });
     const pip = process.platform === "win32" ? path.join(API_DIR, ".venv", "Scripts", "pip.exe") : path.join(API_DIR, ".venv", "bin", "pip");
     execSync(`"${pip}" install -r requirements.txt`, { cwd: API_DIR, stdio: "inherit" });
-    console.log(C_SYS + "✓ Python dependencies installed.");
+    console.log(C_SYS + "[OK] Python dependencies installed.");
   } catch (err) {
     console.error(C_SYS + "Failed to setup python venv automatically. Make sure python3 is installed.");
   }
@@ -42,9 +42,9 @@ if (!fs.existsSync(venvUvicorn)) {
 function checkOllama() {
   const req = http.get("http://localhost:11434/api/tags", (res) => {
     if (res.statusCode === 200) {
-      console.log(C_AI + "✓ Local Ollama detected online on port 11434 (Local AI Ready).");
+      console.log(C_AI + "[OK] Local Ollama detected online on port 11434 (Local AI Ready).");
     } else {
-      console.log(C_AI + "ℹ Ollama responded with status " + res.statusCode + ". Fallback engine active.");
+      console.log(C_AI + "[INFO] Ollama responded with status " + res.statusCode + ". Fallback engine active.");
     }
   });
   req.on("error", () => {
@@ -118,9 +118,9 @@ webProcess.on("exit", (code) => {
 });
 
 console.log("\n" + C_SYS + "==========================================================");
-console.log(C_SYS + "  🌐 WEBSITE APPLICATION: \x1b[1m\x1b[32mhttp://localhost:3000\x1b[0m  (Open this in browser)");
-console.log(C_SYS + "  ⚙️  BACKEND API SERVICE: \x1b[36mhttp://localhost:8000\x1b[0m");
-console.log(C_SYS + "  📚 SWAGGER API DOCS:    \x1b[36mhttp://localhost:8000/docs\x1b[0m");
+console.log(C_SYS + "  WEBSITE APPLICATION: \x1b[1m\x1b[32mhttp://localhost:3000\x1b[0m  (Open this in browser)");
+console.log(C_SYS + "  BACKEND API SERVICE: \x1b[36mhttp://localhost:8000\x1b[0m");
+console.log(C_SYS + "  SWAGGER API DOCS:    \x1b[36mhttp://localhost:8000/docs\x1b[0m");
 console.log(C_SYS + "==========================================================");
 console.log(C_SYS + "Press Ctrl+C to terminate both servers cleanly.\n");
 

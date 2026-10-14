@@ -148,7 +148,7 @@ fs.writeFileSync(path.join(BRANDING_DIR, 'favicon.svg'), faviconSvg);
 fs.writeFileSync(path.join(PUBLIC_DIR, 'icon.svg'), faviconSvg);
 fs.writeFileSync(path.join(APP_DIR, 'icon.svg'), faviconSvg);
 
-console.log('✓ Vector SVG branding assets written successfully.');
+console.log('[OK] Vector SVG branding assets written successfully.');
 
 // Rasterize using Playwright
 async function rasterize() {
@@ -166,7 +166,7 @@ async function rasterize() {
     const masterPngPath = path.join(BRANDING_DIR, 'icon-512.png');
     await page.screenshot({ path: masterPngPath, omitBackground: true });
     fs.copyFileSync(masterPngPath, path.join(PUBLIC_DIR, 'icon-512.png'));
-    console.log('✓ Master icon 512x512 rendered.');
+    console.log('[OK] Master icon 512x512 rendered.');
 
     // Render 192x192 Web App Manifest Icon
     await page.setViewportSize({ width: 192, height: 192 });
@@ -174,7 +174,7 @@ async function rasterize() {
     const icon192Path = path.join(PUBLIC_DIR, 'icon-192.png');
     await page.screenshot({ path: icon192Path, omitBackground: true });
     fs.copyFileSync(icon192Path, path.join(BRANDING_DIR, 'icon-192.png'));
-    console.log('✓ Icon 192x192 rendered.');
+    console.log('[OK] Icon 192x192 rendered.');
 
     // Render 180x180 Apple Touch Icon
     await page.setViewportSize({ width: 180, height: 180 });
@@ -183,21 +183,21 @@ async function rasterize() {
     await page.screenshot({ path: appleIconPath, omitBackground: true });
     fs.copyFileSync(appleIconPath, path.join(APP_DIR, 'apple-icon.png'));
     fs.copyFileSync(appleIconPath, path.join(BRANDING_DIR, 'apple-touch-icon.png'));
-    console.log('✓ Apple touch icon 180x180 rendered.');
+    console.log('[OK] Apple touch icon 180x180 rendered.');
 
     // Render 32x32 Favicon PNG
     await page.setViewportSize({ width: 32, height: 32 });
     await page.setContent('<!DOCTYPE html><html><body style="margin:0;padding:0;background:transparent;width:32px;height:32px;">' + faviconSvg + '</body></html>');
     const favicon32Path = path.join(BRANDING_DIR, 'favicon-32.png');
     await page.screenshot({ path: favicon32Path, omitBackground: true });
-    console.log('✓ Favicon 32x32 rendered.');
+    console.log('[OK] Favicon 32x32 rendered.');
 
     // Render 16x16 Favicon PNG
     await page.setViewportSize({ width: 16, height: 16 });
     await page.setContent('<!DOCTYPE html><html><body style="margin:0;padding:0;background:transparent;width:16px;height:16px;">' + faviconSvg.replace('width="32" height="32"', 'width="16" height="16"') + '</body></html>');
     const favicon16Path = path.join(BRANDING_DIR, 'favicon-16.png');
     await page.screenshot({ path: favicon16Path, omitBackground: true });
-    console.log('✓ Favicon 16x16 rendered.');
+    console.log('[OK] Favicon 16x16 rendered.');
 
     // Render OpenGraph Preview Card (1200x630)
     await page.setViewportSize({ width: 1200, height: 630 });
@@ -264,7 +264,7 @@ async function rasterize() {
     const ogCardPath = path.join(BRANDING_DIR, 'og-card.png');
     await page.screenshot({ path: ogCardPath });
     fs.copyFileSync(ogCardPath, path.join(PUBLIC_DIR, 'og-card.png'));
-    console.log('✓ OpenGraph 1200x630 card rendered.');
+    console.log('[OK] OpenGraph 1200x630 card rendered.');
 
   } finally {
     await browser.close();

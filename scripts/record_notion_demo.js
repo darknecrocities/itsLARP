@@ -67,7 +67,7 @@ function processVideo(rawWebmPath, baseName) {
     { stdio: 'inherit' }
   );
 
-  console.log(`✓ Updated ${baseName}.mp4, ${baseName}.webm, and ${baseName}-poster.jpg`);
+  console.log(`[OK] Updated ${baseName}.mp4, ${baseName}.webm, and ${baseName}-poster.jpg`);
 }
 
 async function seedData(page) {
@@ -264,7 +264,7 @@ async function recordNotionDemo() {
     await ctx.close();
 
     processVideo(videoPath, 'notion-pipeline-demo');
-    console.log('✓ Demo 3 recording successfully updated!');
+    console.log('[OK] Demo 3 recording successfully updated!');
   } finally {
     await browser.close();
     try {

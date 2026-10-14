@@ -4,10 +4,10 @@ import { type BotTelemetry } from "@/lib/swarm";
 
 interface AgentExplorerGridProps {
   bots: BotTelemetry[];
-  activePoolTab: "all" | "discovery" | "tailor" | "apply" | "alerts";
+  activePoolTab: "all" | "discovery" | "tailor" | "apply" | "notion" | "alerts";
   alertsCount: number;
   inspectedBotId?: string;
-  onSelectPoolTab: (tab: "all" | "discovery" | "tailor" | "apply" | "alerts") => void;
+  onSelectPoolTab: (tab: "all" | "discovery" | "tailor" | "apply" | "notion" | "alerts") => void;
   onInspectBot: (bot: BotTelemetry) => void;
 }
 
@@ -39,7 +39,7 @@ export function AgentExplorerGrid({
             }`}
             onClick={() => onSelectPoolTab("all")}
           >
-            All 1,000 Agents
+            All Agents
           </button>
           <button
             className={`px-3 py-1 rounded border transition-colors ${
@@ -49,7 +49,7 @@ export function AgentExplorerGrid({
             }`}
             onClick={() => onSelectPoolTab("discovery")}
           >
-            300 Job Finders
+            Job Finders
           </button>
           <button
             className={`px-3 py-1 rounded border transition-colors ${
@@ -59,7 +59,7 @@ export function AgentExplorerGrid({
             }`}
             onClick={() => onSelectPoolTab("tailor")}
           >
-            300 Resume Makers
+            Resume Makers
           </button>
           <button
             className={`px-3 py-1 rounded border transition-colors ${
@@ -69,8 +69,19 @@ export function AgentExplorerGrid({
             }`}
             onClick={() => onSelectPoolTab("apply")}
           >
-            400 Auto-Appliers
+            Auto-Appliers
           </button>
+          <button
+            className={`px-3 py-1 rounded border transition-colors ${
+              activePoolTab === "notion"
+                ? "bg-black text-white border-black font-semibold"
+                : "bg-white border-neutral-300 text-neutral-800 hover:border-black"
+            }`}
+            onClick={() => onSelectPoolTab("notion")}
+          >
+            Notion Sync
+          </button>
+
           {alertsCount > 0 && (
             <button
               className={`px-3 py-1 rounded border transition-colors flex items-center gap-1.5 ${

@@ -105,7 +105,7 @@ async function record() {
       { stdio: 'inherit' }
     );
 
-    console.log('✓ Workforce Swarm demo recorded and processed!');
+    console.log('[OK] Workforce Swarm demo recorded and processed!');
   } finally {
     await browser.close();
     try { fs.rmSync(TMP_REC_DIR, { recursive: true, force: true }); } catch {}
