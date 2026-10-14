@@ -25,6 +25,7 @@ export default function JobsPage() {
   const [importError, setImportError] = useState("");
 
   const profile = useStore((s) => s.profile);
+  const apps = useStore((s) => s.apps);
   const { data: jobs, isLoading, error, refetch } = useJobs(searchParam, remote);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
