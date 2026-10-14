@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Job } from "@/lib/data";
 import { Badge, Empty, ErrorBox, PageHeader, Reveal } from "@/components/ui";
+import { X } from "lucide-react";
 
 export default function JobsPage() {
   const [q, setQ] = useState("");
@@ -146,10 +147,11 @@ export default function JobsPage() {
               <h3 className="text-lg font-semibold">Import Opportunity</h3>
               <button
                 type="button"
-                className="text-muted hover:text-fg text-sm"
+                className="text-muted hover:text-fg text-sm p-1 rounded"
                 onClick={() => setShowImport(false)}
+                aria-label="Close"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
             <p className="text-xs text-muted mb-4">

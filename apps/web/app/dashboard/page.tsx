@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useSwarm } from "@/lib/swarm";
 import { apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Reveal, Stat } from "@/components/ui";
+import { ArrowRight } from "lucide-react";
 
 export default function Dashboard() {
   const { apps, setApps, profile } = useStore();
@@ -58,8 +59,9 @@ export default function Dashboard() {
         <Reveal i={1}>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-xl font-semibold">High-Compatibility Roles</h2>
-            <Link href="/jobs" className="text-xs text-muted hover:underline">
-              View all ({jobs?.length || 0}) →
+            <Link href="/jobs" className="text-xs text-muted hover:underline inline-flex items-center gap-1">
+              <span>View all ({jobs?.length || 0})</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -101,8 +103,9 @@ export default function Dashboard() {
         <Reveal i={2}>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-xl font-semibold">Agent Workforce Feed</h2>
-            <Link href="/agents" className="text-xs text-muted hover:underline">
-              Full control center →
+            <Link href="/agents" className="text-xs text-muted hover:underline inline-flex items-center gap-1">
+              <span>Full control center</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 

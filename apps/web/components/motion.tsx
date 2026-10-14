@@ -8,6 +8,7 @@ import {
   useInView,
   type Variants,
 } from "framer-motion";
+import { Sparkles } from "lucide-react";
 
 /**
  * Top Scroll Progress Bar
@@ -330,7 +331,7 @@ export function InfiniteLoopMarquee({
             className="inline-flex items-center gap-8 font-mono text-xs uppercase tracking-wider text-dmuted"
           >
             <span className="font-bold text-ink">{item}</span>
-            <span className="text-neutral-400">✦</span>
+            <Sparkles className="w-3 h-3 text-neutral-400" />
           </span>
         ))}
         {items.map((item, idx) => (
@@ -339,7 +340,7 @@ export function InfiniteLoopMarquee({
             className="inline-flex items-center gap-8 font-mono text-xs uppercase tracking-wider text-dmuted"
           >
             <span className="font-bold text-ink">{item}</span>
-            <span className="text-neutral-400">✦</span>
+            <Sparkles className="w-3 h-3 text-neutral-400" />
           </span>
         ))}
       </motion.div>

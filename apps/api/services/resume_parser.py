@@ -29,24 +29,48 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
     clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
     full_lower = text.lower()
 
-    # Name extraction heuristic: first non-empty line that isn't email/link
-    name = ""
-    for line in clean_lines[:5]:
-        if len(line) < 45 and not re.search(r"[@/\\:|]", line) and not any(k in line.lower() for k in ["curriculum", "resume", "cv", "page"]):
-            name = line
-            break
+    DISQUALIFIED_NAME_WORDS = [
+        "curriculum", "resume", "cv", "page", "website", "websites", "portfolio", "portfolios",
+        "profile", "profiles", "contact", "contacts", "summary", "about", "experience", "education",
+        "skills", "projects", "links", "phone", "email", "address", "github", "linkedin", "social",
+        "references", "work", "history", "objective", "technical", "engine"
+    ]
 
     # Email
     email_match = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text)
     email = email_match.group(0) if email_match else ""
 
+    # Name extraction heuristic: find actual personal name, skipping section titles and comma lists
+    name = ""
+    for line in clean_lines[:10]:
+        line_clean = line.strip()
+        lower_line = line_clean.lower()
+        if re.search(r"[@/\\:|0-9]", line_clean) or line_clean.count(",") > 0:
+            continue
+        if 2 < len(line_clean) < 40 and not any(k in lower_line for k in DISQUALIFIED_NAME_WORDS):
+            words = line_clean.split()
+            if 1 <= len(words) <= 4:
+                name = line_clean
+                break
+
     # Location heuristic (e.g. "Manila, Philippines", "San Francisco, CA", "Remote")
     location = ""
-    for loc_match in re.finditer(r"\b([A-Z][a-zA-Z\s]+,\s*[A-Z]{2,}|Remote|[A-Za-z\s]+Philippines|[A-Za-z\s]+Singapore|[A-Za-z\s]+USA|[A-Za-z\s]+Canada)\b", text):
+    loc_pattern = re.compile(r"\b([A-Z][a-zA-Z\s]{1,30},\s*(?:[A-Z]{2,}|[A-Z][a-zA-Z]+)|Remote)\b")
+    for loc_match in loc_pattern.finditer(text):
         candidate_loc = loc_match.group(0).strip()
-        if len(candidate_loc) < 40 and not any(w in candidate_loc.lower() for w in ["university", "college", "experience", "education"]):
+        if "\n" in candidate_loc:
+            continue
+        lower_loc = candidate_loc.lower()
+        if len(candidate_loc) < 40 and not any(w in lower_loc for w in ["university", "college", "school", "experience", "education", "dynamic", "systems", "ai", "llm", "engineer", "developer", "sql", "python", "pytorch", "react", "fastapi", "docker", "skills", "projects", "frameworks"]):
             location = candidate_loc
             break
+    if not location:
+        if "philippines" in full_lower:
+            location = "Manila, Philippines"
+        elif "singapore" in full_lower:
+            location = "Singapore"
+        else:
+            location = "Remote"
 
     # Headline
     headline = ""
@@ -80,6 +104,45 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
         links["linkedin"] = f"linkedin.com/in/{linkedin_match.group(1)}"
     if portfolio_match and not any(x in portfolio_match.group(0) for x in ["github.com", "linkedin.com", "gmail.com"]):
         links["portfolio"] = portfolio_match.group(0)
+
+    # Education extraction heuristic
+    education = ""
+    deg_pattern = re.compile(r"\b(bachelor|master|doctor|b\.?s\.?|b\.?sc\.?|m\.?s\.?|m\.?sc\.?|ph\.?d\.?|associate|degree|diploma|polytechnic|university|college|institute)\b", re.I)
+    for line in clean_lines:
+        lower_l = line.lower().strip()
+        if lower_l in ["education", "education:", "academic preparation", "credentials"]:
+            continue
+        if deg_pattern.search(line):
+            if 4 < len(line) < 100 and not any(skip in lower_l for skip in ["experience", "projects", "skills", "summary"]):
+                education = line
+                break
+    if not education:
+        education = "Bachelor of Science in Computer Science" if "computer science" in full_lower else "Relevant Degree / Technical Background"
+
+    # Work experience extraction heuristic
+    experience = []
+    exp_section = False
+    for line in clean_lines:
+        lower_l = line.lower()
+        if any(h == lower_l or lower_l.startswith(h) for h in ["experience", "work experience", "employment history", "professional experience", "work history"]) and len(line) < 35:
+            exp_section = True
+            continue
+        if exp_section:
+            if any(h in lower_l for h in ["education", "projects", "certifications", "skills", "languages", "awards", "publications", "interests", "websites"]) and len(line) < 35 and not line.startswith("•") and not line.startswith("-"):
+                break
+            if 3 < len(line) < 80 and not line.startswith("•") and not line.startswith("-") and not line.startswith("*"):
+                # Potential title / company line
+                parts = re.split(r"\s*[|–—\-•]\s*", line)
+                if len(parts) >= 2:
+                    experience.append({"title": parts[0].strip(), "company": parts[1].strip(), "text": ""})
+                else:
+                    experience.append({"title": line.strip(), "company": "", "text": ""})
+            elif experience and (line.startswith("•") or line.startswith("-") or line.startswith("*") or len(line) > 10):
+                clean_bullet = line.lstrip("•-* ").strip()
+                if experience[-1]["text"]:
+                    experience[-1]["text"] += " " + clean_bullet
+                else:
+                    experience[-1]["text"] = clean_bullet
 
     # Projects extraction heuristic
     projects = []
@@ -119,8 +182,9 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
         "email": email,
         "location": location or "Remote",
         "years": years,
-        "education": "Bachelor of Science in Computer Science" if "computer science" in full_lower else "Relevant Degree / Technical Background",
+        "education": education,
         "skills": list(dict.fromkeys(skills_found)),
+        "experience": experience[:6],
         "projects": projects[:6],
         "links": links,
         "evidence": evidence[:25],

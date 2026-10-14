@@ -1,13 +1,19 @@
 "use client";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, PageHeader, Reveal } from "@/components/ui";
+import { Download, Printer, FileText, Layers, Check, Copy, Briefcase } from "lucide-react";
 
 export default function ResumeStudio() {
-  const { profile: p, apps } = useStore();
+  const { profile: p, apps, fetchProfile, fetchApps } = useStore();
   const [activeFormat, setActiveFormat] = useState<"standard" | "apa">("apa");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchApps();
+  }, [fetchProfile, fetchApps]);
 
   const surname = useMemo(() => {
     const parts = (p.name || "Candidate").trim().split(" ");
@@ -33,6 +39,15 @@ export default function ResumeStudio() {
 
     lines.push("Technical Competencies & Specializations\n" + "-".repeat(72));
     lines.push(`Core Frameworks: ${p.skills.join(", ")}\n`);
+
+    if (p.experience && p.experience.length > 0) {
+      lines.push("Professional Experience & Appointments\n" + "-".repeat(72));
+      p.experience.forEach((exp) => {
+        lines.push(`${exp.title}${exp.company ? ` | ${exp.company}` : ""}${exp.period ? ` (${exp.period})` : ""}`);
+        if (exp.text) lines.push(`    ${exp.text}`);
+        lines.push("");
+      });
+    }
 
     lines.push("Software Artifacts & Project Contributions (APA 7th Format)\n" + "-".repeat(72));
     p.projects.forEach((proj) => {
@@ -79,16 +94,18 @@ export default function ResumeStudio() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button
-              className="btn text-xs bg-bg2 border border-line"
+              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
               onClick={() => downloadTextFile(apaText, `${surname}_Resume_APA_7th.txt`)}
             >
-              📥 Download APA (.txt)
+              <Download className="w-3.5 h-3.5" />
+              <span>Download APA (.txt)</span>
             </button>
             <button
-              className="btn text-xs bg-bg2 border border-line"
+              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
               onClick={handlePrint}
             >
-              🖨️ Print / Save PDF
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print / Save PDF</span>
             </button>
             <Link href="/profile" className="btn text-xs">
               Edit Career DNA
@@ -112,20 +129,22 @@ export default function ResumeStudio() {
           <div className="flex flex-wrap justify-between items-center gap-4 mb-6 pb-3 border-b border-line">
             <div className="flex gap-2">
               <button
-                className={`btn text-xs py-1.5 px-3.5 font-mono ${
+                className={`btn text-xs py-1.5 px-3.5 font-mono flex items-center gap-1.5 ${
                   activeFormat === "apa" ? "bg-black text-white" : ""
                 }`}
                 onClick={() => setActiveFormat("apa")}
               >
-                📄 APA 7th Edition Standard Format (Academic / Verified)
+                <FileText className="w-3.5 h-3.5" />
+                <span>APA 7th Edition Standard Format (Academic / Verified)</span>
               </button>
               <button
-                className={`btn text-xs py-1.5 px-3.5 font-mono ${
+                className={`btn text-xs py-1.5 px-3.5 font-mono flex items-center gap-1.5 ${
                   activeFormat === "standard" ? "bg-black text-white" : ""
                 }`}
                 onClick={() => setActiveFormat("standard")}
               >
-                🗂️ Modern Cards View
+                <Layers className="w-3.5 h-3.5" />
+                <span>Modern Cards View</span>
               </button>
             </div>
 
@@ -191,7 +210,29 @@ export default function ResumeStudio() {
                 </div>
               </div>
 
-              {/* Section 4: Software Artifacts (APA Citations) */}
+              {/* Section 4: Professional Experience */}
+              {p.experience && p.experience.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-center font-bold text-sm border-b border-black pb-1 mb-3 uppercase tracking-wider">
+                    Professional Experience and Appointments
+                  </h2>
+                  <div className="space-y-4 text-sm">
+                    {p.experience.map((exp, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between items-baseline font-bold text-black">
+                          <span>
+                            {exp.title} {exp.company && <span className="font-normal italic">&mdash; {exp.company}</span>}
+                          </span>
+                          {exp.period && <span className="text-xs font-mono text-neutral-600">{exp.period}</span>}
+                        </div>
+                        {exp.text && <p className="text-xs text-neutral-700 leading-relaxed pl-4">{exp.text}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Section 5: Software Artifacts (APA Citations) */}
               <div className="mb-6">
                 <h2 className="text-center font-bold text-sm border-b border-black pb-1 mb-3 uppercase tracking-wider">
                   Software Artifacts and Project Contributions
@@ -213,7 +254,7 @@ export default function ResumeStudio() {
                 </div>
               </div>
 
-              {/* Section 5: Verifiable Evidence Index */}
+              {/* Section 6: Verifiable Evidence Index */}
               {p.evidence.length > 0 && (
                 <div>
                   <h2 className="text-center font-bold text-sm border-b border-black pb-1 mb-3 uppercase tracking-wider">
@@ -235,16 +276,18 @@ export default function ResumeStudio() {
                 <span>APA 7th Standard · Verified via itsLARP</span>
                 <div className="flex gap-2">
                   <button
-                    className="btn text-xs py-1 px-3 bg-black text-white"
+                    className="btn text-xs py-1 px-3 bg-black text-white flex items-center gap-1.5"
                     onClick={() => copyToClipboard(apaText, "apa-text")}
                   >
-                    {copiedId === "apa-text" ? "Copied!" : "Copy APA Plaintext"}
+                    {copiedId === "apa-text" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedId === "apa-text" ? "Copied!" : "Copy APA Plaintext"}</span>
                   </button>
                   <button
-                    className="btn text-xs py-1 px-3"
+                    className="btn text-xs py-1 px-3 flex items-center gap-1.5"
                     onClick={() => downloadTextFile(apaText, `${surname}_APA_Resume.txt`)}
                   >
-                    Download .txt
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download .txt</span>
                   </button>
                 </div>
               </div>
@@ -269,10 +312,11 @@ export default function ResumeStudio() {
                     </div>
                   </div>
                   <button
-                    className="btn text-xs"
+                    className="btn text-xs flex items-center gap-1.5"
                     onClick={() => copyToClipboard(apaText, "master")}
                   >
-                    {copiedId === "master" ? "Copied!" : "Copy Master Text"}
+                    {copiedId === "master" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedId === "master" ? "Copied!" : "Copy Master Text"}</span>
                   </button>
                 </div>
 
@@ -284,6 +328,26 @@ export default function ResumeStudio() {
                     </span>
                   ))}
                 </div>
+
+                {p.experience && p.experience.length > 0 && (
+                  <>
+                    <div className="label-xs mt-5 flex items-center gap-1.5">
+                      <Briefcase className="w-3.5 h-3.5 inline text-muted" />
+                      <span>Verified Work Experience</span>
+                    </div>
+                    <div className="space-y-2.5 mt-2">
+                      {p.experience.map((exp, idx) => (
+                        <div key={idx} className="card p-3 bg-bg border border-line">
+                          <div className="flex justify-between items-start">
+                            <span className="font-medium text-sm text-ink">{exp.title} &mdash; <span className="text-muted">{exp.company}</span></span>
+                            {exp.period && <span className="text-[11px] font-mono text-muted">{exp.period}</span>}
+                          </div>
+                          {exp.text && <p className="text-muted text-xs mt-1.5 leading-relaxed">{exp.text}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
 
                 <div className="label-xs mt-5">Featured Evidence Projects</div>
                 <div className="grid sm:grid-cols-2 gap-3 mt-2">
@@ -330,17 +394,23 @@ export default function ResumeStudio() {
                         <div className="flex items-center gap-2 mt-1">
                           <Badge tone={a.match >= 80 ? "ok" : "n"}>{a.match}% Compatibility</Badge>
                           <Badge>{a.status}</Badge>
-                          {a.verified && <Badge tone="ok">✓ Evidence Verified</Badge>}
+                          {a.verified && (
+                            <Badge tone="ok">
+                              <Check className="w-3 h-3 inline mr-1" />
+                              Evidence Verified
+                            </Badge>
+                          )}
                           <Badge tone="n">APA Aligned</Badge>
                         </div>
                       </div>
 
                       <div className="flex gap-2">
                         <button
-                          className="btn text-xs"
+                          className="btn text-xs flex items-center gap-1.5"
                           onClick={() => downloadTextFile(a.resume || apaText, `${a.company}_Tailored_Resume_APA.txt`)}
                         >
-                          📥 Download Tailored APA
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Tailored APA</span>
                         </button>
                         <Link href={`/apply/${a.jobId}`} className="btn text-xs">
                           View in Studio
