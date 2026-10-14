@@ -5,8 +5,10 @@ import { STAGES, useSwarm, type Stage } from "@/lib/swarm";
 import { useStore } from "@/lib/store";
 import { Badge, PageHeader, Stat, Reveal, ErrorBox } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
+import { NotionSyncModal } from "@/components/NotionSyncModal";
 import { api } from "@/lib/api";
 import { Key, Zap, X } from "lucide-react";
+
 
 const STAGE_LABELS: Record<Stage, string> = {
   discovery: "300 Discovery Agents (LinkedIn, JobStreet, Indeed, Glassdoor)",
@@ -53,12 +55,8 @@ export default function AgentsPage() {
   const [jobstreetUser, setJobstreetUser] = useState("");
   const [indeedUser, setIndeedUser] = useState("");
 
-  // Notion 1-click modal
+  // Notion database modal
   const [showNotionModal, setShowNotionModal] = useState(false);
-  const [notionToken, setNotionToken] = useState(notion.token || "");
-  const [notionMsg, setNotionMsg] = useState("");
-  const [notionBusy, setNotionBusy] = useState(false);
-  const [notionError, setNotionError] = useState("");
 
   const totQ = Object.values(counts).reduce((acc, c) => acc + c.queued, 0);
   const totD = Object.values(counts).reduce((acc, c) => acc + c.done, 0);
@@ -74,47 +72,6 @@ export default function AgentsPage() {
     await start(num, queries.length ? queries : ["AI Engineer"], creds);
   };
 
-  const handleNotionAutoSync = async () => {
-    if (!notionToken.trim()) {
-      setNotionError("Please enter your Notion Integration Token.");
-      return;
-    }
-    setNotionBusy(true);
-    setNotionError("");
-    setNotionMsg("");
-    try {
-      const res = await api<{ ok: boolean; database_id: string; database_url: string; synced_count: number }>(
-        "/integrations/notion/auto-create-and-sync",
-        {
-          token: notionToken.trim(),
-          applications: results.length
-            ? results.map((r) => ({
-                company: r.job.company,
-                role: r.job.title,
-                match: r.match?.score || 0,
-                status: r.state || "APPLIED",
-                source: r.job.source,
-                url: r.job.id ? `http://localhost:3000/apply/${r.job.id}` : "",
-              }))
-            : apps.map((a) => ({
-                company: a.company,
-                role: a.role,
-                match: a.match,
-                status: a.status,
-              })),
-        }
-      );
-
-      if (res.ok) {
-        setNotion({ token: notionToken, databaseId: res.database_id, connected: true });
-        setNotionMsg(`Success! Created database in Notion with ${res.synced_count} synced applications.`);
-      }
-    } catch (e: any) {
-      setNotionError(e.message || "Failed to connect to Notion.");
-    } finally {
-      setNotionBusy(false);
-    }
-  };
 
   return (
     <>
@@ -241,52 +198,20 @@ export default function AgentsPage() {
         </div>
       )}
 
-      {/* Notion 1-Click Auto-Create Modal */}
-      {showNotionModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="card max-w-lg w-full p-6 bg-bg border border-line shadow-2xl rise">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-bold">Notion 1-Click Self-Create List</h3>
-              <button className="text-muted hover:text-ink text-sm p-1 rounded" onClick={() => setShowNotionModal(false)} aria-label="Close">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-muted mb-4">
-              Enter your Notion integration token. This button will automatically create a dedicated database with columns (Company Name, Position, Platform, Status, Match Score, Applied Date) and mirror your opportunities!
-            </p>
-            <div className="space-y-3">
-              <div>
-                <label htmlFor="n-token" className="label-xs block mb-1">Notion Integration Token</label>
-                <input
-                  id="n-token"
-                  type="password"
-                  className="input text-xs"
-                  placeholder="ntn_... or secret_..."
-                  value={notionToken}
-                  onChange={(e) => setNotionToken(e.target.value)}
-                />
-              </div>
+      {/* Notion Database Link & Sync Modal */}
+      <NotionSyncModal
+        show={showNotionModal}
+        onClose={() => setShowNotionModal(false)}
+        onSuccess={(data) => {
+          setNotion({
+            connected: true,
+            databaseId: data.database_id,
+            databaseName: data.database_name,
+            databaseUrl: data.database_url,
+          });
+        }}
+      />
 
-              {notionError && <ErrorBox msg={notionError} />}
-              {notionMsg && <p className="text-ok text-xs font-mono">{notionMsg}</p>}
-
-              <div className="flex justify-end gap-2 mt-4">
-                <button className="btn text-xs" onClick={() => setShowNotionModal(false)}>
-                  Close
-                </button>
-                <button
-                  className="btn btn-primary text-xs flex items-center gap-1.5"
-                  disabled={notionBusy || !notionToken.trim()}
-                  onClick={handleNotionAutoSync}
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  <span>{notionBusy ? "Creating Database & Mirroring..." : "Connect & Auto-Create List"}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Workforce Top Summary */}
       <section aria-label="Workforce Totals" className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">

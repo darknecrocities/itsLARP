@@ -9,8 +9,9 @@ export type AgentLog = { t: string; id: string; msg: string };
 
 export type BotTelemetry = {
   id: string;
-  pool: "discovery" | "tailor" | "apply";
+  pool: "discovery" | "tailor" | "apply" | "notion";
   platform: string;
+
   status: "idle" | "browsing" | "analyzing" | "tailoring" | "applying" | "completed" | "needs_verification";
   current_task: string;
   cpu_pct: number;

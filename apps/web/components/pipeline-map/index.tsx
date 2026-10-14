@@ -19,7 +19,7 @@ export function HorizontalPipelineMap({
   onVerifyBot,
 }: HorizontalPipelineMapProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<number>(1);
-  const [activePoolTab, setActivePoolTab] = useState<"all" | "discovery" | "tailor" | "apply" | "alerts">("all");
+  const [activePoolTab, setActivePoolTab] = useState<"all" | "discovery" | "tailor" | "apply" | "notion" | "alerts">("all");
   const [inspectedBot, setInspectedBot] = useState<BotTelemetry | null>(null);
 
   // Fallback sample bots
@@ -53,7 +53,7 @@ export function HorizontalPipelineMap({
               Interactive Agent Network
             </h3>
             <p className="text-xs text-neutral-600 font-sans mt-0.5">
-              Click any circle below to see how your Agents find jobs, write resumes, and apply for you.
+              Hover or click any agent dot node or macro step circle to inspect real-time tasks and telemetry.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
@@ -70,14 +70,18 @@ export function HorizontalPipelineMap({
           </div>
         </div>
 
-        {/* SVG Canvas & Node Step Inspector */}
+        {/* SVG Canvas & Node Step Inspector with Working Agent Dot Nodes */}
         <PipelineSvgGraph
           running={running}
           selectedNodeId={selectedNodeId}
           onSelectNode={setSelectedNodeId}
           onFilterPool={setActivePoolTab}
+          bots={botsList}
+          inspectedBotId={inspectedBot?.id}
+          onInspectBot={handleInspect}
         />
       </div>
+
 
       {/* Agent Explorer & Matrix */}
       <div>

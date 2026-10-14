@@ -69,5 +69,27 @@ export function generateSampleBots(running: boolean): BotTelemetry[] {
       ],
     });
   }
+
+  // Notion Sync Bots (sample subset of 15)
+  for (let i = 1; i <= 15; i++) {
+    const bid = `agent_notion_${String(i).padStart(3, "0")}`;
+    list.push({
+      id: bid,
+      pool: "notion",
+      platform: "Notion API",
+      status: running ? (i % 2 === 0 ? "applying" : "completed") : "idle",
+      current_task: running ? "Syncing approved application to your Notion database" : "Standby for incoming applications",
+      cpu_pct: +(0.15 + (i % 3) * 0.08).toFixed(2),
+      memory_mb: +(1.0 + (i % 4) * 0.1).toFixed(2),
+      target_company: "Notion Application Tracker",
+      target_role: "Database Synchronization",
+      logs: [
+        { t: "12:00:04", msg: "Verified Notion database schema and column mappings" },
+        { t: "12:00:07", msg: "Synchronized application record with two-way status hook" },
+      ],
+    });
+  }
+
   return list;
 }
+

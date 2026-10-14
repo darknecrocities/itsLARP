@@ -28,5 +28,6 @@ export interface GraphNode {
   badge: string;
   desc: string;
   stats: { label: string; val: string }[];
-  poolKey: "all" | "discovery" | "tailor" | "apply";
+  poolKey: "all" | "discovery" | "tailor" | "apply" | "notion";
 }
+

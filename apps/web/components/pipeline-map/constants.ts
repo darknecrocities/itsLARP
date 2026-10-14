@@ -107,8 +107,9 @@ export const GRAPH_NODES: GraphNode[] = [
       { label: "Spreadsheets", val: "No Manual Copying" },
       { label: "Live Updates", val: "Always Up to Date" },
     ],
-    poolKey: "all",
+    poolKey: "notion",
   },
+
 ];
 
 // Edges matching sketch: (6-4), (4-3), (4-5), (3-2), (5-2), (5-1), (2-1)
