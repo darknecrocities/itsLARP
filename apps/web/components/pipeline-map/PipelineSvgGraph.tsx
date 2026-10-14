@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "../ui";
 import { GraphNode } from "./types";
 import { GRAPH_NODES, GRAPH_EDGES } from "./constants";
+import { ArrowDown } from "lucide-react";
 
 interface PipelineSvgGraphProps {
   running: boolean;
@@ -160,10 +161,11 @@ export function PipelineSvgGraph({
             <div className="flex items-center gap-2 text-xs">
               <Badge tone="dark">{selectedNode.badge}</Badge>
               <button
-                className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono"
+                className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono inline-flex items-center gap-1"
                 onClick={() => onFilterPool(selectedNode.poolKey)}
               >
-                View Agents Below ↓
+                <span>View Agents Below</span>
+                <ArrowDown className="w-3 h-3" />
               </button>
             </div>
           </div>

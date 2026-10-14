@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, CardMotion, AnimatedLoopText } from "@/components/motion";
+import { Check, Sparkles, ArrowRight } from "lucide-react";
 
 export function ProcessStepsSection() {
   return (
@@ -32,8 +33,9 @@ export function ProcessStepsSection() {
                     Drop your resume or connect your LinkedIn and GitHub. Our system creates your verified profile in seconds—no tedious typing required.
                   </p>
                 </div>
-                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
-                  ✓ Takes under 1 minute
+                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  <span>Takes under 1 minute</span>
                 </div>
               </div>
             </CardMotion>
@@ -55,8 +57,9 @@ export function ProcessStepsSection() {
                     300 Agents browse LinkedIn, JobStreet, and Indeed around the clock, matching jobs based on your title, location, and salary goals.
                   </p>
                 </div>
-                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
-                  ✓ Searches 24/7 on autopilot
+                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  <span>Searches 24/7 on autopilot</span>
                 </div>
               </div>
             </CardMotion>
@@ -78,8 +81,9 @@ export function ProcessStepsSection() {
                     For every single job opening found, 300 Agents build an individualized, clean APA-format resume highlighting your relevant real-world work.
                   </p>
                 </div>
-                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
-                  ✓ Zero made-up or fake skills
+                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  <span>Zero made-up or fake skills</span>
                 </div>
               </div>
             </CardMotion>
@@ -101,8 +105,9 @@ export function ProcessStepsSection() {
                     400 Agents fill out the repetitive application forms. You review with one tap, and every company is organized in your Notion tracker.
                   </p>
                 </div>
-                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold">
-                  ✓ 1-Click Notion database sync
+                <div className="mt-6 pt-3 border-t border-line text-[11px] font-mono text-ink font-semibold flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  <span>1-Click Notion database sync</span>
                 </div>
               </div>
             </CardMotion>
@@ -113,7 +118,7 @@ export function ProcessStepsSection() {
         <FadeIn delay={0.25} distance={18}>
           <div className="mt-8 card p-6 bg-bg border border-line flex flex-wrap items-center justify-between gap-4 font-mono text-xs hover:border-black transition-colors">
             <div className="flex items-center gap-3">
-              <span className="text-xl">✨</span>
+              <Sparkles className="w-5 h-5 text-ink shrink-0" />
               <div>
                 <strong className="text-ink text-sm font-sans block mb-0.5">The Bottom Line:</strong>
                 <div className="text-muted font-sans text-xs">
@@ -131,8 +136,9 @@ export function ProcessStepsSection() {
               </div>
             </div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/onboarding" className="btn btn-primary text-xs py-2 px-4 shadow-sm">
-                Get Started Now →
+              <Link href="/onboarding" className="btn btn-primary text-xs py-2 px-4 shadow-sm inline-flex items-center gap-1.5">
+                <span>Get Started Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </motion.div>
           </div>

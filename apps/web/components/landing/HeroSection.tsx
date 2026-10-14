@@ -13,6 +13,7 @@ import {
   KineticTextStagger,
   AnimatedSparkBar,
 } from "@/components/motion";
+import { ArrowRight } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -45,8 +46,9 @@ export function HeroSection() {
 
             <FadeIn delay={0.3} distance={20} className="mt-8 flex flex-wrap gap-3">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/onboarding" className="btn btn-primary text-base py-3 px-6 font-semibold shadow-sm">
-                  Start Auto-Applying Now →
+                <Link href="/onboarding" className="btn btn-primary text-base py-3 px-6 font-semibold shadow-sm inline-flex items-center gap-2">
+                  <span>Start Auto-Applying Now</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>

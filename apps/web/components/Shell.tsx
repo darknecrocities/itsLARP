@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 
@@ -33,6 +33,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
   );
   const [open, setOpen] = useState(false);
   const profile = useStore((s) => s.profile);
+  const fetchProfile = useStore((s) => s.fetchProfile);
+  const fetchApps = useStore((s) => s.fetchApps);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchApps();
+  }, [fetchProfile, fetchApps]);
 
   if (BARE.includes(path)) {
     return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;

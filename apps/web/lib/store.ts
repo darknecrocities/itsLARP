@@ -10,11 +10,12 @@ export type Profile = {
   location: string;
   years: number;
   skills: string[];
-  experience: { company: string; title: string; text: string }[];
+  experience: { company: string; title: string; text: string; period?: string }[];
   projects: { name: string; tech: string[]; text: string }[];
   education: string;
   links: { github?: string; linkedin?: string; portfolio?: string };
   evidence: Evidence[];
+  target_roles?: string[];
 };
 
 export const EMPTY: Profile = {
@@ -29,6 +30,7 @@ export const EMPTY: Profile = {
   education: "",
   links: {},
   evidence: [],
+  target_roles: [],
 };
 
 export type App = {
@@ -49,9 +51,11 @@ type S = {
   profile: Profile;
   setProfile: (p: Partial<Profile>) => void;
   addEvidence: (e: Evidence[]) => void;
+  fetchProfile: () => Promise<void>;
   apps: App[];
   setApps: (apps: App[]) => void;
   upsertApp: (a: App) => void;
+  fetchApps: () => Promise<void>;
   activeSwarmId: string | null;
   setActiveSwarmId: (id: string | null) => void;
   notion: { token: string; databaseId: string; connected: boolean };
@@ -73,11 +77,27 @@ export const useStore = create<S>()(
         set({ profile: next });
         api("/profile/save", { profile: next }).catch(() => {});
       },
+      fetchProfile: async () => {
+        try {
+          const res = await api<{ profile: Profile | null }>("/profile");
+          if (res?.profile && (res.profile.name || res.profile.skills?.length)) {
+            set({ profile: { ...get().profile, ...res.profile } });
+          }
+        } catch {}
+      },
       apps: [],
       setApps: (apps) => set({ apps }),
       upsertApp: (a) => {
         const existing = get().apps.filter((x) => x.id !== a.id);
         set({ apps: [a, ...existing] });
+      },
+      fetchApps: async () => {
+        try {
+          const res = await api<App[]>("/applications");
+          if (Array.isArray(res)) {
+            set({ apps: res });
+          }
+        } catch {}
       },
       activeSwarmId: null,
       setActiveSwarmId: (id) => set({ activeSwarmId: id }),

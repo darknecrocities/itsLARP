@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { importGithub } from "@/lib/profile";
+import { ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -142,8 +143,9 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-full justify-center py-2.5 font-medium mt-2">
-            Continue →
+          <button type="submit" className="btn btn-primary w-full justify-center py-2.5 font-medium mt-2 flex items-center gap-1.5">
+            <span>Continue</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
       </div>

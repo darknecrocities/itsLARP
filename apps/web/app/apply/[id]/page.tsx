@@ -7,6 +7,7 @@ import { FIELDS, type Job } from "@/lib/data";
 import { type Change } from "@/lib/profile";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, ErrorBox, PageHeader } from "@/components/ui";
+import { Check, X, ExternalLink } from "lucide-react";
 
 type VerificationResult = {
   passed: boolean;
@@ -197,9 +198,10 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
                 href={job.url}
                 target="_blank"
                 rel="noreferrer"
-                className="btn text-xs"
+                className="btn text-xs inline-flex items-center gap-1.5"
               >
-                View Employer Post ↗
+                <span>View Employer Post</span>
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
             <button
@@ -451,16 +453,62 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           <div className="grid sm:grid-cols-4 gap-3 my-4 py-3 border-y border-line text-xs">
-            <div>Resume: {accepted.length ? `✓ ${accepted.length} accepted` : "— accept at least 1 change"}</div>
-            <div>Cover letter: {cover ? "✓ Completed" : "— Missing"}</div>
-            <div>Form answers: {FIELDS.every((f) => answers[f]) ? "✓ Completed" : "— Incomplete"}</div>
-            <div>Verification: {ver?.passed ? "✓ All claims verified" : "✗ Blocked claims"}</div>
+            <div className="flex items-center gap-1.5">
+              <span>Resume:</span>
+              {accepted.length ? (
+                <span className="text-ok font-medium inline-flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  {accepted.length} accepted
+                </span>
+              ) : (
+                <span className="text-muted">— accept at least 1 change</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>Cover letter:</span>
+              {cover ? (
+                <span className="text-ok font-medium inline-flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  Completed
+                </span>
+              ) : (
+                <span className="text-muted">— Missing</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>Form answers:</span>
+              {FIELDS.every((f) => answers[f]) ? (
+                <span className="text-ok font-medium inline-flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  Completed
+                </span>
+              ) : (
+                <span className="text-muted">— Incomplete</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>Verification:</span>
+              {ver?.passed ? (
+                <span className="text-ok font-medium inline-flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-ok" />
+                  All claims verified
+                </span>
+              ) : (
+                <span className="text-critical font-medium inline-flex items-center gap-1">
+                  <X className="w-3.5 h-3.5 text-critical" />
+                  Blocked claims
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 mt-4">
             {approved ? (
               <div className="flex items-center gap-3">
-                <span className="text-ok text-sm font-medium">✓ Application recorded and tracked.</span>
+                <span className="text-ok text-sm font-medium inline-flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-ok" />
+                  Application recorded and tracked.
+                </span>
                 <Link href="/applications" className="btn btn-primary">
                   View Tracker
                 </Link>

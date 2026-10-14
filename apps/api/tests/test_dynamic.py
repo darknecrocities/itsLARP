@@ -15,20 +15,32 @@ def test_resume_parser():
     arron@example.com
     Manila, Philippines
     5 years of experience building Python and FastAPI microservices.
-    
+
+    Education
+    Polytechnic University of the Philippines - BS in Computer Science
+
+    Work Experience
+    Lead AI Engineer - NeuroTech Systems
+    • Built autonomous multi-agent systems and real-time inference pipelines.
+
     Skills:
     Python, FastAPI, PyTorch, Docker, Kubernetes, PostgreSQL, Redis, RAG, LLM
-    
+
     Projects:
     Autonomous Multi-Agent Swarm
     Engineered an asynchronous task workforce using Redis queues and Python.
-    
+
     Links:
     github.com/arronkianparejas
     linkedin.com/in/arronkianparejas
     """
     res = resume_parser.parse_resume_content(sample_text)
     assert res["name"] == "Arron Parejas"
+    assert res["location"] == "Manila, Philippines"
+    assert "Polytechnic University" in res["education"]
+    assert len(res["experience"]) >= 1
+    assert res["experience"][0]["title"] == "Lead AI Engineer"
+    assert "NeuroTech" in res["experience"][0]["company"]
     assert "python" in res["skills"]
     assert "fastapi" in res["skills"]
     assert res["years"] == 5

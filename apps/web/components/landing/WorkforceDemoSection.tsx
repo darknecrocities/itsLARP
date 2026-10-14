@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { FadeIn } from "@/components/motion";
 import { DEMO_LOGS } from "./constants";
+import { Pause, Play, ArrowRight } from "lucide-react";
 
 export function WorkforceDemoSection() {
   const [activeLogIndex, setActiveLogIndex] = useState(DEMO_LOGS.length - 1);
@@ -38,7 +39,17 @@ export function WorkforceDemoSection() {
               className={`btn text-xs ${simRunning ? "bg-black text-white" : ""}`}
               onClick={() => setSimRunning(!simRunning)}
             >
-              {simRunning ? "⏸ Pause Demo" : "▶ Resume Demo"}
+              {simRunning ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Pause className="w-3.5 h-3.5" />
+                  <span>Pause Demo</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5">
+                  <Play className="w-3.5 h-3.5" />
+                  <span>Resume Demo</span>
+                </span>
+              )}
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.96 }}
@@ -129,8 +140,9 @@ export function WorkforceDemoSection() {
               </div>
               <div className="pt-4 border-t border-neutral-300 flex justify-between items-center text-xs font-mono">
                 <span className="text-neutral-500">Standard APA 7th Edition Output</span>
-                <Link href="/resume" className="btn text-xs py-1 px-3 bg-black text-white">
-                  Open Resume Studio →
+                <Link href="/resume" className="btn text-xs py-1 px-3 bg-black text-white inline-flex items-center gap-1.5">
+                  <span>Open Resume Studio</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </motion.div>
@@ -148,8 +160,9 @@ export function WorkforceDemoSection() {
                   <span className="text-base font-bold font-sans">Your Auto-Created Notion Tracker</span>
                   <Badge tone="ok">Auto-Organized</Badge>
                 </div>
-                <Link href="/integrations" className="btn text-xs py-1 px-2.5">
-                  Connect Your Notion →
+                <Link href="/integrations" className="btn text-xs py-1 px-2.5 inline-flex items-center gap-1.5">
+                  <span>Connect Your Notion</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
               <div className="overflow-x-auto">
