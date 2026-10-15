@@ -177,7 +177,7 @@ export const useStore = create<S>()(
       },
       fetchProfile: async () => {
         try {
-          const res = await api<{ profile: Profile | null }>("/profile");
+          const res = await apiGet<{ profile: Profile | null }>("/profile");
           if (res?.profile && (res.profile.name || res.profile.skills?.length)) {
             set({ profile: { ...get().profile, ...res.profile } });
           }
@@ -191,7 +191,7 @@ export const useStore = create<S>()(
       },
       fetchApps: async () => {
         try {
-          const res = await api<App[]>("/applications");
+          const res = await apiGet<App[]>("/applications");
           if (Array.isArray(res)) {
             set({ apps: res });
           }
@@ -238,7 +238,7 @@ export const useStore = create<S>()(
       setNotion: (n) => set((s) => ({ notion: { ...s.notion, ...n } })),
       fetchNotionStatus: async () => {
         try {
-          const res = await api<{
+          const res = await apiGet<{
             connected: boolean;
             database_id: string;
             database_name: string;

@@ -56,6 +56,7 @@ def _get_or_init_notion_record(db) -> Optional[IntegrationRecord]:
 
 
 @router.get("/status")
+@router.post("/status")
 def notion_status():
     """Returns saved Notion connection status and metadata."""
     db = SessionLocal()

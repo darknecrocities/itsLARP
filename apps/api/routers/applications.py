@@ -168,6 +168,7 @@ def application_reapply(app_id: str):
 
 
 @router.get("")
+@router.post("")
 def applications_list():
     db = SessionLocal()
     try:

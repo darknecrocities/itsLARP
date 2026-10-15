@@ -122,6 +122,7 @@ def profile_save(b: ProfileIn):
 
 
 @router.get("")
+@router.post("")
 def profile_get():
     db = SessionLocal()
     try:
