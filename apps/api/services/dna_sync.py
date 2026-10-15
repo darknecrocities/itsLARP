@@ -15,118 +15,59 @@ VERSION = "2022-06-28"
 def _h(token: str) -> dict:
     return {"Authorization": f"Bearer {token}", "Notion-Version": VERSION, "Content-Type": "application/json"}
 
-VERIFIED_SAMPLE_PROFILE: Dict[str, Any] = {
-    "name": "Alex Rivera",
-    "headline": "Lead AI Systems Engineer & Fullstack Systems Architect",
-    "email": "alex.rivera@example.com",
-    "phone": "+1 (555) 234-5678",
-    "location": "San Francisco, CA (Remote)",
-    "years": 5,
-    "education": "B.S. in Computer Science, Stanford University",
-    "summary": "Empirical systems architect with 5+ years building autonomous AI agent fleets, high-throughput inference runtimes, and distributed web platforms.",
-    "target_roles": ["Lead AI Systems Engineer", "Staff Backend Architect", "Senior Machine Learning Engineer"],
-    "target_companies": ["Anthropic", "OpenAI", "Vercel", "Stripe", "Databricks", "Supabase", "Linear", "Scale AI", "Google DeepMind", "Meta"],
-    "work_types": ["fulltime", "remote"],
-    "skills": ["Python", "FastAPI", "React", "TypeScript", "Docker", "PostgreSQL", "PyTorch", "Kubernetes", "Redis", "Next.js"],
-    "experience": [
-        {
-            "company": "Anthropic Labs",
-            "title": "Senior AI Systems Engineer",
-            "text": "Architected distributed agent runtime executing parallel tasks with verifiable zero-hallucination gates."
-        },
-        {
-            "company": "FinTech Scale",
-            "title": "Full Stack Engineer",
-            "text": "Engineered real-time reactive event pipelines in TypeScript, Next.js, and Postgres."
-        }
-    ],
-    "projects": [
-        {
-            "name": "Autonomous Task Engine",
-            "tech": ["Python", "FastAPI", "React", "Docker", "Kubernetes"],
-            "text": "High-throughput parallel workforce crawler and application staging pipeline executing concurrent agents."
-        },
-        {
-            "name": "Career DNA Synthesizer",
-            "tech": ["Python", "PostgreSQL", "PyTorch"],
-            "text": "Structured citation and evidence extraction compiler adhering to APA 7th publication standards."
-        }
-    ],
-    "links": {
-        "github": "https://github.com/alexrivera",
-        "linkedin": "https://linkedin.com/in/alexrivera"
-    },
-    "evidence": [
-        {
-            "source": "GitHub: Autonomous Task Engine",
-            "text": "Implemented distributed worker swarm with async task queues and OTP challenge handling."
-        },
-        {
-            "source": "Verified APA Repository",
-            "text": "Strict evidence verification gate preventing exaggeration or fabrication of skills."
-        }
-    ]
-}
-
 TARGET_PLATFORMS = ["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Wellfound"]
 APPLICATION_STATUSES = ["APPLIED", "SCREENING", "INTERVIEW", "READY", "OFFER"]
 
 
-def get_active_profile(db) -> Dict[str, Any]:
-    """Retrieves current profile from DB or initializes with verified sample DNA."""
+def get_active_profile(db) -> Optional[Dict[str, Any]]:
+    """Retrieves current active candidate profile from DB. Returns None if not configured."""
+    if not db:
+        return None
     rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
-    if not rec or not rec.name or not rec.skills:
-        if not rec:
-            rec = ProfileRecord(id="default")
-            db.add(rec)
-        rec.name = VERIFIED_SAMPLE_PROFILE["name"]
-        rec.headline = VERIFIED_SAMPLE_PROFILE["headline"]
-        rec.email = VERIFIED_SAMPLE_PROFILE["email"]
-        rec.phone = VERIFIED_SAMPLE_PROFILE["phone"]
-        rec.location = VERIFIED_SAMPLE_PROFILE["location"]
-        rec.years = VERIFIED_SAMPLE_PROFILE["years"]
-        rec.education = VERIFIED_SAMPLE_PROFILE["education"]
-        rec.summary = VERIFIED_SAMPLE_PROFILE["summary"]
-        rec.target_roles = VERIFIED_SAMPLE_PROFILE["target_roles"]
-        rec.target_companies = VERIFIED_SAMPLE_PROFILE["target_companies"]
-        rec.work_types = VERIFIED_SAMPLE_PROFILE["work_types"]
-        rec.skills = VERIFIED_SAMPLE_PROFILE["skills"]
-        rec.experience = VERIFIED_SAMPLE_PROFILE["experience"]
-        rec.projects = VERIFIED_SAMPLE_PROFILE["projects"]
-        rec.links = VERIFIED_SAMPLE_PROFILE["links"]
-        rec.evidence = VERIFIED_SAMPLE_PROFILE["evidence"]
-        db.commit()
+    if not rec or (not rec.name and not rec.skills):
+        return None
 
     return {
-        "name": rec.name or VERIFIED_SAMPLE_PROFILE["name"],
-        "headline": rec.headline or VERIFIED_SAMPLE_PROFILE["headline"],
-        "email": rec.email or VERIFIED_SAMPLE_PROFILE["email"],
-        "phone": rec.phone or VERIFIED_SAMPLE_PROFILE["phone"],
-        "location": rec.location or VERIFIED_SAMPLE_PROFILE["location"],
-        "years": rec.years or VERIFIED_SAMPLE_PROFILE["years"],
-        "education": rec.education or VERIFIED_SAMPLE_PROFILE["education"],
-        "summary": rec.summary or VERIFIED_SAMPLE_PROFILE["summary"],
-        "target_roles": rec.target_roles or VERIFIED_SAMPLE_PROFILE["target_roles"],
-        "target_companies": rec.target_companies or VERIFIED_SAMPLE_PROFILE["target_companies"],
-        "work_types": rec.work_types or VERIFIED_SAMPLE_PROFILE["work_types"],
-        "skills": rec.skills or VERIFIED_SAMPLE_PROFILE["skills"],
-        "experience": rec.experience or VERIFIED_SAMPLE_PROFILE["experience"],
-        "projects": rec.projects or VERIFIED_SAMPLE_PROFILE["projects"],
-        "links": rec.links or VERIFIED_SAMPLE_PROFILE["links"],
-        "evidence": rec.evidence or VERIFIED_SAMPLE_PROFILE["evidence"]
+        "name": rec.name or "",
+        "headline": rec.headline or "",
+        "email": rec.email or "",
+        "phone": rec.phone or "",
+        "location": rec.location or "",
+        "years": rec.years or 0,
+        "education": rec.education or "",
+        "summary": rec.summary or "",
+        "target_roles": rec.target_roles or ["all"],
+        "target_companies": rec.target_companies or ["all"],
+        "work_types": rec.work_types or ["fulltime", "remote"],
+        "skills": rec.skills or [],
+        "experience": rec.experience or [],
+        "projects": rec.projects or [],
+        "links": rec.links or {},
+        "evidence": rec.evidence or []
     }
 
 
-def generate_dna_applications(profile: dict, target_count: int = 15, db = None) -> List[dict]:
+def generate_dna_applications(profile: Optional[dict], target_count: int = 15, db = None) -> List[dict]:
     """Generates dynamic applications tailored directly against the candidate's Career DNA."""
+    if not profile or (not profile.get("name") and not profile.get("skills")):
+        return []
+
     target_count = max(1, min(target_count, 50000))
-    cos = list(COMPANIES_DB.keys())
+    user_companies = [c for c in (profile.get("target_companies") or []) if c != "all"]
+    if user_companies:
+        cos = [c for c in user_companies if c in COMPANIES_DB] or list(COMPANIES_DB.keys())
+    else:
+        cos = list(COMPANIES_DB.keys())
+
+    user_roles = [r for r in (profile.get("target_roles") or []) if r != "all"]
+    user_skills = profile.get("skills", [])
+    user_name = profile.get("name") or "Candidate"
     generated = []
 
     for i in range(target_count):
         company_name = cos[i % len(cos)]
         info = get_company_info(company_name)
-        roles = info.get("roles", ["Software Engineer", "AI Systems Engineer"])
+        roles = user_roles if user_roles else info.get("roles", ["Software Engineer", "Systems Engineer"])
         role = roles[(i // len(cos)) % len(roles)]
         platform = TARGET_PLATFORMS[i % len(TARGET_PLATFORMS)]
         status = APPLICATION_STATUSES[i % len(APPLICATION_STATUSES)]
@@ -135,7 +76,7 @@ def generate_dna_applications(profile: dict, target_count: int = 15, db = None) 
         job_data = {
             "title": role,
             "company": company_name,
-            "skills": [s.lower() for s in profile.get("skills", ["python", "docker"])[:5]],
+            "skills": [s.lower() for s in user_skills[:5]] if user_skills else ["python", "docker"],
             "years": max(1, profile.get("years", 3) - 1),
             "domain": "ai" if any(k in role.lower() for k in ["ai", "learning", "model"]) else "web",
             "remote": True
@@ -143,10 +84,10 @@ def generate_dna_applications(profile: dict, target_count: int = 15, db = None) 
         score_res = tailoring.match(profile, job_data)
         match_pct = max(78, min(99, score_res.get("score", 92)))
 
-        matched_skills = [s for s in profile.get("skills", []) if s.lower() in [x.lower() for x in job_data["skills"]]]
-        skills_summary = ", ".join(matched_skills[:3]) if matched_skills else "Python, FastAPI, PyTorch"
+        matched_skills = [s for s in user_skills if s.lower() in [x.lower() for x in job_data["skills"]]]
+        skills_summary = ", ".join(matched_skills[:3]) if matched_skills else ", ".join(user_skills[:3]) or "Core Engineering Skills"
         notes = (
-            f"Tailored for {profile.get('name', 'Candidate')} ({match_pct}% match). "
+            f"Tailored for {user_name} ({match_pct}% match). "
             f"Grounding verified on {skills_summary}. APA 7th Edition resume generated."
         )
 
@@ -269,16 +210,53 @@ async def backfill_notion_pages(token: str, database_id: str) -> dict:
     return {"ok": True, "backfilled": updated, "total_inspected": len(pages)}
 
 
+async def archive_all_notion_pages(token: str, database_id: str) -> dict:
+    """Archives all pages in the user's Notion database to reset to a clean state."""
+    clean_id = database_id.replace("-", "").strip()
+    archived_count = 0
+    has_more = True
+    start_cursor = None
+
+    async with httpx.AsyncClient(timeout=15) as c:
+        while has_more:
+            payload: dict = {"page_size": 100}
+            if start_cursor:
+                payload["start_cursor"] = start_cursor
+            r = await c.post(f"{API}/databases/{clean_id}/query", headers=_h(token), json=payload)
+            if r.status_code != 200:
+                break
+            data = r.json()
+            results = data.get("results", [])
+            for p in results:
+                patch_r = await c.patch(f"{API}/pages/{p['id']}", headers=_h(token), json={"archived": True})
+                if patch_r.status_code == 200:
+                    archived_count += 1
+            has_more = data.get("has_more", False)
+            start_cursor = data.get("next_cursor")
+
+    return {"ok": True, "archived_count": archived_count}
+
+
 async def sync_dna_applications_to_notion(token: str, database_id: str, target_count: int = 15, db = None) -> dict:
     """Coordinates end-to-end Career DNA generation, backfilling, and direct Notion synchronization."""
     from . import notion
     clean_id = database_id.replace("-", "").strip()
 
+    profile = get_active_profile(db)
+    if not profile or (not profile.get("name") and not profile.get("skills")):
+        return {
+            "ok": False,
+            "error": "No active Career DNA profile found. Please configure your profile or upload your resume first.",
+            "total_generated": 0,
+            "synced_to_notion": 0,
+            "backfilled": 0,
+            "database_url": f"https://notion.so/{clean_id}"
+        }
+
     # 1. Backfill existing Notion pages
     backfill_res = await backfill_notion_pages(token, clean_id)
 
     # 2. Get active profile and generate tailored applications
-    profile = get_active_profile(db)
     apps = generate_dna_applications(profile, target_count=target_count, db=db)
 
     # 3. Push newly generated applications into Notion

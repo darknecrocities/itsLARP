@@ -233,3 +233,16 @@ async def application_update_status(app_id: str, b: StatusUpdateIn):
     finally:
         db.close()
 
+
+@router.post("/clear")
+def applications_clear():
+    """Clear all locally tracked applications."""
+    db = SessionLocal()
+    try:
+        deleted = db.query(ApplicationRecord).delete()
+        db.commit()
+        return {"ok": True, "deleted_count": deleted}
+    finally:
+        db.close()
+
+

@@ -1,95 +1,82 @@
 import { type BotTelemetry } from "@/lib/swarm";
 
+/**
+ * Generates standby agent worker topology placeholders when no live telemetry is active.
+ * Avoids fabricated companies or fake activity logs.
+ */
 export function generateSampleBots(running: boolean): BotTelemetry[] {
   const list: BotTelemetry[] = [];
-  const platforms = ["LinkedIn", "JobStreet", "Indeed", "Glassdoor", "Wellfound", "RemoteOK"];
+  const platforms = ["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Wellfound"];
 
-  // 300 Crawlers (sample subset of 30)
-  for (let i = 1; i <= 30; i++) {
-    const bid = `agent_scrape_${String(i).padStart(3, "0")}`;
+  // Discovery Crawler Nodes
+  for (let i = 1; i <= 20; i++) {
     const plat = platforms[(i - 1) % platforms.length];
     list.push({
-      id: bid,
+      id: `agent_crawl_${String(i).padStart(3, "0")}`,
       pool: "discovery",
       platform: plat,
-      status: running ? (i % 5 === 0 ? "needs_verification" : i % 2 === 0 ? "browsing" : "completed") : "idle",
-      current_task: running ? `Searching ${plat} for matching jobs you like` : "Ready on standby",
-      cpu_pct: +(0.2 + (i % 6) * 0.1).toFixed(2),
-      memory_mb: +(1.1 + (i % 5) * 0.2).toFixed(2),
-      target_role: "Software Engineer",
-      target_company: plat === "LinkedIn" ? "Tech Innovations" : "Global Systems",
-      logs: [
-        { t: "12:00:01", msg: `Started searching on ${plat}` },
-        { t: "12:00:04", msg: `Found matching jobs matching your preferences` },
-      ],
-      verification_challenge:
-        i % 5 === 0 && running
-          ? { platform: plat, prompt: `Enter 2FA Code or Confirm login for ${plat}`, created_at: 1710000000000 }
-          : null,
+      status: running ? "browsing" : "idle",
+      current_task: running ? `Scanning ${plat} feeds` : "Standby for swarm activation",
+      cpu_pct: running ? 0.4 : 0.0,
+      memory_mb: running ? 1.2 : 0.5,
+      target_role: "Configured via Profile",
+      target_company: plat,
+      logs: running ? [{ t: new Date().toLocaleTimeString(), msg: `Browsing ${plat}` }] : [],
+      verification_challenge: null,
     });
   }
 
-  // 300 Tailors (sample subset of 30)
-  for (let i = 1; i <= 30; i++) {
-    const bid = `agent_tailor_${String(i).padStart(3, "0")}`;
+  // Tailoring Nodes
+  for (let i = 1; i <= 20; i++) {
     list.push({
-      id: bid,
+      id: `agent_tailor_${String(i).padStart(3, "0")}`,
       pool: "tailor",
-      platform: "Local AI",
-      status: running ? (i % 2 === 0 ? "tailoring" : "completed") : "idle",
-      current_task: running ? "Creating custom APA resume for this job" : "Ready on standby",
-      cpu_pct: +(0.5 + (i % 4) * 0.1).toFixed(2),
-      memory_mb: +(1.4 + (i % 4) * 0.2).toFixed(2),
-      target_company: "Apex Tech Corp",
-      target_role: "Full Stack Developer",
-      logs: [
-        { t: "12:00:02", msg: "Read job requirements and checked skill match" },
-        { t: "12:00:05", msg: "Generated customized APA-format resume" },
-      ],
+      platform: "Local LLM",
+      status: running ? "tailoring" : "idle",
+      current_task: running ? "Evaluating requirements" : "Standby for matching jobs",
+      cpu_pct: running ? 0.6 : 0.0,
+      memory_mb: running ? 1.5 : 0.5,
+      target_role: "Dynamic Career DNA",
+      target_company: "Local Inference",
+      logs: running ? [{ t: new Date().toLocaleTimeString(), msg: "Model ready for alignment" }] : [],
+      verification_challenge: null,
     });
   }
 
-  // 400 Appliers (sample subset of 40)
-  for (let i = 1; i <= 40; i++) {
-    const bid = `agent_apply_${String(i).padStart(3, "0")}`;
+  // Application Staging Nodes
+  for (let i = 1; i <= 25; i++) {
     const plat = platforms[(i - 1) % platforms.length];
     list.push({
-      id: bid,
+      id: `agent_apply_${String(i).padStart(3, "0")}`,
       pool: "apply",
       platform: plat,
-      status: running ? (i % 3 === 0 ? "applying" : "completed") : "idle",
-      current_task: running ? `Filling application questions on ${plat}` : "Ready on standby",
-      cpu_pct: +(0.3 + (i % 5) * 0.1).toFixed(2),
-      memory_mb: +(1.2 + (i % 6) * 0.15).toFixed(2),
-      target_company: "DeepSignal AI",
-      target_role: "Software Developer",
-      logs: [
-        { t: "12:00:03", msg: `Filled application questions from your profile` },
-        { t: "12:00:06", msg: `Application prepared and ready for your review` },
-      ],
+      status: running ? "applying" : "idle",
+      current_task: running ? `Staging application on ${plat}` : "Standby for review approval",
+      cpu_pct: running ? 0.3 : 0.0,
+      memory_mb: running ? 1.0 : 0.5,
+      target_role: "Dynamic Candidate Match",
+      target_company: plat,
+      logs: running ? [{ t: new Date().toLocaleTimeString(), msg: `Prepared staging worker for ${plat}` }] : [],
+      verification_challenge: null,
     });
   }
 
-  // Notion Sync Bots (sample subset of 15)
-  for (let i = 1; i <= 15; i++) {
-    const bid = `agent_notion_${String(i).padStart(3, "0")}`;
+  // Notion Sync Nodes
+  for (let i = 1; i <= 10; i++) {
     list.push({
-      id: bid,
+      id: `agent_notion_${String(i).padStart(3, "0")}`,
       pool: "notion",
       platform: "Notion API",
-      status: running ? (i % 2 === 0 ? "applying" : "completed") : "idle",
-      current_task: running ? "Syncing approved application to your Notion database" : "Standby for incoming applications",
-      cpu_pct: +(0.15 + (i % 3) * 0.08).toFixed(2),
-      memory_mb: +(1.0 + (i % 4) * 0.1).toFixed(2),
-      target_company: "Notion Application Tracker",
+      status: running ? "applying" : "idle",
+      current_task: running ? "Syncing to Notion" : "Standby for database sync",
+      cpu_pct: running ? 0.2 : 0.0,
+      memory_mb: running ? 0.8 : 0.5,
       target_role: "Database Synchronization",
-      logs: [
-        { t: "12:00:04", msg: "Verified Notion database schema and column mappings" },
-        { t: "12:00:07", msg: "Synchronized application record with two-way status hook" },
-      ],
+      target_company: "Connected Workspace",
+      logs: running ? [{ t: new Date().toLocaleTimeString(), msg: "Database connection verified" }] : [],
+      verification_challenge: null,
     });
   }
 
   return list;
 }
-
