@@ -126,6 +126,12 @@ export const LATEST_UPDATE_DATA: UpdateRelease = {
         "Full-screen empirical CV generator adhering to APA publication standards with 0% hallucination verification gates and direct PDF/print export.",
     },
     {
+      category: "Desktop Branding",
+      title: "Official itsLARP Brand Logo Integration",
+      details:
+        "Packaged multi-resolution Apple ICNS and Windows ICO suites into desktop binaries. Configured runtime BrowserWindow and macOS dock icon binding to match the official brand mark.",
+    },
+    {
       category: "Platform Integration",
       title: "Two-Way Notion Synchronization",
       details:
@@ -133,6 +139,12 @@ export const LATEST_UPDATE_DATA: UpdateRelease = {
     },
   ],
   stabilityFixes: [
+    {
+      category: "Desktop Packaging",
+      issue: "macOS Dock and Windows taskbar displayed default Electron atom icon",
+      resolution:
+        "Generated multi-resolution ICNS/ICO suites from official SVG brand mark and bound app.dock.setIcon() and BrowserWindow icon.",
+    },
     {
       category: "Desktop Runtime",
       issue: "Desktop application stuck on 'Local web service not ready yet. Retrying...'",

@@ -11,20 +11,24 @@
     "pack": "electron-builder --dir",
     "dist:mac": "electron-builder --mac dmg zip --arm64",
     "dist:all": "electron-builder -m --arm64 --x64",
-    "verify": "node scripts/verify-builds.js"
+    "verify": "node scripts/verify-builds.js",
+    "icons": "python3 scripts/generate-icons.py"
   },
   "build": {
     "appId": "com.itslarp.desktop",
     "productName": "itsLARP",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
+    "icon": "build/icon.png",
     "files": [
       "src/**/*",
       "package.json"
     ],
     "mac": {
       "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
       "target": [
         "dmg",
         "zip"
@@ -33,6 +37,7 @@
       "gatekeeperAssess": false
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "zip"
