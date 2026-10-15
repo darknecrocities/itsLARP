@@ -107,7 +107,7 @@ export function PipelineSvgGraph({
       {/* Actual Binary Search Tree Canvas */}
       <div className="relative py-4 px-2 bg-neutral-50 border border-neutral-200 rounded overflow-x-auto flex flex-col items-center select-none">
         <svg
-          viewBox="0 0 900 480"
+          viewBox="0 0 900 430"
           className="w-full max-w-[900px] h-auto select-none"
           style={{ minWidth: "580px" }}
         >
@@ -123,7 +123,7 @@ export function PipelineSvgGraph({
             <text x="18" y="58" fill="#525252" fontWeight="bold">L0 • ROOT DISPATCHER</text>
             <text x="18" y="178" fill="#525252" fontWeight="bold">L1 • SWARM PARTITIONS</text>
             <text x="18" y="298" fill="#525252" fontWeight="bold">L2 • SPECIALIZED HUBS</text>
-            <text x="18" y="415" fill="#525252" fontWeight="bold">L3 • WORKER PODS</text>
+            <text x="18" y="380" fill="#525252" fontWeight="bold">L3 • WORKER PODS</text>
           </g>
 
           {/* Tree Edge Branches */}
@@ -181,7 +181,7 @@ export function PipelineSvgGraph({
                 <line
                   key={`fil-${leaf.id}`}
                   x1={parent.x}
-                  y1={parent.y}
+                  y1={parent.y + 15}
                   x2={leaf.x}
                   y2={leaf.y}
                   stroke="#171717"
@@ -192,7 +192,7 @@ export function PipelineSvgGraph({
             })}
           </g>
 
-          {/* Dynamically Spawning Leaf Worker Nodes */}
+          {/* Leaf Worker Nodes */}
           <g id="worker-nodes">
             {workerLeaves.map((leaf) => {
               const isInspected = inspectedBotId === leaf.bot.id;
@@ -206,17 +206,16 @@ export function PipelineSvgGraph({
                   onMouseEnter={() => setHoveredBot({ bot: leaf.bot, x: leaf.x, y: leaf.y })}
                   onMouseLeave={() => setHoveredBot(null)}
                 >
-                  {/* Spawn ripple effect */}
-                  {(running || isNewlySpawned) && (
+                  {/* Subtle newly spawned ring without CSS transform distortion */}
+                  {isNewlySpawned && (
                     <circle
                       cx={leaf.x}
                       cy={leaf.y}
-                      r={isNewlySpawned ? 14 : 9}
+                      r={9}
                       fill="none"
-                      stroke={isNewlySpawned ? "#10b981" : "#000000"}
-                      strokeWidth={isNewlySpawned ? 2 : 1}
-                      opacity={0.6}
-                      className="animate-ping"
+                      stroke="#10b981"
+                      strokeWidth="1.5"
+                      opacity={0.8}
                     />
                   )}
 
@@ -224,11 +223,11 @@ export function PipelineSvgGraph({
                   <circle
                     cx={leaf.x}
                     cy={leaf.y}
-                    r={isInspected ? 6.5 : isNewlySpawned ? 6 : 4.5}
+                    r={isInspected ? 6 : isNewlySpawned ? 5.5 : 4}
                     fill={isNewlySpawned ? "#10b981" : isInspected ? "#000000" : "#ffffff"}
                     stroke={isNewlySpawned ? "#059669" : "#000000"}
-                    strokeWidth={isInspected ? 2.5 : 1.5}
-                    className="transition-all duration-200 hover:scale-150"
+                    strokeWidth={isInspected ? 2 : 1.25}
+                    className="transition-transform duration-150 hover:scale-125"
                   />
                 </g>
               );
@@ -244,22 +243,35 @@ export function PipelineSvgGraph({
                 if (!fromNode || !toNode) return null;
 
                 const pos = getEdgePoint(fromNode, toNode, pkt.t);
+                const tagW = pkt.label.length * 5.6 + 8;
 
                 return (
                   <g key={pkt.id} className="pointer-events-none select-none">
                     {/* Glowing outer halo */}
-                    <circle cx={pos.x} cy={pos.y} r={7} fill={pkt.color} opacity={0.3} filter="url(#glow)" />
+                    <circle cx={pos.x} cy={pos.y} r={6.5} fill={pkt.color} opacity={0.25} filter="url(#glow)" />
                     {/* Central Packet Sphere */}
-                    <circle cx={pos.x} cy={pos.y} r={3.5} fill={pkt.color} stroke="#ffffff" strokeWidth="1" />
-                    {/* Packet Micro Label Tag */}
-                    <text
+                    <circle cx={pos.x} cy={pos.y} r={3.2} fill={pkt.color} stroke="#ffffff" strokeWidth="1" />
+                    {/* High-contrast solid pill tag for micro label */}
+                    <rect
                       x={pos.x + 6}
-                      y={pos.y - 5}
-                      fill="#000000"
-                      fontSize="8"
+                      y={pos.y - 12}
+                      width={tagW}
+                      height="12"
+                      rx="2.5"
+                      fill="#ffffff"
+                      stroke="#d4d4d4"
+                      strokeWidth="0.75"
+                      opacity="0.95"
+                    />
+                    <text
+                      x={pos.x + 6 + tagW / 2}
+                      y={pos.y - 3}
+                      textAnchor="middle"
+                      fill="#171717"
+                      fontSize="7.5"
                       fontWeight="bold"
                       fontFamily="monospace"
-                      opacity={0.85}
+                      opacity={0.9}
                     >
                       {pkt.label}
                     </text>
@@ -274,28 +286,25 @@ export function PipelineSvgGraph({
             {GRAPH_NODES.map((n) => {
               const isSelected = selectedNodeId === n.id;
               const isRoot = n.id === 1;
+              const labelW = n.label.length * 6 + 12;
 
               return (
-                <motion.g
+                <g
                   key={n.id}
                   className="cursor-pointer group"
-                  style={{ transformOrigin: `${n.x}px ${n.y}px` }}
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.94 }}
                   onClick={() => onSelectNode(n.id)}
                 >
-                  {/* Selection Pulsing Aura */}
+                  {/* Selection Ring */}
                   {isSelected && (
                     <circle
                       cx={n.x}
                       cy={n.y}
-                      r={isRoot ? 36 : 30}
+                      r={isRoot ? 35 : 28}
                       fill="none"
                       stroke="#000000"
-                      strokeWidth="2"
-                      strokeDasharray="4 4"
-                      className="animate-spin"
-                      style={{ animationDuration: "12s" }}
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                      opacity={0.7}
                     />
                   )}
 
@@ -324,20 +333,31 @@ export function PipelineSvgGraph({
                     {n.id}
                   </text>
 
-                  {/* Clean Node Label (Positioned without overlap) */}
+                  {/* Clean Node Label Pill (Zero collisions) */}
+                  <rect
+                    x={n.x - labelW / 2}
+                    y={n.labelY - 10}
+                    width={labelW}
+                    height="14"
+                    rx="3"
+                    fill="#ffffff"
+                    stroke="#e5e5e5"
+                    strokeWidth="1"
+                    opacity="0.95"
+                  />
                   <text
                     x={n.x}
-                    y={n.labelY - (isRoot ? 20 : 0)}
+                    y={n.labelY + 1}
                     textAnchor="middle"
                     fill="#000000"
-                    fontSize="9.5"
+                    fontSize="9"
                     fontWeight="bold"
                     fontFamily="monospace"
                     className="pointer-events-none select-none tracking-tight"
                   >
                     {n.label}
                   </text>
-                </motion.g>
+                </g>
               );
             })}
           </g>
