@@ -7,7 +7,7 @@ import { TargetingPreferences } from "@/components/TargetingPreferences";
 import { Plus, X, Trash2, Briefcase, FileText, Shield, ExternalLink } from "lucide-react";
 
 export default function ProfilePage() {
-  const { profile: p, setProfile, addEvidence } = useStore();
+  const { profile: p, setProfile, addEvidence, loadDummyProfile } = useStore();
   const [newSkill, setNewSkill] = useState("");
   const [newEvidenceSource, setNewEvidenceSource] = useState("");
   const [newEvidenceText, setNewEvidenceText] = useState("");
@@ -27,10 +27,15 @@ export default function ProfilePage() {
     return (
       <>
         <PageHeader title="Career DNA" sub="Structured single source of truth for your entire career." />
-        <Empty title="No Career DNA Created" hint="Upload your resume or connect GitHub to build your verified profile.">
-          <Link href="/onboarding" className="btn btn-primary">
-            Start Onboarding
-          </Link>
+        <Empty title="No Career DNA Created" hint="Upload your resume or connect GitHub to build your verified profile, or test immediately with demo data.">
+          <div className="flex gap-2 justify-center">
+            <Link href="/onboarding" className="btn btn-primary">
+              Start Onboarding
+            </Link>
+            <button type="button" onClick={() => loadDummyProfile()} className="btn">
+              Load Demo Career DNA
+            </button>
+          </div>
         </Empty>
       </>
     );
@@ -107,6 +112,14 @@ export default function ProfilePage() {
         sub="The verified single source of truth for your entire professional background. All autonomous agents ground their applications in this evidence."
         action={
           <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn text-xs"
+              onClick={() => loadDummyProfile()}
+              title="Reset or load verified demo Career DNA profile"
+            >
+              Load Demo Profile
+            </button>
             <Link href="/resume" className="btn text-xs">
               View Complete Resume
             </Link>

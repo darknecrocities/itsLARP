@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("updater:status", handler);
     return () => ipcRenderer.removeListener("updater:status", handler);
   },
+  showNotification: (options) => ipcRenderer.invoke("notification:show", options),
 });

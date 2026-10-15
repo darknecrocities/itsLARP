@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, apiGet, API } from "@/lib/api";
-import { Download, RefreshCw, Play } from "lucide-react";
+import { Download, RefreshCw, Play, Cpu } from "lucide-react";
 import {
   type OllamaStatus,
   type RecommendedModel,
@@ -260,7 +260,7 @@ export function OllamaManager() {
       <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-4 gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-black text-white flex items-center justify-center font-bold font-mono">
-            🦙
+            <Cpu className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -349,7 +349,7 @@ export function OllamaManager() {
                     : "bg-white border-neutral-300 text-neutral-800 hover:border-black"
                 }`}
               >
-                {cat === "all" ? "All Models" : cat === "performance" ? "⚡ High Performance (Low RAM)" : cat === "balanced" ? "★ Sweet Spot" : "🧠 Maximum Ability"}
+                {cat === "all" ? "All Models" : cat === "performance" ? "High Speed (Low RAM)" : cat === "balanced" ? "Balanced Spec" : "Deep Reasoning"}
               </button>
             ))}
           </div>

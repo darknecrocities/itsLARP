@@ -147,6 +147,32 @@ export type App = {
   isOngoing?: boolean;
 };
 
+export type EmailResponse = {
+  company: string;
+  subject: string;
+  snippet: string;
+  classification: string;
+  date: string;
+};
+
+export type EmailIntegrationState = {
+  connected: boolean;
+  provider: "gmail" | "outlook" | "custom";
+  email: string;
+  monitoringEnabled: boolean;
+  lastCheckedAt?: string;
+  responses: EmailResponse[];
+};
+
+export type JobPreferences = {
+  selectedPlatforms: string[];
+  remoteOnly: boolean;
+  minSalary: number;
+  matchThreshold: number;
+  dailyPace: number;
+  blacklistedCompanies: string[];
+};
+
 export type AgentQuestion = {
   id: string;
   run_id?: string;
@@ -181,12 +207,19 @@ type S = {
     databaseId: string;
     databaseName?: string;
     databaseUrl?: string;
+    workspace?: string;
     connected: boolean;
     lastSyncedAt?: string;
     syncedCount?: number;
   };
   setNotion: (n: Partial<S["notion"]>) => void;
   fetchNotionStatus: () => Promise<void>;
+  loadDummyProfile: () => void;
+  emailIntegration: EmailIntegrationState;
+  setEmailIntegration: (e: Partial<EmailIntegrationState>) => void;
+  fetchEmailStatus: () => Promise<void>;
+  jobPreferences: JobPreferences;
+  setJobPreferences: (p: Partial<JobPreferences>) => void;
 };
 
 export const useStore = create<S>()(
@@ -271,6 +304,7 @@ export const useStore = create<S>()(
             database_id: string;
             database_name: string;
             database_url: string;
+            workspace?: string;
             last_synced_at?: string;
             synced_count?: number;
           }>("/integrations/notion/status");
@@ -282,6 +316,7 @@ export const useStore = create<S>()(
                 databaseId: res.database_id,
                 databaseName: res.database_name,
                 databaseUrl: res.database_url,
+                workspace: res.workspace,
                 lastSyncedAt: res.last_synced_at,
                 syncedCount: res.synced_count,
               },
@@ -289,6 +324,47 @@ export const useStore = create<S>()(
           }
         } catch {}
       },
+      loadDummyProfile: () => {
+        set({ profile: DEFAULT_PROFILE });
+        api("/profile/save", { profile: DEFAULT_PROFILE }).catch(() => {});
+      },
+      emailIntegration: {
+        connected: false,
+        provider: "gmail",
+        email: "",
+        monitoringEnabled: true,
+        responses: [],
+      },
+      setEmailIntegration: (e) =>
+        set((s) => ({ emailIntegration: { ...s.emailIntegration, ...e } })),
+      fetchEmailStatus: async () => {
+        try {
+          const res = await apiGet<any>("/integrations/email/status");
+          if (res) {
+            set((s) => ({
+              emailIntegration: {
+                ...s.emailIntegration,
+                connected: Boolean(res.connected),
+                provider: res.provider || "gmail",
+                email: res.email || "",
+                monitoringEnabled: res.monitoring_enabled ?? true,
+                lastCheckedAt: res.last_checked_at,
+                responses: res.responses || [],
+              },
+            }));
+          }
+        } catch {}
+      },
+      jobPreferences: {
+        selectedPlatforms: ["linkedin", "indeed", "glassdoor", "ziprecruiter", "wellfound"],
+        remoteOnly: false,
+        minSalary: 100000,
+        matchThreshold: 75,
+        dailyPace: 25,
+        blacklistedCompanies: [],
+      },
+      setJobPreferences: (p) =>
+        set((s) => ({ jobPreferences: { ...s.jobPreferences, ...p } })),
     }),
     {
       name: "howtolarped_state",
@@ -299,6 +375,8 @@ export const useStore = create<S>()(
           apps: s.apps,
           activeSwarmId: s.activeSwarmId,
           notion: { ...s.notion, token: "" },
+          emailIntegration: s.emailIntegration,
+          jobPreferences: s.jobPreferences,
         }) as unknown as S,
     }
   )

@@ -6,7 +6,62 @@ import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Job } from "@/lib/data";
 import { Badge, Empty, ErrorBox, PageHeader, Reveal } from "@/components/ui";
-import { X } from "lucide-react";
+import { X, Globe } from "lucide-react";
+import {
+  LinkedInIcon,
+  IndeedIcon,
+  GlassdoorIcon,
+  ZipRecruiterIcon,
+  WellfoundIcon,
+} from "@/components/BrandIcons";
+
+const PLATFORMS = [
+  { id: "linkedin", name: "LinkedIn", Icon: LinkedInIcon },
+  { id: "indeed", name: "Indeed", Icon: IndeedIcon },
+  { id: "glassdoor", name: "Glassdoor", Icon: GlassdoorIcon },
+  { id: "ziprecruiter", name: "ZipRecruiter", Icon: ZipRecruiterIcon },
+  { id: "wellfound", name: "Wellfound", Icon: WellfoundIcon },
+];
+
+function renderPlatformSource(source: string) {
+  const s = (source || "").toLowerCase();
+  if (s.includes("linkedin")) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-fg font-medium">
+        <LinkedInIcon size={14} /> LinkedIn
+      </span>
+    );
+  }
+  if (s.includes("indeed")) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-fg font-medium">
+        <IndeedIcon size={14} /> Indeed
+      </span>
+    );
+  }
+  if (s.includes("glassdoor")) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-fg font-medium">
+        <GlassdoorIcon size={14} /> Glassdoor
+      </span>
+    );
+  }
+  if (s.includes("ziprecruiter")) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-fg font-medium">
+        <ZipRecruiterIcon size={14} /> ZipRecruiter
+      </span>
+    );
+  }
+  if (s.includes("wellfound") || s.includes("angel")) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-fg font-medium">
+        <WellfoundIcon size={14} /> Wellfound
+      </span>
+    );
+  }
+  return <span className="text-muted text-xs">{source}</span>;
+}
 
 export default function JobsPage() {
   const [q, setQ] = useState("");
@@ -26,6 +81,8 @@ export default function JobsPage() {
 
   const profile = useStore((s) => s.profile);
   const apps = useStore((s) => s.apps);
+  const jobPreferences = useStore((s) => s.jobPreferences);
+  const setJobPreferences = useStore((s) => s.setJobPreferences);
   const { data: jobs, isLoading, error, refetch } = useJobs(searchParam, remote);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -63,6 +120,12 @@ export default function JobsPage() {
     return jobs
       .filter((j) => {
         if (domainFilter !== "all" && j.domain !== domainFilter) return false;
+        const src = (j.source || "").toLowerCase();
+        const matchesPlatform = PLATFORMS.some((p) => src.includes(p.id));
+        if (matchesPlatform) {
+          const isSelected = jobPreferences.selectedPlatforms.some((p) => src.includes(p));
+          if (!isSelected) return false;
+        }
         return true;
       })
       .sort((a, b) => {
@@ -71,7 +134,7 @@ export default function JobsPage() {
         }
         return a.company.localeCompare(b.company);
       });
-  }, [jobs, domainFilter, sort]);
+  }, [jobs, domainFilter, sort, jobPreferences.selectedPlatforms]);
 
   return (
     <>
@@ -89,6 +152,46 @@ export default function JobsPage() {
           </div>
         }
       />
+
+      {/* Target Platforms Bar */}
+      <div className="card p-3 mb-6 bg-bg2/40 border border-line flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted">Target Platforms:</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {PLATFORMS.map(({ id, name, Icon }) => {
+              const active = jobPreferences.selectedPlatforms.includes(id);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    const next = active
+                      ? jobPreferences.selectedPlatforms.filter((p) => p !== id)
+                      : [...jobPreferences.selectedPlatforms, id];
+                    setJobPreferences({ selectedPlatforms: next.length > 0 ? next : [id] });
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors border ${
+                    active
+                      ? "bg-bg text-fg border-black shadow-xs font-medium"
+                      : "bg-transparent text-muted border-line/60 opacity-60 hover:opacity-100"
+                  }`}
+                  title={`${active ? "Active" : "Disabled"} for application swarm`}
+                >
+                  <Icon size={14} />
+                  <span>{name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted">
+          <span>Pace: <strong className="text-fg">{jobPreferences.dailyPace || 25}/day</strong></span>
+          <span>Auto-Match: <strong className="text-fg">{jobPreferences.matchThreshold || 75}%</strong></span>
+          <Link href="/integrations" className="text-fg underline hover:no-underline font-medium">
+            Configure Integrations
+          </Link>
+        </div>
+      </div>
 
       {/* Search & Filters */}
       <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3 mb-6">
@@ -294,7 +397,7 @@ export default function JobsPage() {
                       {j.location} {j.remote && "· Remote"}
                     </td>
                     <td className="text-xs">{j.salary || "Not listed"}</td>
-                    <td className="text-muted text-xs">{j.source}</td>
+                    <td className="text-muted text-xs">{renderPlatformSource(j.source)}</td>
                     <td>
                       {isLoading ? (
                         <span className="text-muted">…</span>
