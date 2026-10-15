@@ -10,10 +10,11 @@ export function LandingFooter() {
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6">
           <div>
             <BrandLogo size="sm" variant="full" />
-            <p className="text-muted text-[11px] mt-1.5">Your AI Job-Hunting Team · No Manual Applications Needed</p>
+            <p className="text-muted text-[11px] mt-1.5">Your AI Job-Hunting Team · Windows & macOS Native Desktop</p>
           </div>
 
           <div className="flex flex-wrap gap-6 text-muted">
+            <Link href="/download" className="hover:text-ink transition-colors font-semibold text-ink">Download</Link>
             <Link href="/dashboard" className="hover:text-ink transition-colors">Dashboard</Link>
             <Link href="/profile" className="hover:text-ink transition-colors">Profile</Link>
             <Link href="/resume" className="hover:text-ink transition-colors">APA Resume</Link>
@@ -27,7 +28,7 @@ export function LandingFooter() {
             <span className="w-2 h-2 rounded-full bg-black inline-block animate-pulse" />
             <span>Private & Local AI First</span>
             <span>·</span>
-            <span>GitHub: darknecrocities/itsLARP</span>
+            <span>macOS & Windows</span>
           </div>
         </div>
       </FadeIn>
