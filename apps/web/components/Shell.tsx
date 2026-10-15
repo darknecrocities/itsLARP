@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
@@ -10,7 +10,6 @@ const NAV = [
   ["/dashboard", "Dashboard", "Overview"],
   ["/profile", "Career Profile", "Your real skills"],
   ["/jobs", "Jobs", "Matching openings"],
-  ["/resume", "APA Resume", "Download & edit"],
   ["/apply", "Applications", "Track progress"],
   ["/agents", "Auto-Apply Agents", "1,000 active agents"],
   ["/analytics", "Analytics", "Success rates"],
@@ -18,10 +17,11 @@ const NAV = [
   ["/settings", "Settings", "Preferences"],
 ] as const;
 
-const BARE = ["/", "/login", "/onboarding"];
+const BARE = ["/", "/login", "/onboarding", "/download", "/resume"];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const router = useRouter();
   const [qc] = useState(
     () =>
       new QueryClient({
@@ -33,6 +33,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       })
   );
   const [open, setOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const profile = useStore((s) => s.profile);
   const fetchProfile = useStore((s) => s.fetchProfile);
   const fetchApps = useStore((s) => s.fetchApps);
@@ -42,16 +43,39 @@ export function Shell({ children }: { children: React.ReactNode }) {
     fetchApps();
   }, [fetchProfile, fetchApps]);
 
-  if (BARE.includes(path)) {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const desktop = Boolean(
+        (window as any).electronAPI?.isDesktop ||
+        (window as any).isDesktop ||
+        navigator.userAgent.toLowerCase().includes("electron")
+      );
+      if (desktop) {
+        setIsDesktop(true);
+        // Automatically redirect to dashboard if someone lands on / in desktop mode
+        if (path === "/" || path === "/login") {
+          router.replace("/dashboard");
+        }
+      }
+    }
+  }, [path, router]);
+
+  const isBare = BARE.includes(path) || path.startsWith("/resume");
+  if (isBare && !(isDesktop && (path === "/" || path === "/login"))) {
     return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
   }
 
   return (
     <QueryClientProvider client={qc}>
       <div className="min-h-screen md:flex bg-bg">
-        {/* Mobile Header */}
+        {/* Mobile / Compact Header */}
         <header className="md:hidden flex items-center justify-between border-b border-line px-4 py-3 bg-bg">
-          <BrandLogo size="sm" />
+          <div className="flex items-center gap-2">
+            <BrandLogo size="sm" />
+            <span className="text-[10px] font-mono px-1 py-0.5 bg-bg2 border border-line rounded">
+              {isDesktop ? "DESKTOP" : "OS"}
+            </span>
+          </div>
           <button
             className="btn text-xs py-1 px-2.5"
             aria-expanded={open}
@@ -71,10 +95,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
           } md:flex md:flex-col md:justify-between md:w-64 md:shrink-0 md:sticky md:top-0 md:h-screen border-r border-line bg-bg2/40 p-5`}
         >
           <div>
-            {/* Logo */}
+            {/* Logo: In desktop mode, clicking keeps user on /dashboard */}
             <div className="mb-6">
-              <BrandLogo size="md" />
-              <p className="text-[11px] text-muted font-mono mt-1 pl-0.5">1,000 Auto-Apply Agents</p>
+              <Link href={isDesktop ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+                <BrandLogo size="md" />
+                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-black text-white rounded font-medium">
+                  {isDesktop ? "DESKTOP" : "v1.0"}
+                </span>
+              </Link>
+              <p className="text-[11px] text-muted font-mono mt-1">
+                {isDesktop ? "Standalone Desktop OS" : "1,000 Auto-Apply Agents"}
+              </p>
             </div>
 
             {/* Navigation links */}
@@ -103,6 +134,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 );
               })}
             </ul>
+
+            {/* Standalone APA Resume Studio Link */}
+            <div className="mt-4 pt-3 border-t border-line/60">
+              <Link
+                href="/resume"
+                className="flex items-center justify-between text-xs px-2 py-1.5 rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono group"
+              >
+                <span>APA Resume Studio</span>
+                <span className="text-[10px] bg-bg2 border border-line px-1 rounded group-hover:border-black">
+                  CV ↗
+                </span>
+              </Link>
+            </div>
           </div>
 
           {/* User profile footer */}
@@ -126,10 +170,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
             <div className="flex items-center justify-between mt-3 text-[10px] text-muted font-mono px-1">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block animate-pulse" />
-                Local AI Ready
+                <span className="w-2 h-2 rounded-full bg-ok inline-block animate-pulse" />
+                {isDesktop ? "Local App Native" : "Local AI Ready"}
               </span>
-              <span>Postgres Core</span>
+              <span>Zero-Auth</span>
             </div>
           </div>
         </nav>

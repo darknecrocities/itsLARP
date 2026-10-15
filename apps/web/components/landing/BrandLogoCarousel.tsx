@@ -15,17 +15,17 @@ const BRANDS: BrandItem[] = [
     category: "Jobs & Marketplace",
     renderLogo: () => (
       <div className="flex items-center gap-2 select-none">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 shrink-0">
-          <rect width="32" height="32" rx="8" fill="#FF2636" />
-          <circle cx="9" cy="9" r="2.2" fill="#FFFFFF" />
+        <svg viewBox="65 210 115 120" className="h-7 w-7 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
-            d="M22 13 C17 12 12.5 16 12.5 21 C12.5 25.5 16.5 28.5 22 27"
-            stroke="#FFFFFF"
-            strokeWidth="3.2"
-            strokeLinecap="round"
+            d="m164 222.8v-4.2c0-3-2.4-5.5-5.5-5.5h-13.8c-3 0-5.5 2.5-5.5 5.5v3h-56.1c-7.2 0-17.9 4.8-17.9 17.9v73.9c0 7.2 4.8 17.9 17.9 17.9h73.9c7.2 0 17.9-4.8 17.9-17.9v-73.9c0-5.8-3-13.7-10.9-16.7"
+            fill="#FF2636"
+          />
+          <path
+            d="m155.2 273.1h-9c-1.8 0-3.3 1.5-3.3 3.3s1.5 3.3 3.3 3.3h9c1.8.1 3.3-1.4 3.4-3.2s-1.4-3.3-3.2-3.4zm-14.3-5.9c.7 1.7 2.7 2.4 4.3 1.7l8.3-3.7c1.7-.7 2.4-2.6 1.7-4.3s-2.6-2.4-4.3-1.7h-.1l-8.3 3.7c-1.6.7-2.3 2.6-1.6 4.3m-1-8 6.1-6.7c1.2-1.3 1.1-3.4-.2-4.6s-3.4-1.1-4.6.2l-6.1 6.7c-1.2 1.3-1.1 3.4.2 4.6 1.4 1.3 3.4 1.2 4.6-.2m-8.7 41c-.6-1.7-2.4-2.7-4.1-2.1-2.2.7-4.6 1.1-7 1.1-12.6 0-22.8-10.2-22.8-22.8s10.2-22.8 22.8-22.8c2.4 0 4.8.4 7 1.1 1.7.6 3.6-.4 4.1-2.1l2.8-8.6c.6-1.7-.4-3.6-2.1-4.1-3.8-1.2-7.8-1.9-11.9-1.9-21.2 0-38.4 17.2-38.4 38.4s17.2 38.4 38.4 38.4c4.1 0 8.1-.7 11.9-1.9 1.7-.6 2.7-2.4 2.1-4.1zm8.7-6.6c-1.2-1.3-3.3-1.4-4.6-.1-1.3 1.2-1.4 3.2-.2 4.5l6.1 6.7c1.2 1.3 3.3 1.4 4.6.1 1.3-1.2 1.4-3.2.2-4.5zm13.6-5.9-8.3-3.7c-1.7-.7-3.6.1-4.3 1.8-.7 1.6 0 3.5 1.6 4.2l8.3 3.7c1.7.7 3.6-.1 4.3-1.8.7-1.6 0-3.4-1.6-4.2"
+            fill="#FFFFFF"
           />
         </svg>
-        <span className="font-extrabold text-lg tracking-tight text-neutral-900 dark:text-white">
+        <span className="font-extrabold text-lg tracking-tight text-[#FF2636]">
           carousell
         </span>
       </div>
@@ -36,7 +36,7 @@ const BRANDS: BrandItem[] = [
     category: "Professional Network",
     renderLogo: () => (
       <div className="flex items-center gap-1 select-none">
-        <span className="font-bold text-lg tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-lg tracking-tight text-neutral-900">
           Linked
         </span>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0">
@@ -58,7 +58,7 @@ const BRANDS: BrandItem[] = [
           <circle cx="14" cy="14" r="14" fill="#1C3F94" />
           <path d="M14 6 L16 11.5 L21.5 12 L17.5 15.5 L18.5 21 L14 18 L9.5 21 L10.5 15.5 L6.5 12 L12 11.5 Z" fill="#FFC80A" />
         </svg>
-        <span className="font-bold text-lg tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-lg tracking-tight text-[#1C3F94]">
           JobStreet
         </span>
       </div>
@@ -96,7 +96,7 @@ const BRANDS: BrandItem[] = [
             strokeLinejoin="round"
           />
         </svg>
-        <span className="font-bold text-lg tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-lg tracking-tight text-neutral-900">
           Notion
         </span>
       </div>
@@ -111,7 +111,7 @@ const BRANDS: BrandItem[] = [
           <circle cx="12" cy="12" r="11" fill="#008552" />
           <path d="M9 14 C9 10 12 7 15 7 C15 11 13 14 9 14 Z" fill="#FFFFFF" />
         </svg>
-        <span className="font-bold text-base tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-base tracking-tight text-[#008552]">
           greenhouse
         </span>
       </div>
@@ -126,7 +126,7 @@ const BRANDS: BrandItem[] = [
           <rect width="24" height="24" rx="3" fill="#1B2432" />
           <path d="M7 17 L12 7 L17 17" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="font-bold text-base tracking-widest text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-base tracking-widest text-neutral-900">
           LEVER
         </span>
       </div>
@@ -141,7 +141,7 @@ const BRANDS: BrandItem[] = [
           <path d="M3 16 C7 9 17 9 21 16" stroke="#E26D00" strokeWidth="2.8" strokeLinecap="round" />
           <circle cx="12" cy="7" r="2.5" fill="#0051C3" />
         </svg>
-        <span className="font-bold text-base tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-base tracking-tight text-neutral-900">
           workday
         </span>
       </div>
@@ -159,7 +159,7 @@ const BRANDS: BrandItem[] = [
             fill="#FFFFFF"
           />
         </svg>
-        <span className="font-bold text-base tracking-tight text-neutral-800 dark:text-neutral-200">
+        <span className="font-bold text-base tracking-tight text-neutral-900">
           GitHub
         </span>
       </div>
@@ -171,7 +171,7 @@ export function BrandLogoCarousel() {
   return (
     <section className="py-10 border-b border-line bg-bg relative overflow-hidden select-none">
       <div className="max-w-6xl mx-auto px-6 mb-5 text-center">
-        <p className="text-xs font-semibold text-muted tracking-wide uppercase">
+        <p className="text-xs font-bold text-neutral-600 tracking-wider uppercase">
           Works seamlessly with the platforms where you want to work
         </p>
       </div>
@@ -191,7 +191,7 @@ export function BrandLogoCarousel() {
           {[...BRANDS, ...BRANDS, ...BRANDS].map((brand, idx) => (
             <div
               key={`${brand.name}-${idx}`}
-              className="flex items-center opacity-85 hover:opacity-100 transition-all duration-150 transform hover:scale-105 cursor-default"
+              className="flex items-center opacity-100 transition-all duration-150 transform hover:scale-105 cursor-default"
               title={`${brand.name} · ${brand.category}`}
             >
               {brand.renderLogo()}

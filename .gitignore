@@ -12,6 +12,11 @@ __pycache__/
 out/
 build/
 dist/
+release/
+apps/desktop/release/
+apps/web/public/releases/*.dmg
+apps/web/public/releases/*.zip
+apps/web/public/releases/*.exe
 *.tsbuildinfo
 
 # SQLite databases & logs

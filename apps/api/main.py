@@ -18,7 +18,11 @@ from routers import (
 
 init_db()
 
-app = FastAPI(title="HowToLarped API - AI Job-Hunting Workforce")
+app = FastAPI(
+    title="HowToLarped API - AI Job-Hunting Workforce",
+    description="Backend API and local Ollama gateway for the itsLARP desktop and web applications."
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,7 +30,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/")
 def root_index(request: Request):
@@ -37,7 +40,7 @@ def root_index(request: Request):
 <html>
 <head>
   <meta charset="utf-8">
-  <title>HowToLarped Backend API</title>
+  <title>itsLARP Backend API</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; color: #09090b; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px; max-width: 440px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
@@ -53,27 +56,25 @@ def root_index(request: Request):
 <body>
   <div class="card">
     <div class="badge">BACKEND API · PORT 8000</div>
-    <h1>HowToLarped API Online</h1>
-    <p>You have navigated to the FastAPI backend service on port 8000. The full website user interface is running on <strong>port 3000</strong>.</p>
-    <a href="http://localhost:3000" class="btn">Open Web App (localhost:3000) →</a>
+    <h1>itsLARP API Online</h1>
+    <p>You have navigated to the FastAPI backend service on port 8000. The application user interface is running on <strong>port 3000</strong>.</p>
+    <a href="http://localhost:3000/dashboard" class="btn">Open App Dashboard (localhost:3000/dashboard) →</a>
     <a href="/docs" class="btn-sec">View Swagger API Docs (/docs)</a>
   </div>
 </body>
 </html>"""
         )
     return {
-        "service": "HowToLarped API",
+        "service": "itsLARP API",
         "status": "online",
-        "web_app": "http://localhost:3000",
+        "dashboard": "http://localhost:3000/dashboard",
         "docs": "/docs",
         "health": "/health",
     }
 
-
 @app.get("/health")
 def health():
-    return {"ok": True, "service": "HowToLarped API", "time": datetime.utcnow().isoformat()}
-
+    return {"ok": True, "service": "itsLARP API", "time": datetime.now().isoformat()}
 
 # Include all modular routers
 app.include_router(ai_router)

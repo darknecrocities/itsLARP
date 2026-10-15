@@ -7,11 +7,25 @@ import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { FadeIn } from "@/components/motion";
 import { DEMO_LOGS } from "./constants";
 import { Pause, Play, ArrowRight } from "lucide-react";
+import { SAMPLE_PROFILE } from "@/lib/sampleResume";
 
 export function WorkforceDemoSection() {
   const [activeLogIndex, setActiveLogIndex] = useState(DEMO_LOGS.length - 1);
   const [simRunning, setSimRunning] = useState(true);
   const [demoTab, setDemoTab] = useState<"pipeline" | "apa" | "notion">("pipeline");
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (typeof window !== "undefined" && window.location.hash === "#apa-format") {
+        setDemoTab("apa");
+        const el = document.getElementById("apa-format") || document.getElementById("workforce-demo");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
 
   useEffect(() => {
     if (!simRunning) return;
@@ -105,42 +119,118 @@ export function WorkforceDemoSection() {
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               id="apa-format"
-              className="card p-8 bg-white text-black border border-line shadow-lg font-serif max-w-3xl mx-auto"
+              className="card p-8 md:p-10 bg-white text-black border border-line shadow-lg font-serif max-w-3xl mx-auto"
             >
+              {/* APA Running Head */}
               <div className="flex justify-between items-center text-xs text-neutral-500 font-mono border-b border-neutral-300 pb-2 mb-6">
-                <span>JANE DOE · RESUME PREVIEW</span>
+                <span>RUNNING HEAD: CHEN / CURRICULUM VITAE</span>
                 <span>Page 1</span>
               </div>
+
+              {/* APA Title Block */}
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold">Jane Doe</h3>
-                <div className="text-sm italic text-neutral-700 mt-0.5">Senior Software Engineer</div>
+                <h3 className="text-2xl font-bold">{SAMPLE_PROFILE.name}</h3>
+                <div className="text-sm italic text-neutral-700 mt-0.5">{SAMPLE_PROFILE.headline}</div>
                 <div className="text-xs text-neutral-500 font-mono mt-1">
-                  jane@example.com | San Francisco, CA | github.com/janedoe
+                  {SAMPLE_PROFILE.email} | {SAMPLE_PROFILE.location} | {SAMPLE_PROFILE.links.github}
                 </div>
               </div>
-              <div className="mb-4">
-                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider">
-                  Professional Summary
+
+              {/* Section 1: Professional Abstract */}
+              <div className="mb-5">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Professional Abstract
                 </h4>
-                <p className="text-xs text-neutral-800 leading-relaxed indent-6">
-                  Experienced engineer with 4+ years building high-performance web applications, distributed systems, and real-time APIs. Specialized in Python, React, TypeScript, and Docker.
+                <p className="text-xs text-neutral-800 leading-relaxed indent-6 text-justify">
+                  Empirical technical practitioner with {SAMPLE_PROFILE.years}+ years of experience architecting high-throughput distributed software platforms, local LLM inference engines, and artificial intelligence infrastructure. Technical competencies span {SAMPLE_PROFILE.skills.slice(0, 8).join(", ")}. All claims are verified against primary source code evidence.
                 </p>
               </div>
-              <div className="mb-4">
-                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider">
-                  Verified Project Work
+
+              {/* Section 2: Academic Credentials */}
+              <div className="mb-5">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Academic Preparation & Credentials
                 </h4>
-                <p className="text-xs leading-snug pl-4 -indent-4">
-                  <strong>Autonomous Task Runner</strong> (2026) · <em>Python, React, FastAPI</em>
-                </p>
-                <p className="text-[11px] text-neutral-600 pl-4 mt-0.5">
-                  High-speed background runner processing thousands of tasks in parallel with 100% verified accuracy.
-                </p>
+                <div className="text-xs space-y-1 text-neutral-800 whitespace-pre-line">
+                  {SAMPLE_PROFILE.education}
+                </div>
               </div>
-              <div className="pt-4 border-t border-neutral-300 flex justify-between items-center text-xs">
-                <span className="text-neutral-500">Clean, Professional Formatting</span>
-                <Link href="/resume" className="btn text-xs py-1 px-3 bg-black text-white inline-flex items-center gap-1.5">
-                  <span>Open Resume Studio</span>
+
+              {/* Section 3: Professional Employment History */}
+              <div className="mb-5">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Professional Employment History
+                </h4>
+                <div className="space-y-3 text-xs">
+                  {SAMPLE_PROFILE.experience.map((exp, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between items-baseline font-sans">
+                        <span className="font-bold text-black">{exp.role || exp.title}</span>
+                        <span className="text-[11px] font-mono text-neutral-600">{exp.dates}</span>
+                      </div>
+                      <div className="italic text-neutral-700 text-[11px] mb-1">{exp.company}</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-neutral-800 leading-relaxed pl-1">
+                        {(exp.bullets || []).map((b, bIdx) => (
+                          <li key={bIdx} className="text-justify">{b}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 4: Technical Competencies */}
+              <div className="mb-5">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Technical Competencies & Frameworks
+                </h4>
+                <div className="flex flex-wrap gap-1.5 text-[11px] font-mono">
+                  {SAMPLE_PROFILE.skills.map((s) => (
+                    <span key={s} className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded text-neutral-800">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 5: Software Artifacts (APA 7th Format) */}
+              <div className="mb-5">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Software Artifacts (APA 7th Format)
+                </h4>
+                <div className="space-y-2 text-xs">
+                  {SAMPLE_PROFILE.projects.map((proj) => (
+                    <div key={proj.name} className="pl-4 -indent-4">
+                      <p className="leading-snug">
+                        <strong>Chen, A.</strong> (2026). <em>{proj.name}</em> [Computer software / {proj.tech.join(", ")}].
+                      </p>
+                      <p className="indent-0 text-[11px] text-neutral-600 mt-0.5 pl-4">
+                        {proj.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 6: Verifiable Evidence Corpus */}
+              <div className="mb-6">
+                <h4 className="text-center font-bold text-xs uppercase border-b border-black pb-1 mb-2 tracking-wider font-sans">
+                  Verifiable Evidence Corpus
+                </h4>
+                <div className="space-y-1.5 text-[11px] font-mono text-neutral-700">
+                  {SAMPLE_PROFILE.evidence.map((ev, i) => (
+                    <div key={i} className="p-1.5 bg-neutral-50 border border-neutral-200 rounded">
+                      <span className="font-bold text-black">[{i + 1}] Source: {ev.source}</span>
+                      <div className="italic text-neutral-600 mt-0.5">"{ev.text}"</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-neutral-300 flex flex-wrap justify-between items-center gap-3 text-xs font-mono">
+                <span className="text-neutral-500">Standard APA 7th Edition Output · 100% Verifiable</span>
+                <Link href="/resume" className="btn text-xs py-1.5 px-3 bg-black text-white hover:bg-neutral-800 transition-colors inline-flex items-center gap-1.5">
+                  <span>Open Full APA Resume Studio</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

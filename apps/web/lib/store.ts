@@ -2,15 +2,16 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { api, apiGet } from "./api";
 
-export type Evidence = { source: string; text: string };
-
 export type ExperienceItem = {
   company: string;
-  title: string;
+  title?: string;
+  role?: string;
   start_date?: string;
   end_date?: string;
-  text: string;
+  dates?: string;
+  text?: string;
   metrics?: string;
+  bullets?: string[];
 };
 
 export type ProjectItem = {
@@ -20,18 +21,23 @@ export type ProjectItem = {
   url?: string;
 };
 
+export type Evidence = {
+  source: string;
+  text: string;
+};
+
 export type Profile = {
   name: string;
   headline: string;
   email: string;
-  phone: string;
+  phone?: string;
   location: string;
   years: number;
   education: string;
-  summary: string;
-  target_roles: string[];
-  target_companies: string[];
-  work_types: string[];
+  summary?: string;
+  target_roles?: string[];
+  target_companies?: string[];
+  work_types?: string[];
   skills: string[];
   experience: ExperienceItem[];
   projects: ProjectItem[];
