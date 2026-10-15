@@ -53,7 +53,7 @@ export function HorizontalPipelineMap({
               Interactive Agent Network
             </h3>
             <p className="text-xs text-neutral-600 font-sans mt-0.5">
-              Hover or click any agent dot node or macro step circle to inspect real-time tasks and telemetry.
+              Binary search tree hierarchy. Autonomous agent nodes spawn dynamically, transmitting live job criteria, match vectors, and tailored applications.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
