@@ -7,7 +7,7 @@ import { TargetingPreferences } from "@/components/TargetingPreferences";
 import { Plus, X, Trash2, Briefcase, FileText, Shield, ExternalLink } from "lucide-react";
 
 export default function ProfilePage() {
-  const { profile: p, setProfile, addEvidence, loadDummyProfile } = useStore();
+  const { profile: p, setProfile, addEvidence, clearProfile } = useStore();
   const [newSkill, setNewSkill] = useState("");
   const [newEvidenceSource, setNewEvidenceSource] = useState("");
   const [newEvidenceText, setNewEvidenceText] = useState("");
@@ -26,14 +26,18 @@ export default function ProfilePage() {
   if (!p.skills.length && !p.name) {
     return (
       <>
-        <PageHeader title="Career DNA" sub="Structured single source of truth for your entire career." />
-        <Empty title="No Career DNA Created" hint="Upload your resume or connect GitHub to build your verified profile, or test immediately with demo data.">
+        <PageHeader title="Career DNA Studio" sub="Structured single source of truth for your entire career." />
+        <Empty title="No Career DNA Created Yet" hint="Upload your resume (PDF/TXT) or extract your background from GitHub/LinkedIn to build your verified profile.">
           <div className="flex gap-2 justify-center">
             <Link href="/onboarding" className="btn btn-primary">
-              Start Onboarding
+              Upload Resume & Start Onboarding
             </Link>
-            <button type="button" onClick={() => loadDummyProfile()} className="btn">
-              Load Demo Career DNA
+            <button
+              type="button"
+              onClick={() => setProfile({ name: "Candidate", headline: "Software Engineer", skills: ["Python"] })}
+              className="btn"
+            >
+              Enter Manually
             </button>
           </div>
         </Empty>
@@ -114,11 +118,15 @@ export default function ProfilePage() {
           <div className="flex gap-2">
             <button
               type="button"
-              className="btn text-xs"
-              onClick={() => loadDummyProfile()}
-              title="Reset or load verified demo Career DNA profile"
+              className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
+              onClick={() => {
+                if (window.confirm("Reset your Career DNA profile? This will clear local entries.")) {
+                  clearProfile();
+                }
+              }}
+              title="Reset Career DNA profile"
             >
-              Load Demo Profile
+              Reset Profile
             </button>
             <Link href="/resume" className="btn text-xs">
               View Complete Resume

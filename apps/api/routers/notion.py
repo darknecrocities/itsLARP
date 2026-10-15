@@ -295,3 +295,21 @@ async def notion_auto_create_and_sync(b: NotionAutoSyncIn):
     finally:
         db.close()
 
+
+@router.post("/cleanup-test-data")
+async def notion_cleanup_test_data():
+    """Archives test pages in the user's Notion database for a clean start."""
+    from services.dna_sync import archive_all_notion_pages
+    db = SessionLocal()
+    try:
+        rec = _get_or_init_notion_record(db)
+        if not rec or not rec.connected or not rec.token or not rec.database_id:
+            raise HTTPException(400, "Notion is not configured yet.")
+        result = await archive_all_notion_pages(rec.token, rec.database_id)
+        rec.synced_count = 0
+        db.commit()
+        return result
+    finally:
+        db.close()
+
+

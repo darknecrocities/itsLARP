@@ -5,31 +5,13 @@ import { useStore, type App } from "@/lib/store";
 import { api, apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Stat } from "@/components/ui";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
-import {
-  RefreshCw,
-  ExternalLink,
-  Zap,
-  RotateCcw,
-  CheckCircle,
-  Database,
-  Search,
-} from "lucide-react";
+import { RefreshCw, ExternalLink, Zap, RotateCcw, CheckCircle, Database, Search } from "lucide-react";
 
-const STATUSES = [
-  "SAVED",
-  "ANALYZING",
-  "PREPARING",
-  "READY",
-  "APPLIED",
-  "SCREENING",
-  "INTERVIEW",
-  "OFFER",
-  "REJECTED",
-  "WITHDRAWN",
-];
+const STATUSES = ["SAVED", "ANALYZING", "PREPARING", "READY", "APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN"];
+
 
 export default function ApplicationsPage() {
-  const { apps, setApps, upsertApp, notion, setNotion, fetchNotionStatus } = useStore();
+  const { apps, setApps, upsertApp, clearApps, profile, notion, setNotion, fetchNotionStatus } = useStore();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,6 +39,14 @@ export default function ApplicationsPage() {
     loadData();
   }, []);
 
+  const handleClearApplications = async () => {
+    if (window.confirm("Clear all locally tracked applications?")) {
+      await clearApps();
+      setBannerNotice("Cleared all locally tracked applications.");
+      setTimeout(() => setBannerNotice(null), 4000);
+    }
+  };
+
   const handleSyncNotion = async () => {
     setSyncing(true);
     try {
@@ -81,10 +71,16 @@ export default function ApplicationsPage() {
   };
 
   const handleSyncDnaToNotion = async () => {
+    if (!profile.name || !profile.skills.length) {
+      setBannerNotice("Please set up your Career DNA in Profile or upload your resume first before syncing.");
+      setTimeout(() => setBannerNotice(null), 6000);
+      return;
+    }
     setSyncingDna(true);
     try {
       const res = await api<{
         ok: boolean;
+        error?: string;
         total_generated: number;
         synced_to_notion: number;
         backfilled: number;
@@ -94,10 +90,13 @@ export default function ApplicationsPage() {
       });
       if (res.ok) {
         setBannerNotice(
-          `Synchronized ${res.synced_to_notion} Career DNA applications into Notion! (${res.backfilled} existing pages backfilled with accurate company data)`
+          `Synchronized ${res.synced_to_notion} Career DNA applications into Notion!`
         );
         setTimeout(() => setBannerNotice(null), 7000);
         await loadData();
+      } else {
+        setBannerNotice(res.error || "Failed to sync Career DNA.");
+        setTimeout(() => setBannerNotice(null), 6000);
       }
     } catch (e: any) {
       setBannerNotice(e.message || "Failed to sync Career DNA to Notion.");
@@ -171,6 +170,15 @@ export default function ApplicationsPage() {
         sub="Track every job application, interview, and offer in real time. Directly linked to your Notion database."
         action={
           <div className="flex flex-wrap items-center gap-2">
+            {apps.length > 0 && (
+              <button
+                className="btn text-xs bg-white text-red-600 border border-neutral-300 hover:border-red-400"
+                onClick={handleClearApplications}
+                title="Clear all locally tracked applications"
+              >
+                Clear All ({apps.length})
+              </button>
+            )}
             <button
               className="btn text-xs bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
               onClick={() => setShowNotionModal(true)}

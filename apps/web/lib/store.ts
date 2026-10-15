@@ -64,68 +64,6 @@ export const EMPTY: Profile = {
   evidence: [],
 };
 
-export const DEFAULT_PROFILE: Profile = {
-  name: "Jane Doe",
-  headline: "Lead AI Systems & Full Stack Engineer",
-  email: "jane.doe@example.com",
-  phone: "+1 (555) 234-5678",
-  location: "San Francisco, CA (Remote)",
-  years: 5,
-  education: "B.S. in Computer Science, Stanford University",
-  summary: "Empirical technical practitioner with 5+ years contributing to scalable software systems and artificial intelligence.",
-  target_roles: ["Lead AI Engineer", "Senior Full Stack Engineer"],
-  target_companies: ["all"],
-  work_types: ["fulltime", "remote"],
-  skills: [
-    "Python",
-    "FastAPI",
-    "React",
-    "TypeScript",
-    "Docker",
-    "PostgreSQL",
-    "PyTorch",
-    "Tailwind CSS",
-  ],
-  experience: [
-    {
-      company: "Anthropic Labs",
-      title: "Senior AI Systems Engineer",
-      text: "Architected distributed agent runtime executing 100,000+ autonomous parallel tasks with verifiable zero-hallucination gates.",
-    },
-    {
-      company: "FinTech Scale",
-      title: "Full Stack Engineer",
-      text: "Engineered real-time reactive event pipelines in TypeScript, Next.js, and Postgres.",
-    },
-  ],
-  projects: [
-    {
-      name: "Autonomous Task Engine",
-      tech: ["Python", "FastAPI", "React", "Docker"],
-      text: "High-throughput parallel workforce crawler and application staging pipeline executing 1,000 concurrent bots.",
-    },
-    {
-      name: "Career DNA Synthesizer",
-      tech: ["Python", "PostgreSQL", "PyTorch"],
-      text: "Structured citation and evidence extraction compiler adhering to APA 7th publication standards.",
-    },
-  ],
-  links: {
-    github: "github.com/janedoe",
-    linkedin: "linkedin.com/in/janedoe",
-  },
-  evidence: [
-    {
-      source: "GitHub: Autonomous Task Engine",
-      text: "Implemented 1,000 parallel worker swarm with async task queues and 2FA challenge handling.",
-    },
-    {
-      source: "Verified APA Repository",
-      text: "0% hallucination verification gate preventing exaggeration or fabrication of skills.",
-    },
-  ],
-};
-
 export type App = {
   id: string;
   jobId: string;
@@ -214,7 +152,8 @@ type S = {
   };
   setNotion: (n: Partial<S["notion"]>) => void;
   fetchNotionStatus: () => Promise<void>;
-  loadDummyProfile: () => void;
+  clearApps: () => Promise<void>;
+  clearProfile: () => Promise<void>;
   emailIntegration: EmailIntegrationState;
   setEmailIntegration: (e: Partial<EmailIntegrationState>) => void;
   fetchEmailStatus: () => Promise<void>;
@@ -324,9 +263,15 @@ export const useStore = create<S>()(
           }
         } catch {}
       },
-      loadDummyProfile: () => {
-        set({ profile: DEFAULT_PROFILE });
-        api("/profile/save", { profile: DEFAULT_PROFILE }).catch(() => {});
+      clearApps: async () => {
+        try {
+          await api("/applications/clear", {});
+        } catch {}
+        set({ apps: [] });
+      },
+      clearProfile: async () => {
+        set({ profile: EMPTY });
+        api("/profile/save", { profile: EMPTY }).catch(() => {});
       },
       emailIntegration: {
         connected: false,
