@@ -1,6 +1,9 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+
+def utc_now():
+    return datetime.now(timezone.utc)
 from sqlalchemy import create_engine, Column, String, Integer, Float, Boolean, Text, DateTime, JSON
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -29,7 +32,7 @@ class JobRecord(Base):
     skills = Column(JSON, default=list)
     years = Column(Integer, default=0)
     description = Column(Text, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class ApplicationRecord(Base):
@@ -50,8 +53,8 @@ class ApplicationRecord(Base):
     notion_page_id = Column(String(128), nullable=True, index=True)
     notion_database_id = Column(String(128), nullable=True)
     applied_date = Column(String(64), default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class ProfileRecord(Base):
@@ -73,7 +76,7 @@ class ProfileRecord(Base):
     projects = Column(JSON, default=list)
     links = Column(JSON, default=dict)
     evidence = Column(JSON, default=list)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class AgentQuestionRecord(Base):
@@ -88,7 +91,7 @@ class AgentQuestionRecord(Base):
     context = Column(Text, default="")
     status = Column(String(32), default="pending")  # pending, answered, dismissed
     answer = Column(Text, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     answered_at = Column(DateTime, nullable=True)
 
 
@@ -104,7 +107,7 @@ class IntegrationRecord(Base):
     last_synced_at = Column(DateTime, nullable=True)
     synced_count = Column(Integer, default=0)
     settings = Column(JSON, default=dict)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 def init_db():

@@ -6,6 +6,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   arch: process.arch,
   getHardwareSpecs: () => ipcRenderer.invoke("system:getHardwareSpecs"),
   checkOllamaStatus: () => ipcRenderer.invoke("ollama:checkStatus"),
-  installOllama: () => ipcRenderer.invoke("ollama:autoInstall"),
   startOllama: () => ipcRenderer.invoke("ollama:startDaemon"),
+  installOllama: () => ipcRenderer.invoke("ollama:autoInstall"),
+  pullModel: (modelName) => ipcRenderer.invoke("ollama:pullModel", modelName),
+  onPullProgress: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("ollama:pullProgress", handler);
+    return () => ipcRenderer.removeListener("ollama:pullProgress", handler);
+  },
+  navigateWorkspace: (target) => ipcRenderer.invoke("workspace:navigate", target),
+  getWorkspaceStatus: () => ipcRenderer.invoke("workspace:getStatus"),
 });

@@ -1,47 +1,84 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api, apiGet } from "@/lib/api";
-import { Badge } from "./ui";
-import { Cpu, Download, CheckCircle, AlertCircle, RefreshCw, Zap, Sparkles } from "lucide-react";
-
-interface OllamaStatus {
-  installed: boolean;
-  running: boolean;
-  version: string | null;
-  binary_path: string | null;
-  port: number;
-  host: string;
-  models: string[];
-  models_count: number;
-  os: string;
-  hardware_tier: string;
-}
-
-interface RecommendedModel {
-  name: string;
-  category: "performance" | "balanced" | "ability";
-  tier: string;
-  size: string;
-  params: string;
-  min_ram: string;
-  rec_ram: string;
-  speed_score: number;
-  ability_score: number;
-  best_for: string;
-  is_default: boolean;
-}
+import { api, apiGet, API } from "@/lib/api";
+import { Download, RefreshCw, Play } from "lucide-react";
+import {
+  type OllamaStatus,
+  type RecommendedModel,
+  DEFAULT_RECOMMENDED,
+} from "@/lib/ollamaTypes";
+import { OllamaModelCard } from "./OllamaModelCard";
 
 export function OllamaManager() {
   const { data: status, isLoading: statusLoading, refetch: refetchStatus } = useQuery<OllamaStatus>({
     queryKey: ["ollama_status"],
-    queryFn: () => apiGet<OllamaStatus>("/ai/ollama/status"),
+    queryFn: async () => {
+      if (typeof window !== "undefined" && (window as any).electronAPI) {
+        try {
+          const res = await (window as any).electronAPI.checkOllamaStatus();
+          const hw = await (window as any).electronAPI.getHardwareSpecs();
+          return {
+            installed: Boolean(res.installed),
+            running: Boolean(res.running),
+            version: "0.33",
+            binary_path: res.binaryPath || null,
+            port: 11434,
+            host: "http://127.0.0.1:11434",
+            models: res.models || [],
+            models_count: (res.models || []).length,
+            os: hw.platform,
+            hardware_tier: hw.tier,
+          };
+        } catch {}
+      }
+      try {
+        return await apiGet<OllamaStatus>("/ai/ollama/status");
+      } catch {
+        try {
+          const direct = await fetch("http://127.0.0.1:11434/api/tags");
+          if (direct.ok) {
+            const data = await direct.json();
+            return {
+              installed: true,
+              running: true,
+              version: "0.33",
+              binary_path: null,
+              port: 11434,
+              host: "http://127.0.0.1:11434",
+              models: (data.models || []).map((m: any) => m.name),
+              models_count: (data.models || []).length,
+              os: "local",
+              hardware_tier: "On-Device Ollama Engine",
+            };
+          }
+        } catch {}
+        return {
+          installed: false,
+          running: false,
+          version: null,
+          binary_path: null,
+          port: 11434,
+          host: "http://127.0.0.1:11434",
+          models: [],
+          models_count: 0,
+          os: "unknown",
+          hardware_tier: "Engine Offline",
+        };
+      }
+    },
     refetchInterval: 5000,
   });
 
   const { data: recData } = useQuery<{ recommended: RecommendedModel[] }>({
     queryKey: ["recommended_models"],
-    queryFn: () => apiGet<{ recommended: RecommendedModel[] }>("/ai/models/recommended"),
+    queryFn: async () => {
+      try {
+        return await apiGet<{ recommended: RecommendedModel[] }>("/ai/models/recommended");
+      } catch {
+        return { recommended: DEFAULT_RECOMMENDED };
+      }
+    },
   });
 
   const [activeCategory, setActiveCategory] = useState<"all" | "performance" | "balanced" | "ability">("all");
@@ -51,7 +88,6 @@ export function OllamaManager() {
   const [installMsg, setInstallMsg] = useState<string | null>(null);
   const [activeModel, setActiveModel] = useState<string>("qwen2.5-coder:7b");
 
-  // Load current configured model
   useEffect(() => {
     apiGet<any>("/ai/status")
       .then((res) => {
@@ -63,13 +99,25 @@ export function OllamaManager() {
   const handleAutomatedInstall = async () => {
     setInstalling(true);
     setInstallMsg("Contacting installer service...");
+
+    if (typeof window !== "undefined" && (window as any).electronAPI?.installOllama) {
+      try {
+        const res = await (window as any).electronAPI.installOllama();
+        setInstallMsg(res.message || "Installer launched. Complete setup to start Ollama.");
+      } catch (err: any) {
+        setInstallMsg(`Install error: ${err.message}`);
+      } finally {
+        setInstalling(false);
+      }
+      return;
+    }
+
     try {
       const res = await api<{ ok: boolean; installer_url: string; instructions: string }>("/ai/ollama/install", {});
       setInstallMsg(`Installer ready: ${res.instructions}`);
       if (typeof window !== "undefined" && res.installer_url) {
         window.open(res.installer_url, "_blank");
       }
-      // Poll status continuously
       const poll = setInterval(async () => {
         const s = await refetchStatus();
         if (s.data?.running) {
@@ -78,9 +126,30 @@ export function OllamaManager() {
           setInstallMsg("✓ Ollama detected and running!");
         }
       }, 3000);
-    } catch (err: any) {
+    } catch {
       setInstallMsg("Install trigger completed. Follow on-screen instructions.");
       setInstalling(false);
+    }
+  };
+
+  const handleStartDaemon = async () => {
+    setInstallMsg("Starting Ollama background daemon...");
+    if (typeof window !== "undefined" && (window as any).electronAPI?.startOllama) {
+      await (window as any).electronAPI.startOllama();
+      setTimeout(async () => {
+        await refetchStatus();
+        setInstallMsg("✓ Ollama daemon started.");
+      }, 1500);
+      return;
+    }
+    try {
+      await api("/ai/ollama/start");
+      setTimeout(async () => {
+        await refetchStatus();
+        setInstallMsg("✓ Ollama service running.");
+      }, 1500);
+    } catch (err: any) {
+      setInstallMsg(err.message || "Failed to start Ollama service.");
     }
   };
 
@@ -88,8 +157,39 @@ export function OllamaManager() {
     setPullingModel(modelName);
     setPullProgress({ status: "Starting pull..." });
 
+    if (typeof window !== "undefined" && (window as any).electronAPI?.pullModel) {
+      const unsub = (window as any).electronAPI.onPullProgress((data: any) => {
+        if (data.total && data.completed) {
+          const pct = Math.round((data.completed / data.total) * 100);
+          setPullProgress({ status: data.status, completed: data.completed, total: data.total, pct });
+        } else if (data.status) {
+          setPullProgress({ status: data.status });
+        }
+      });
+
+      try {
+        const res = await (window as any).electronAPI.pullModel(modelName);
+        if (res.ok) {
+          setPullProgress({ status: "Complete!", pct: 100 });
+          await refetchStatus();
+          await handleSelectModel(modelName);
+        } else {
+          setPullProgress({ status: `Pull failed: ${res.error}` });
+        }
+      } catch (e: any) {
+        setPullProgress({ status: `Pull failed: ${e.message}` });
+      } finally {
+        if (typeof unsub === "function") unsub();
+        setTimeout(() => {
+          setPullingModel(null);
+          setPullProgress(null);
+        }, 2500);
+      }
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:8000/ai/ollama/pull", {
+      const res = await fetch(`${API}/ai/ollama/pull`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: modelName }),
@@ -138,7 +238,9 @@ export function OllamaManager() {
     try {
       await api("/ai/configure", { provider: "ollama", model: modelName });
       setActiveModel(modelName);
-    } catch {}
+    } catch {
+      setActiveModel(modelName);
+    }
   };
 
   const isModelInstalled = (name: string) => {
@@ -147,7 +249,7 @@ export function OllamaManager() {
     return status.models.some((m) => m === name || m.startsWith(`${clean}:`));
   };
 
-  const filteredModels = (recData?.recommended || []).filter((m) => {
+  const filteredModels = (recData?.recommended || DEFAULT_RECOMMENDED).filter((m) => {
     if (activeCategory === "all") return true;
     return m.category === activeCategory;
   });
@@ -171,20 +273,29 @@ export function OllamaManager() {
               ) : (
                 <span className="flex items-center gap-1.5 px-2 py-0.5 bg-neutral-200 border border-neutral-400 rounded text-[11px] font-mono text-black font-semibold">
                   <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                  NOT CONNECTED
+                  {status?.installed ? "STOPPED" : "NOT CONNECTED"}
                 </span>
               )}
             </div>
             <p className="text-xs text-neutral-600 mt-0.5">
               {status?.running
                 ? `${status.models.length} model(s) installed on localhost:11434 · ${status.hardware_tier}`
-                : "Local Ollama daemon not running. Automated installer available below."}
+                : "Local Ollama daemon not running. Automated installer & starter available."}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {!status?.running && (
+          {status?.installed && !status?.running && (
+            <button
+              onClick={handleStartDaemon}
+              className="btn text-xs py-1.5 px-3 flex items-center gap-1.5 font-semibold bg-black text-white"
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span>Start Daemon</span>
+            </button>
+          )}
+          {!status?.installed && !status?.running && (
             <button
               onClick={handleAutomatedInstall}
               disabled={installing}
@@ -246,77 +357,18 @@ export function OllamaManager() {
 
         {/* Model Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredModels.map((m) => {
-            const installed = isModelInstalled(m.name);
-            const isActive = activeModel === m.name;
-            const isPulling = pullingModel === m.name;
-
-            return (
-              <div
-                key={m.name}
-                className={`p-4 rounded border flex flex-col justify-between transition-all ${
-                  isActive
-                    ? "border-black bg-neutral-100 shadow-sm"
-                    : installed
-                    ? "border-neutral-300 bg-white"
-                    : "border-neutral-200 bg-neutral-50"
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-mono text-xs font-bold text-black">{m.name}</span>
-                    {m.is_default && <Badge tone="ok">RECOMMENDED</Badge>}
-                  </div>
-
-                  <div className="text-[11px] text-neutral-500 font-mono mb-2">{m.tier}</div>
-                  <p className="text-xs text-neutral-700 leading-snug mb-3">{m.best_for}</p>
-
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono p-2 bg-white rounded border border-neutral-200 mb-3">
-                    <div>Size: <strong>{m.size}</strong></div>
-                    <div>Min RAM: <strong>{m.min_ram}</strong></div>
-                    <div>Speed: <strong>{m.speed_score}/10</strong></div>
-                    <div>Ability: <strong>{m.ability_score}/10</strong></div>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-neutral-200">
-                  {isPulling ? (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="truncate">{pullProgress?.status || "Pulling..."}</span>
-                        <span>{pullProgress?.pct ? `${pullProgress.pct}%` : ""}</span>
-                      </div>
-                      <div className="w-full bg-neutral-200 h-1.5 rounded overflow-hidden">
-                        <div
-                          className="bg-black h-full transition-all duration-300"
-                          style={{ width: `${pullProgress?.pct || 20}%` }}
-                        />
-                      </div>
-                    </div>
-                  ) : isActive ? (
-                    <div className="text-center py-1 text-xs font-mono font-bold text-black bg-neutral-200 rounded">
-                      ✓ Active Engine
-                    </div>
-                  ) : installed ? (
-                    <button
-                      onClick={() => handleSelectModel(m.name)}
-                      className="btn w-full text-xs py-1.5 font-medium border border-neutral-300 hover:border-black"
-                    >
-                      Set Active
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handlePullModel(m.name)}
-                      className="btn btn-primary w-full text-xs py-1.5 flex items-center justify-center gap-1.5"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>1-Click Download ({m.size})</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {filteredModels.map((m) => (
+            <OllamaModelCard
+              key={m.name}
+              model={m}
+              installed={isModelInstalled(m.name)}
+              isActive={activeModel === m.name}
+              isPulling={pullingModel === m.name}
+              pullProgress={pullProgress}
+              onSelect={handleSelectModel}
+              onPull={handlePullModel}
+            />
+          ))}
         </div>
       </div>
     </div>
