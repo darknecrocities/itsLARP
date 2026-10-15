@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useSwarm } from "@/lib/swarm";
 import { apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Reveal, Stat } from "@/components/ui";
+import { OllamaManager } from "@/components/OllamaManager";
 import { LLMRecommendationsCard } from "@/components/LLMRecommendationsCard";
 import { AgentQuestionsDrawer } from "@/components/AgentQuestionsDrawer";
 import {
@@ -48,7 +49,7 @@ export default function Dashboard() {
     <>
       <PageHeader
         title="Command Workspace"
-        sub="Monitor your 50,000-agent workforce, inspect structured Career DNA, review complete resumes, and auto-apply strategic recommendations."
+        sub="Monitor your autonomous workforce, inspect local Ollama models, review complete resumes, and auto-apply strategic recommendations."
         action={
           <div className="flex gap-2">
             <Link href="/agents" className="btn btn-primary flex items-center gap-1.5">
@@ -73,6 +74,11 @@ export default function Dashboard() {
         <Stat label="Interviews Scheduled" value={count("INTERVIEW")} i={1} />
         <Stat label="Offers Received" value={count("OFFER")} i={2} />
         <Stat label="Opportunities Scored" value={jobs?.length ?? 0} i={3} />
+      </section>
+
+      {/* Ollama Local Engine & Recommended Models Hub */}
+      <section className="mb-8">
+        <OllamaManager />
       </section>
 
       {/* LLM Strategic Recommendations Engine with 1-Click Auto-Apply */}
@@ -245,10 +251,10 @@ export default function Dashboard() {
                   {profile.experience.map((exp, idx) => (
                     <div key={idx} className="p-3 bg-bg2 rounded border border-line text-xs">
                       <div className="flex justify-between font-bold text-ink">
-                        <span>{exp.title} — {exp.company}</span>
-                        <span className="text-muted font-normal font-mono">{exp.start_date || ""} – {exp.end_date || "Present"}</span>
+                        <span>{exp.title || exp.role} — {exp.company}</span>
+                        <span className="text-muted font-normal font-mono">{exp.start_date || exp.dates || ""} – {exp.end_date || "Present"}</span>
                       </div>
-                      <p className="text-muted mt-1 leading-relaxed">{exp.text}</p>
+                      <p className="text-muted mt-1 leading-relaxed">{exp.text || (exp.bullets ? exp.bullets.join("; ") : "")}</p>
                       {exp.metrics && <div className="text-[11px] font-mono font-medium text-ink mt-0.5">Impact: {exp.metrics}</div>}
                     </div>
                   ))}
