@@ -22,41 +22,40 @@ export interface WorkerLeaf {
 }
 
 export const INITIAL_PACKETS: DataPacket[] = [
-  { id: "p1", fromId: 1, toId: 2, label: "Profile DNA", color: "#10b981", speed: 0.007, t: 0.1 },
-  { id: "p2", fromId: 1, toId: 3, label: "Criteria", color: "#6366f1", speed: 0.006, t: 0.5 },
-  { id: "p3", fromId: 2, toId: 4, label: "Job Query", color: "#059669", speed: 0.009, t: 0.35 },
-  { id: "p4", fromId: 2, toId: 5, label: "Raw Feed", color: "#10b981", speed: 0.008, t: 0.75 },
-  { id: "p5", fromId: 5, toId: 6, label: "96% Match", color: "#f59e0b", speed: 0.006, t: 0.45 },
-  { id: "p6", fromId: 3, toId: 6, label: "APA CV Spec", color: "#8b5cf6", speed: 0.008, t: 0.25 },
-  { id: "p7", fromId: 3, toId: 7, label: "Queue", color: "#6366f1", speed: 0.007, t: 0.65 },
-  { id: "p8", fromId: 6, toId: 7, label: "Tailored APA", color: "#ec4899", speed: 0.008, t: 0.8 },
-  { id: "p9", fromId: 7, toId: 1, label: "Notion Synced ✓", color: "#10b981", speed: 0.005, t: 0.1 },
+  { id: "p1", fromId: 1, toId: 2, label: "DNA", color: "#10b981", speed: 0.005, t: 0.15 },
+  { id: "p2", fromId: 1, toId: 3, label: "CRITERIA", color: "#6366f1", speed: 0.005, t: 0.65 },
+  { id: "p3", fromId: 2, toId: 4, label: "QUERY", color: "#059669", speed: 0.006, t: 0.35 },
+  { id: "p4", fromId: 2, toId: 5, label: "RAW JOBS", color: "#10b981", speed: 0.006, t: 0.8 },
+  { id: "p5", fromId: 3, toId: 6, label: "APA SPEC", color: "#8b5cf6", speed: 0.006, t: 0.25 },
+  { id: "p6", fromId: 3, toId: 7, label: "QUEUE", color: "#6366f1", speed: 0.006, t: 0.75 },
+  { id: "p7", fromId: 5, toId: 6, label: "96% MATCH", color: "#f59e0b", speed: 0.005, t: 0.5 },
+  { id: "p8", fromId: 7, toId: 1, label: "NOTION ✓", color: "#10b981", speed: 0.004, t: 0.4 },
 ];
 
 export const PARENT_LEAF_OFFSETS: Record<number, { dx: number; dy: number }[]> = {
   4: [
-    { dx: -40, dy: 85 },
-    { dx: -15, dy: 110 },
-    { dx: 15, dy: 110 },
-    { dx: 40, dy: 85 },
+    { dx: -36, dy: 65 },
+    { dx: -12, dy: 85 },
+    { dx: 12, dy: 85 },
+    { dx: 36, dy: 65 },
   ],
   5: [
-    { dx: -40, dy: 85 },
-    { dx: -15, dy: 110 },
-    { dx: 15, dy: 110 },
-    { dx: 40, dy: 85 },
+    { dx: -36, dy: 65 },
+    { dx: -12, dy: 85 },
+    { dx: 12, dy: 85 },
+    { dx: 36, dy: 65 },
   ],
   6: [
-    { dx: -40, dy: 85 },
-    { dx: -15, dy: 110 },
-    { dx: 15, dy: 110 },
-    { dx: 40, dy: 85 },
+    { dx: -36, dy: 65 },
+    { dx: -12, dy: 85 },
+    { dx: 12, dy: 85 },
+    { dx: 36, dy: 65 },
   ],
   7: [
-    { dx: -40, dy: 85 },
-    { dx: -15, dy: 110 },
-    { dx: 15, dy: 110 },
-    { dx: 40, dy: 85 },
+    { dx: -36, dy: 65 },
+    { dx: -12, dy: 85 },
+    { dx: 12, dy: 85 },
+    { dx: 36, dy: 65 },
   ],
 };
 
@@ -144,7 +143,7 @@ export function buildWorkerLeaves(
       id: spawnId,
       parentId,
       x: parent.x + jitterX,
-      y: parent.y + 135,
+      y: parent.y + 105,
       bot: {
         id: spawnId,
         platform: "Ollama Local AI",
