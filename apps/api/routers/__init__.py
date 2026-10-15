@@ -8,6 +8,7 @@ from .swarm import router as swarm_router
 from .analytics import router as analytics_router
 from .notion import router as notion_router
 from .notifications import router as notifications_router
+from .email_monitor import router as email_monitor_router
 
 __all__ = [
     "ai_router",
@@ -19,4 +20,5 @@ __all__ = [
     "analytics_router",
     "notion_router",
     "notifications_router",
+    "email_monitor_router",
 ]

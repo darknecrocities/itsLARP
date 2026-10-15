@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, Notification } = require("electron");
 const path = require("path");
 const os = require("os");
 const http = require("http");
@@ -438,5 +438,25 @@ function setupIpcHandlers() {
 
   ipcMain.handle("updater:download", async () => {
     return downloadLatestRelease(process.platform, process.arch);
+  });
+
+  // 9. Cross-Platform Native Notification Dispatcher
+  ipcMain.handle("notification:show", async (_event, payload) => {
+    try {
+      if (Notification.isSupported()) {
+        const iconPath = getAppIconPath();
+        const notif = new Notification({
+          title: payload?.title || "itsLARP Update",
+          body: payload?.body || "",
+          icon: iconPath || undefined,
+          silent: false,
+        });
+        notif.show();
+        return { ok: true };
+      }
+      return { ok: false, error: "Notifications not supported on host platform" };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
   });
 }
