@@ -2,11 +2,13 @@
 Provides 1-click self-creating list/database for company name, position, platform, status, match score, etc.
 """
 import httpx
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Set
 from datetime import datetime
+from .company_metadata import get_company_info
 
 API = "https://api.notion.com/v1"
 VERSION = "2022-06-28"
+DB_PROPS_CACHE: Dict[str, Set[str]] = {}
 
 
 def _h(token: str) -> dict:
@@ -15,6 +17,23 @@ def _h(token: str) -> dict:
 
 def mask(token: str) -> str:
     return token[:4] + "…" + token[-4:] if len(token) > 10 else "••••"
+
+
+async def get_database_properties(token: str, database_id: str) -> Set[str]:
+    """Retrieves and caches the set of properties available in the user's Notion database."""
+    clean_id = database_id.replace("-", "").strip()
+    if clean_id in DB_PROPS_CACHE:
+        return DB_PROPS_CACHE[clean_id]
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r = await c.get(f"{API}/databases/{clean_id}", headers=_h(token))
+            if r.status_code == 200:
+                props = set(r.json().get("properties", {}).keys())
+                DB_PROPS_CACHE[clean_id] = props
+                return props
+    except Exception:
+        pass
+    return set()
 
 
 async def test_connection(token: str) -> dict:
@@ -52,6 +71,7 @@ async def create_database(token: str, parent_page_id: str) -> dict:
                     {"name": "JobStreet", "color": "purple"},
                     {"name": "Indeed", "color": "green"},
                     {"name": "Glassdoor", "color": "yellow"},
+                    {"name": "Wellfound", "color": "orange"},
                     {"name": "Direct / Website", "color": "gray"}
                 ]
             }
@@ -71,7 +91,12 @@ async def create_database(token: str, parent_page_id: str) -> dict:
             }
         },
         "Match Score": {"number": {"format": "percent"}},
+        "Company Background": {"rich_text": {}},
+        "Company LinkedIn": {"url": {}},
+        "Company Website": {"url": {}},
+        "Job Description": {"rich_text": {}},
         "Resume Format": {"rich_text": {}},
+        "Resume PDF": {"url": {}},
         "Applied Date": {"date": {}},
         "URL": {"url": {}},
         "Notes": {"rich_text": {}}
@@ -89,32 +114,54 @@ async def create_database(token: str, parent_page_id: str) -> dict:
 
 
 async def sync_application(token: str, database_id: str, app: dict) -> dict:
+    clean_id = database_id.replace("-", "").strip()
+    db_props = await get_database_properties(token, clean_id)
     rt = lambda v: {"rich_text": [{"text": {"content": str(v or "")}}]}
     match_val = (app.get("match") or 0) / 100.0 if (app.get("match") or 0) > 1 else app.get("match", 0)
 
+    company = app.get("company", "Company")
+    info = get_company_info(company)
+
     platform = app.get("platform") or "Direct / Website"
-    if any(p.lower() in str(app.get("source", "")).lower() for p in ["linkedin", "jobstreet", "indeed", "glassdoor"]):
-        platform = "LinkedIn" if "linkedin" in str(app.get("source", "")).lower() else "JobStreet" if "jobstreet" in str(app.get("source", "")).lower() else "Indeed"
+    if any(p.lower() in str(app.get("source", "")).lower() for p in ["linkedin", "jobstreet", "indeed", "glassdoor", "wellfound"]):
+        platform = "LinkedIn" if "linkedin" in str(app.get("source", "")).lower() else "JobStreet" if "jobstreet" in str(app.get("source", "")).lower() else "Indeed" if "indeed" in str(app.get("source", "")).lower() else "Wellfound"
 
     props = {
-        "Company Name": {"title": [{"text": {"content": app.get("company", "Company")}}]},
-        "Position": rt(app.get("role") or app.get("title", "Position")),
-        "Platform": {"select": {"name": platform}},
-        "Status": {"select": {"name": app.get("status", "APPLIED")}},
-        "Match Score": {"number": match_val},
-        "Resume Format": rt("APA 7th Edition (Evidence Verified)"),
-        "Notes": rt(app.get("notes") or "Synchronized via 1,000-bot workforce")
+        "Company Name": {"title": [{"text": {"content": company}}]}
     }
 
-    # Date
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    props["Applied Date"] = {"date": {"start": today_str}}
+    if not db_props or "Position" in db_props:
+        props["Position"] = rt(app.get("role") or app.get("title", "Position"))
+    if not db_props or "Platform" in db_props:
+        props["Platform"] = {"select": {"name": platform}}
+    if not db_props or "Status" in db_props:
+        props["Status"] = {"select": {"name": app.get("status", "APPLIED")}}
+    if not db_props or "Match Score" in db_props:
+        props["Match Score"] = {"number": match_val}
+    if not db_props or "Resume Format" in db_props:
+        props["Resume Format"] = rt("APA 7th Edition (Evidence Verified)")
+    if not db_props or "Notes" in db_props:
+        props["Notes"] = rt(app.get("notes") or f"Tailored application grounded in Career DNA skills for {company}.")
+    if not db_props or "Applied Date" in db_props:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        props["Applied Date"] = {"date": {"start": app.get("applied_date") or today_str}}
+    if not db_props or "URL" in db_props:
+        props["URL"] = {"url": app.get("url") or info["careers"]}
 
-    if app.get("url"):
-        props["URL"] = {"url": app["url"]}
+    # Rich company metadata properties
+    if db_props and "Company Background" in db_props:
+        props["Company Background"] = rt(app.get("company_background") or info["background"])
+    if db_props and "Company LinkedIn" in db_props:
+        props["Company LinkedIn"] = {"url": app.get("company_linkedin") or info["linkedin"]}
+    if db_props and "Company Website" in db_props:
+        props["Company Website"] = {"url": app.get("company_website") or info["website"]}
+    if db_props and "Job Description" in db_props:
+        props["Job Description"] = rt(app.get("description") or f"Autonomous application staged for {app.get('role', 'Engineering Position')} at {company}.")
+    if db_props and "Resume PDF" in db_props:
+        props["Resume PDF"] = {"url": app.get("resume_url") or "http://localhost:8000/profile/apa-resume/download?format=html"}
 
     async with httpx.AsyncClient(timeout=15) as c:
-        r = await c.post(f"{API}/pages", headers=_h(token), json={"parent": {"database_id": database_id}, "properties": props})
+        r = await c.post(f"{API}/pages", headers=_h(token), json={"parent": {"database_id": clean_id}, "properties": props})
     r.raise_for_status()
     return {"page_id": r.json()["id"]}
 
@@ -361,7 +408,12 @@ async def push_to_notion(token: str, database_id: str, db) -> dict:
 
 
 async def bidirectional_sync(token: str, database_id: str, db) -> dict:
-    """Two-way sync: Pull remote changes from Notion, then push newly staged local applications."""
+    """Two-way sync: Backfill empty columns on remote Notion pages, pull remote changes, and push staged local applications."""
+    from .dna_sync import backfill_notion_pages
+    try:
+        await backfill_notion_pages(token, database_id)
+    except Exception:
+        pass
     pull_res = await pull_from_notion(token, database_id, db)
     push_res = await push_to_notion(token, database_id, db)
     return {

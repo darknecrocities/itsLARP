@@ -26,6 +26,7 @@ export type SwarmSnapshot = {
   id: string;
   status: "running" | "completed" | "stopped";
   workers: number;
+  target_jobs?: number;
   active: number;
   counts: Record<Stage, { queued: number; done: number; failed: number; retries?: number }>;
   total_queued?: number;
@@ -101,8 +102,10 @@ type SwarmState = {
     appliers_active: number;
   };
   alerts: BotTelemetry[];
+  targetJobs: number;
   setSelectedBotId: (id: string | null) => void;
-  start: (workers: number, customQueries?: string[], credentials?: Record<string, string>) => Promise<void>;
+  setTargetJobs: (count: number) => void;
+  start: (workers: number, customQueries?: string[], credentials?: Record<string, string>, targetJobs?: number) => Promise<void>;
   stop: () => Promise<void>;
   poll: () => Promise<void>;
   fetchResults: () => Promise<void>;
@@ -116,6 +119,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
   runId: null,
   running: false,
   workers: 1000,
+  targetJobs: 1000,
   active: 0,
   status: "idle",
   counts: zeroCounts(),
@@ -138,13 +142,15 @@ export const useSwarm = create<SwarmState>((set, get) => ({
   alerts: [],
 
   setSelectedBotId: (id) => set({ selectedBotId: id }),
+  setTargetJobs: (count) => set({ targetJobs: Math.max(1, Math.min(count, 50000)) }),
 
-  start: async (workerCount: number, customQueries?: string[], credentials?: Record<string, string>) => {
+  start: async (workerCount: number, customQueries?: string[], credentials?: Record<string, string>, targetJobs?: number) => {
     if (pollTimer) {
       clearInterval(pollTimer);
       pollTimer = null;
     }
 
+    const finalTarget = Math.max(1, Math.min(targetJobs || get().targetJobs || workerCount, 50000));
     const profile = useStore.getState().profile;
     const defaultQueries = profile.headline
       ? [profile.headline]
@@ -157,7 +163,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         queries,
         workers: workerCount,
         credentials: credentials || {},
-        target_jobs: workerCount,
+        target_jobs: finalTarget,
         target_roles: profile.target_roles || ["all"],
         target_companies: profile.target_companies || ["all"],
         work_types: profile.work_types || ["fulltime", "remote"],
@@ -168,6 +174,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         running: true,
         status: snap.status,
         workers: snap.workers,
+        targetJobs: snap.target_jobs || finalTarget,
         active: snap.active,
         counts: snap.counts,
         feed: snap.feed,

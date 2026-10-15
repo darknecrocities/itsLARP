@@ -58,6 +58,8 @@ export default function AgentsPage() {
   // Notion database modal
   const [showNotionModal, setShowNotionModal] = useState(false);
 
+  const [targetJobsGoal, setTargetJobsGoal] = useState<number>(1000);
+
   const totQ = Object.values(counts).reduce((acc, c) => acc + c.queued, 0);
   const totD = Object.values(counts).reduce((acc, c) => acc + c.done, 0);
 
@@ -69,7 +71,7 @@ export default function AgentsPage() {
     if (jobstreetUser) creds["jobstreet"] = jobstreetUser;
     if (indeedUser) creds["indeed"] = indeedUser;
 
-    await start(num, queries.length ? queries : ["AI Engineer"], creds);
+    await start(num, queries.length ? queries : ["AI Engineer"], creds, targetJobsGoal);
   };
 
 
@@ -106,7 +108,7 @@ export default function AgentsPage() {
                 className="btn btn-primary text-xs"
                 onClick={() => handleStart(selectedWorkers)}
               >
-                Launch {selectedWorkers.toLocaleString()} Agents
+                Launch {selectedWorkers.toLocaleString()} Agents ({targetJobsGoal.toLocaleString()} Targets)
               </button>
             )}
 
@@ -130,19 +132,53 @@ export default function AgentsPage() {
 
       {/* Target query & platform liking configure */}
       {!running && (
-        <div className="card p-3 mb-4 flex flex-wrap items-center justify-between gap-3 bg-bg2/40">
-          <div className="flex-1 min-w-[260px]">
+        <div className="card p-3.5 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-bg2/40 border border-line">
+          <div>
             <label className="label-xs" htmlFor="tq">Target Roles & Keywords</label>
             <input
               id="tq"
-              className="input mt-1"
+              className="input mt-1 w-full"
               value={targetQuery}
               onChange={(e) => setTargetQuery(e.target.value)}
               placeholder="Software Engineer, Full Stack Developer, Product Manager"
             />
           </div>
-          <div className="text-xs text-muted max-w-sm hidden md:block">
-            Autonomous crawlers search LinkedIn and Indeed for these roles, while resume agents tailor custom APA profiles.
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="label-xs" htmlFor="target-jobs-input">
+                Target Jobs (Max 50,000)
+              </label>
+              <span className="text-xs font-mono font-semibold text-ink">
+                {targetJobsGoal.toLocaleString()} jobs
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                id="target-jobs-input"
+                type="number"
+                min={1}
+                max={50000}
+                className="input text-xs w-28 font-mono"
+                value={targetJobsGoal}
+                onChange={(e) => setTargetJobsGoal(Math.max(1, Math.min(50000, Number(e.target.value) || 1)))}
+              />
+              <div className="flex flex-wrap items-center gap-1">
+                {[100, 1000, 5000, 10000, 25000, 50000].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setTargetJobsGoal(n)}
+                    className={`px-1.5 py-0.5 text-[11px] rounded font-mono border ${
+                      targetJobsGoal === n
+                        ? "bg-black text-white border-black font-semibold"
+                        : "bg-bg text-muted border-line hover:text-ink"
+                    }`}
+                  >
+                    {n >= 1000 ? `${n / 1000}k` : n}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

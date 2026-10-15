@@ -30,12 +30,37 @@ class NotionStatusUpdate(BaseModel):
     token: Optional[str] = None
 
 
+def _get_or_init_notion_record(db) -> Optional[IntegrationRecord]:
+    """Retrieves saved Notion integration record or automatically loads from environment."""
+    rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "notion").first()
+    if rec and rec.connected and rec.token and rec.database_id:
+        return rec
+
+    import os
+    env_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN")
+    env_db_id = os.getenv("NOTION_DATABASE_ID") or "3f8f3d63-50a0-812c-9935-d81a2f9ae8e2"
+    if env_token:
+        if not rec:
+            rec = IntegrationRecord(id="notion")
+            db.add(rec)
+        rec.token = env_token.strip()
+        rec.database_id = env_db_id.replace("-", "").strip()
+        rec.database_name = "HowToLarped Job Applications (1,000 Bots Sync)"
+        rec.database_url = f"https://notion.so/{rec.database_id}"
+        rec.workspace = "Arron Parejas's Notion"
+        rec.connected = True
+        rec.last_synced_at = datetime.utcnow()
+        db.commit()
+        return rec
+    return rec if rec and rec.connected else None
+
+
 @router.get("/status")
 def notion_status():
     """Returns saved Notion connection status and metadata."""
     db = SessionLocal()
     try:
-        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "notion").first()
+        rec = _get_or_init_notion_record(db)
         if not rec or not rec.connected:
             return {
                 "connected": False,
@@ -134,10 +159,42 @@ async def notion_sync():
     """Run full two-way synchronization between local database and Notion."""
     db = SessionLocal()
     try:
-        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "notion").first()
+        rec = _get_or_init_notion_record(db)
         if not rec or not rec.connected or not rec.token or not rec.database_id:
             raise HTTPException(400, "Notion is not configured yet. Connect your Notion database first.")
         return await notion.bidirectional_sync(rec.token, rec.database_id, db)
+    finally:
+        db.close()
+
+
+class DnaSyncIn(BaseModel):
+    target_count: int = Field(default=15, ge=1, le=50000)
+
+
+@router.post("/sync-dna-applications")
+async def notion_sync_dna_applications(b: DnaSyncIn = DnaSyncIn()):
+    """Generates dynamic applications tailored against Career DNA and syncs to Notion with full metadata."""
+    from services.dna_sync import sync_dna_applications_to_notion
+    db = SessionLocal()
+    try:
+        rec = _get_or_init_notion_record(db)
+        if not rec or not rec.connected or not rec.token or not rec.database_id:
+            raise HTTPException(400, "Notion is not configured yet. Connect your Notion database first.")
+        return await sync_dna_applications_to_notion(rec.token, rec.database_id, target_count=b.target_count, db=db)
+    finally:
+        db.close()
+
+
+@router.post("/backfill")
+async def notion_backfill():
+    """Backfills empty columns on existing Notion pages with authentic company background and LinkedIn data."""
+    from services.dna_sync import backfill_notion_pages
+    db = SessionLocal()
+    try:
+        rec = _get_or_init_notion_record(db)
+        if not rec or not rec.connected or not rec.token or not rec.database_id:
+            raise HTTPException(400, "Notion is not configured yet.")
+        return await backfill_notion_pages(rec.token, rec.database_id)
     finally:
         db.close()
 
@@ -147,7 +204,7 @@ async def notion_pull():
     """Pull newest entries directly from Notion into local database."""
     db = SessionLocal()
     try:
-        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "notion").first()
+        rec = _get_or_init_notion_record(db)
         if not rec or not rec.connected or not rec.token or not rec.database_id:
             raise HTTPException(400, "Notion is not configured yet.")
         return await notion.pull_from_notion(rec.token, rec.database_id, db)

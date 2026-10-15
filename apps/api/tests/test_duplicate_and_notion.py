@@ -109,3 +109,23 @@ def test_notion_status_and_masking():
     assert "connected" in data
     assert "database_id" in data
     assert "token_masked" in data
+
+
+def test_dna_applications_generation():
+    from services.dna_sync import generate_dna_applications, VERIFIED_SAMPLE_PROFILE
+    apps = generate_dna_applications(VERIFIED_SAMPLE_PROFILE, target_count=5)
+    assert len(apps) == 5
+    for a in apps:
+        assert a["company"] in ["Anthropic", "OpenAI", "Vercel", "Stripe", "Databricks"]
+        assert len(a["company_background"]) > 10
+        assert a["company_linkedin"].startswith("https://www.linkedin.com/company/")
+        assert a["match"] >= 70
+        assert a["resume_url"].startswith("http")
+
+
+def test_sync_dna_applications_endpoint():
+    res = client.post("/integrations/notion/sync-dna-applications", json={"target_count": 3})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["ok"] is True
+    assert data["total_generated"] == 3
