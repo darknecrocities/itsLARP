@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 import { BrandLogo } from "@/components/BrandLogo";
+import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
 
 const NAV = [
   ["/dashboard", "Dashboard", "Overview"],
@@ -34,6 +35,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   );
   const [open, setOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const profile = useStore((s) => s.profile);
   const fetchProfile = useStore((s) => s.fetchProfile);
   const fetchApps = useStore((s) => s.fetchApps);
@@ -75,6 +77,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="text-[10px] font-mono px-1 py-0.5 bg-bg2 border border-line rounded">
               {isDesktop ? "DESKTOP" : "OS"}
             </span>
+            <button
+              onClick={() => setShowUpdateModal(true)}
+              className="text-[10px] font-mono px-2 py-0.5 bg-bg2 border border-line rounded flex items-center gap-1 hover:border-black transition-colors"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block" />
+              <span>v1.0.0</span>
+            </button>
           </div>
           <button
             className="btn text-xs py-1 px-2.5"
@@ -136,7 +145,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </ul>
 
             {/* Standalone APA Resume Studio Link */}
-            <div className="mt-4 pt-3 border-t border-line/60">
+            <div className="mt-4 pt-3 border-t border-line/60 space-y-1">
               <Link
                 href="/resume"
                 className="flex items-center justify-between text-xs px-2 py-1.5 rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono group"
@@ -146,6 +155,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   CV ↗
                 </span>
               </Link>
+              <button
+                type="button"
+                onClick={() => setShowUpdateModal(true)}
+                className="flex items-center justify-between text-xs px-2 py-1.5 rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono group w-full text-left"
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block" />
+                  <span>Updates & Adds</span>
+                </span>
+                <span className="text-[10px] bg-bg2 border border-line px-1 rounded group-hover:border-black">
+                  v1.0.0
+                </span>
+              </button>
             </div>
           </div>
 
@@ -183,6 +205,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      {/* App Updates & Changelog Modal */}
+      <UpdateNotificationModal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+      />
     </QueryClientProvider>
   );
 }

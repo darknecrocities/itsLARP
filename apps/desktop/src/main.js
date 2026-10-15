@@ -5,6 +5,7 @@ const http = require("http");
 const https = require("https");
 const { exec, spawn } = require("child_process");
 const fs = require("fs");
+const { checkForUpdates, downloadLatestRelease, initAutoUpdater } = require("./updater");
 
 let mainWindow = null;
 
@@ -189,6 +190,7 @@ app.whenReady().then(() => {
   setupIpcHandlers();
   autoStartOllamaIfAvailable();
   createWindow();
+  initAutoUpdater(mainWindow);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -408,5 +410,14 @@ function setupIpcHandlers() {
       cloudReachable,
       currentUrl: mainWindow ? mainWindow.webContents.getURL() : null,
     };
+  });
+
+  // 8. Application Auto-Updater & Status
+  ipcMain.handle("updater:check", async () => {
+    return await checkForUpdates();
+  });
+
+  ipcMain.handle("updater:download", async () => {
+    return downloadLatestRelease(process.platform, process.arch);
   });
 }
