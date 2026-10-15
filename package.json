@@ -1,13 +1,15 @@
 {
-  "name": "howtolarped",
+  "name": "itslarp",
   "version": "1.0.0",
   "private": true,
-  "description": "Your AI Job-Hunting Workforce & Career Operating System",
+  "description": "itsLARP - AI Job-Hunting Workforce & Career Operating System",
   "scripts": {
     "dev": "node scripts/dev.js",
     "dev:web": "cd apps/web && npm run dev",
     "dev:api": "cd apps/api && .venv/bin/uvicorn main:app --port 8000 --reload",
     "build": "cd apps/web && npm run build",
-    "test": "cd apps/api && .venv/bin/pytest tests"
+    "test": "cd apps/api && .venv/bin/pytest tests",
+    "desktop:verify": "node apps/desktop/scripts/verify-builds.js",
+    "desktop:start": "cd apps/desktop && npm start"
   }
 }
