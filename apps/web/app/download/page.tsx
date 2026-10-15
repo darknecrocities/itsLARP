@@ -366,20 +366,39 @@ export default function DownloadPage() {
                 <tr>
                   <td className="py-2.5 font-bold">itsLARP-mac-arm64.dmg</td>
                   <td>Apple Silicon (M1–M4)</td>
-                  <td className="text-[11px] text-neutral-600 font-mono">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">eb83658a96c3b46ef757ade2c5b84f7823e4c28a2dc7f30438e4d1c27a643c20</td>
                 </tr>
                 <tr>
                   <td className="py-2.5 font-bold">itsLARP-mac-x64.dmg</td>
                   <td>macOS Intel (x86_64)</td>
-                  <td className="text-[11px] text-neutral-600 font-mono">ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">eb83658a96c3b46ef757ade2c5b84f7823e4c28a2dc7f30438e4d1c27a643c20</td>
                 </tr>
                 <tr>
                   <td className="py-2.5 font-bold">itsLARP-win-x64-setup.exe</td>
                   <td>Windows 10/11 64-bit</td>
-                  <td className="text-[11px] text-neutral-600 font-mono">ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">f6de836b271d707497c6a9f40904a33728452e771bd06182382780ecdb3c979e</td>
+                </tr>
+                <tr>
+                  <td className="py-2.5 font-bold">itsLARP-win-x64-portable.zip</td>
+                  <td>Windows Portable (No Install)</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">d2678f5add1bddbc68c0b57bbcc3df19d30fd93e8d240a1caee0072374078c35</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </section>
+
+        {/* High-Speed Accelerated Download & Regional CDN Notice */}
+        <section className="card p-6 bg-white border border-neutral-300 rounded-lg mb-14">
+          <div className="flex items-center gap-2 font-bold text-sm text-black mb-2">
+            <Cpu className="w-5 h-5 text-neutral-800" />
+            <span>Experiencing Slow Browser Downloads? (GitHub CDN Single-Stream Throttling)</span>
+          </div>
+          <p className="text-xs text-neutral-600 mb-3 leading-relaxed font-sans">
+            GitHub Release assets can throttle single-connection browser downloads to ~350 KB/s in certain geographic regions regardless of your fiber internet speed. You can bypass this rate limit using a multi-connection download manager or running this parallel command in Terminal:
+          </p>
+          <div className="bg-neutral-900 text-neutral-100 p-3 rounded text-xs font-mono overflow-x-auto">
+            <code>curl -L -C - --parallel --parallel-max 8 -o itsLARP-mac-arm64.dmg https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop/itsLARP-mac-arm64.dmg</code>
           </div>
         </section>
       </main>
