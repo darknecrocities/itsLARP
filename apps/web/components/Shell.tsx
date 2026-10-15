@@ -179,7 +179,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div>
             <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} mb-5`}>
               <Link href={isDesktop ? "/dashboard" : "/"} className="flex items-center gap-2">
-                <BrandLogo variant={collapsed ? "mark" : "full"} size={collapsed ? "sm" : "md"} />
+                <BrandLogo variant={collapsed ? "mark" : "full"} size={collapsed ? "sm" : "md"} href={false} />
               </Link>
               {!collapsed && (
                 <button
@@ -326,7 +326,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 p-6 md:p-10 max-w-6xl overflow-x-hidden">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-7xl overflow-x-hidden">
           {children}
         </main>
       </div>

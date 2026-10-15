@@ -22,7 +22,9 @@ async def test_connection(token: str) -> dict:
         r = await c.get(f"{API}/users/me", headers=_h(token))
     if r.status_code != 200:
         return {"connected": False, "error": "Notion rejected the token."}
-    return {"connected": True, "workspace": r.json().get("name")}
+    data = r.json()
+    ws = data.get("bot", {}).get("workspace_name") or data.get("name") or "Notion Workspace"
+    return {"connected": True, "workspace": ws}
 
 
 async def find_first_page(token: str) -> Optional[str]:

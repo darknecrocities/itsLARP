@@ -80,51 +80,59 @@ export default function AgentsPage() {
         sub="Parallel dynamic workforce scaling up to 50,000 agents: high-speed discovery, Local LLM tailoring, independent application staging, and real Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
+            {/* Segmented worker size control */}
+            <div className="inline-flex rounded border border-line bg-bg2/80 p-0.5">
+              {[100, 1000, 5000, 10000, 50000].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`px-2 py-1 text-xs rounded transition-all font-mono ${
+                    selectedWorkers === n ? "bg-black text-white shadow-xs font-semibold" : "text-muted hover:text-ink"
+                  }`}
+                  disabled={running}
+                  onClick={() => setSelectedWorkers(n)}
+                >
+                  {n >= 1000 ? `${n / 1000}k` : n}
+                </button>
+              ))}
+            </div>
+
+            {running ? (
+              <button className="btn btn-primary bg-black text-white hover:bg-neutral-800 text-xs" onClick={stop}>
+                Stop Agents
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary text-xs"
+                onClick={() => handleStart(selectedWorkers)}
+              >
+                Launch {selectedWorkers.toLocaleString()} Agents
+              </button>
+            )}
+
             <button
               className="btn text-xs flex items-center gap-1.5"
               onClick={() => setShowCreds(true)}
             >
               <Key className="w-3.5 h-3.5" />
-              <span>Platform Logins</span>
+              <span>Logins</span>
             </button>
             <button
               className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
               onClick={() => setShowNotionModal(true)}
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>Notion 1-Click Sync</span>
+              <span>Notion Sync</span>
             </button>
-            {[100, 1000, 5000, 10000, 50000].map((n) => (
-              <button
-                key={n}
-                className={`btn text-xs ${selectedWorkers === n ? "bg-black text-white" : ""}`}
-                disabled={running}
-                onClick={() => setSelectedWorkers(n)}
-              >
-                {n >= 1000 ? `${n / 1000}k` : n} Agents
-              </button>
-            ))}
-            {running ? (
-              <button className="btn btn-primary bg-black text-white hover:bg-neutral-800" onClick={stop}>
-                Stop Agents
-              </button>
-            ) : (
-              <button
-                className="btn btn-primary"
-                onClick={() => handleStart(selectedWorkers)}
-              >
-                Launch {selectedWorkers.toLocaleString()} Agents
-              </button>
-            )}
           </div>
         }
       />
 
       {/* Target query & platform liking configure */}
       {!running && (
-        <div className="card p-4 mb-6 flex flex-wrap items-center justify-between gap-4 bg-bg2/40">
-          <div className="flex-1 min-w-[280px]">
-            <label className="label-xs" htmlFor="tq">Job Titles & Keywords You Want (comma-separated)</label>
+        <div className="card p-3 mb-4 flex flex-wrap items-center justify-between gap-3 bg-bg2/40">
+          <div className="flex-1 min-w-[260px]">
+            <label className="label-xs" htmlFor="tq">Target Roles & Keywords</label>
             <input
               id="tq"
               className="input mt-1"
@@ -133,8 +141,8 @@ export default function AgentsPage() {
               placeholder="Software Engineer, Full Stack Developer, Product Manager"
             />
           </div>
-          <div className="text-xs text-muted max-w-sm">
-            300 Agents will search LinkedIn, JobStreet, and Indeed for these roles. 300 Agents build custom APA resumes, and 400 Agents prepare applications for you.
+          <div className="text-xs text-muted max-w-sm hidden md:block">
+            Autonomous crawlers search LinkedIn and Indeed for these roles, while resume agents tailor custom APA profiles.
           </div>
         </div>
       )}
@@ -212,9 +220,8 @@ export default function AgentsPage() {
         }}
       />
 
-
       {/* Workforce Top Summary */}
-      <section aria-label="Workforce Totals" className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <section aria-label="Workforce Totals" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-4">
         <Stat label="Workers Configured" value={running ? workers : selectedWorkers} />
         <Stat label="Active Parallel Agents" value={active} i={1} />
         <Stat label="Tasks Queued" value={totQ} i={2} />
@@ -223,9 +230,9 @@ export default function AgentsPage() {
       </section>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-line mb-6 font-mono text-xs">
+      <div className="flex gap-3 sm:gap-4 border-b border-line mb-4 font-mono text-xs overflow-x-auto">
         <button
-          className={`pb-2.5 font-bold border-b-2 transition-colors ${
+          className={`pb-2 font-bold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "diagram" ? "border-black text-ink" : "border-transparent text-muted hover:text-ink"
           }`}
           onClick={() => setActiveTab("diagram")}

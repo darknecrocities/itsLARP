@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
+from sqlalchemy.orm.attributes import flag_modified
 from services.database import SessionLocal, IntegrationRecord
 from services import email_monitor
 
@@ -70,7 +71,8 @@ def connect_email(b: EmailConnectIn):
         if "responses" not in settings:
             settings["responses"] = []
 
-        rec.settings = settings
+        rec.settings = dict(settings)
+        flag_modified(rec, "settings")
         rec.connected = True
         rec.last_synced_at = datetime.now(timezone.utc)
         db.commit()
@@ -126,7 +128,8 @@ async def simulate_recruiter_email(b: SimulateResponseIn):
                 "date": datetime.now(timezone.utc).isoformat(),
             })
             settings["responses"] = responses[:25]
-            rec.settings = settings
+            rec.settings = dict(settings)
+            flag_modified(rec, "settings")
             rec.last_synced_at = datetime.now(timezone.utc)
             db.commit()
 

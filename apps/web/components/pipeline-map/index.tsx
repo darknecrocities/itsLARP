@@ -42,14 +42,14 @@ export function HorizontalPipelineMap({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Node Network Architecture Card */}
-      <div className="card p-6 bg-white text-black border border-neutral-300 shadow-sm font-mono">
+      <div className="card p-3 sm:p-5 bg-white text-black border border-neutral-300 shadow-sm font-mono">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-4 mb-6 gap-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-3 mb-3 sm:mb-4 gap-2">
           <div>
             <div className="label-xs text-neutral-500">HOW YOUR AGENTS WORK TOGETHER</div>
-            <h3 className="text-xl font-bold font-sans tracking-tight text-black mt-0.5">
+            <h3 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-black mt-0.5">
               Interactive Agent Network
             </h3>
             <p className="text-xs text-neutral-600 font-sans mt-0.5">

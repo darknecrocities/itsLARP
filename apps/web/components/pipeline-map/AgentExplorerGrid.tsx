@@ -20,7 +20,7 @@ export function AgentExplorerGrid({
   onInspectBot,
 }: AgentExplorerGridProps) {
   return (
-    <div className="card p-6 bg-white text-black border border-neutral-300">
+    <div className="card p-3 sm:p-5 bg-white text-black border border-neutral-300">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div>
           <h3 className="text-lg font-bold font-sans">Individual Agent Explorer</h3>
