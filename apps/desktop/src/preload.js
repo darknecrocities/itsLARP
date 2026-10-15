@@ -16,4 +16,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   navigateWorkspace: (target) => ipcRenderer.invoke("workspace:navigate", target),
   getWorkspaceStatus: () => ipcRenderer.invoke("workspace:getStatus"),
+  checkForUpdates: () => ipcRenderer.invoke("updater:check"),
+  downloadUpdate: () => ipcRenderer.invoke("updater:download"),
+  onUpdateStatus: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("updater:status", handler);
+    return () => ipcRenderer.removeListener("updater:status", handler);
+  },
 });

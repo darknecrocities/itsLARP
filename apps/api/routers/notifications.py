@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from services import swarm
@@ -46,7 +46,7 @@ def answer_question(question_id: str, b: AnswerQuestionIn):
             raise HTTPException(404, "Question not found")
         q_rec.status = "answered"
         q_rec.answer = b.answer
-        q_rec.answered_at = datetime.utcnow()
+        q_rec.answered_at = datetime.now(timezone.utc)
 
         p_rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
         if p_rec:

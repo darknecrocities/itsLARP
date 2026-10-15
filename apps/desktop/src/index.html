@@ -147,6 +147,18 @@
       <div>[Ollama Engine] Checking localhost:11434...</div>
     </div>
 
+    <div class="specs-box" id="updateBox" style="background:#fafafa; border:1px solid #e4e4e7;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <span style="font-weight:700;">[STATUS] v1.0.0 (origin/main · ea4008c)</span>
+        <span style="font-size:10px; padding:1px 6px; background:#f4f4f5; border:1px solid #e4e4e7; border-radius:3px;">UP TO DATE</span>
+      </div>
+      <div style="color:#52525b; font-size:10px; line-height:1.6;">
+        <div>[ADDS] Dynamic workspace resolution: auto-connects to cloud when local port 3000 is inactive</div>
+        <div>[ADDS] Automated background Ollama engine launcher and OS installer</div>
+        <div>[ADDS] 4-level BST agent visualizer and APA 7th Edition Resume Studio</div>
+      </div>
+    </div>
+
     <div class="progress-bar-container" id="progressWrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
@@ -207,6 +219,26 @@
             status.innerText = data.status || "Downloading model...";
           }
         });
+
+        // Listen for auto-update notifications
+        if (window.electronAPI.onUpdateStatus) {
+          window.electronAPI.onUpdateStatus((u) => {
+            const ub = document.getElementById("updateBox");
+            if (ub && u) {
+              ub.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-weight:700;">[STATUS] v${u.currentVersion} (${u.branch} · ${u.commitSha})</span>
+                  <span style="font-size:10px; padding:1px 6px; background:#f4f4f5; border:1px solid #e4e4e7; border-radius:3px;">${u.updateAvailable ? "UPDATE AVAILABLE" : "UP TO DATE"}</span>
+                </div>
+                <div style="color:#52525b; font-size:10px; line-height:1.6;">
+                  <div>[ADDS] Dynamic workspace resolution: auto-connects to cloud when local port 3000 is inactive</div>
+                  <div>[ADDS] Automated background Ollama engine launcher and OS installer</div>
+                  <div>[ADDS] 4-level BST agent visualizer and APA 7th Edition Resume Studio</div>
+                </div>
+              `;
+            }
+          });
+        }
 
         // Test workspace connectivity and auto-launch if ready
         const ws = await window.electronAPI.getWorkspaceStatus();
