@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>itsLARP Desktop - Launchpad</title>
+  <title>itsLARP Desktop - Launchpad & Control Center</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -20,8 +20,8 @@
       background: #ffffff;
       border: 1px solid #e4e4e7;
       border-radius: 8px;
-      padding: 36px;
-      max-width: 540px;
+      padding: 32px;
+      max-width: 580px;
       width: 100%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
@@ -35,7 +35,7 @@
       background: #f4f4f5;
       border: 1px solid #e4e4e7;
       border-radius: 4px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       font-weight: 600;
     }
     .dot {
@@ -46,21 +46,22 @@
       display: inline-block;
       animation: pulse 1.5s infinite;
     }
+    .dot-amber { background: #f59e0b; }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(0.9); }
     }
     h1 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.03em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     p {
       font-size: 13px;
       color: #71717a;
-      line-height: 1.6;
-      margin-bottom: 20px;
+      line-height: 1.5;
+      margin-bottom: 18px;
     }
     .specs-box {
       background: #f4f4f5;
@@ -69,8 +70,14 @@
       padding: 14px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 11px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       line-height: 1.8;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
     }
     .btn {
       display: block;
@@ -79,75 +86,232 @@
       background: #000000;
       color: #ffffff;
       text-decoration: none;
-      padding: 11px 16px;
+      padding: 10px 14px;
       border-radius: 6px;
       font-weight: 600;
-      font-size: 13px;
-      border: none;
+      font-size: 12px;
+      border: 1px solid #000;
       cursor: pointer;
       transition: background 0.15s;
     }
     .btn:hover { background: #27272a; }
+    .btn-secondary {
+      background: #ffffff;
+      color: #09090b;
+      border: 1px solid #e4e4e7;
+    }
+    .btn-secondary:hover { background: #f4f4f5; }
+    .btn-outline {
+      background: #fafafa;
+      color: #3f3f46;
+      border: 1px dashed #d4d4d8;
+    }
+    .btn-outline:hover { background: #f4f4f5; color: #000; }
     .status-text {
       text-align: center;
       font-size: 11px;
-      color: #a1a1aa;
-      font-family: monospace;
-      margin-top: 12px;
+      color: #71717a;
+      font-family: ui-monospace, monospace;
+      margin-top: 10px;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #e4e4e7;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #000000;
+      width: 0%;
+      transition: width 0.2s ease;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="badge">
-      <span class="dot"></span>
-      <span>NATIVE DESKTOP OS · CONNECTING</span>
+      <span class="dot" id="headerDot"></span>
+      <span id="headerBadge">NATIVE DESKTOP OS · LAUNCHPAD</span>
     </div>
-    <h1>itsLARP Standalone Desktop</h1>
+    <h1>itsLARP Desktop Control Center</h1>
     <p>
-      Your local AI Job-Hunting Workforce app is initialized. We are establishing connection to your local dashboard workspace at <strong>localhost:3000/dashboard</strong>.
+      Your autonomous workforce environment. Select your workspace destination or configure on-device AI acceleration.
     </p>
 
     <div class="specs-box" id="specs">
-      <div>[Hardware Specs] Detecting CPU & Memory Architecture...</div>
-      <div>[Ollama Engine] Checking 127.0.0.1:11434...</div>
+      <div>[Hardware Engine] Inspecting system architecture...</div>
+      <div>[Ollama Engine] Checking localhost:11434...</div>
     </div>
 
-    <button class="btn" id="retryBtn" onclick="tryConnect()">Connect to Workspace (localhost:3000)</button>
-    <div class="status-text" id="statusMsg">Auto-reconnecting every 2s...</div>
+    <div class="progress-bar-container" id="progressWrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="status-text" id="pullStatus" style="display:none; margin-bottom:12px;"></div>
+
+    <div class="action-grid">
+      <button class="btn" id="cloudBtn" onclick="launchCloud()">
+        Launch Cloud Workspace →
+      </button>
+      <button class="btn btn-secondary" id="localBtn" onclick="launchLocal()">
+        Launch Local Workspace
+      </button>
+    </div>
+
+    <div class="action-grid" id="ollamaActions">
+      <button class="btn btn-outline" id="ollamaBtn" onclick="handleOllamaAction()">
+        Checking Ollama...
+      </button>
+      <button class="btn btn-outline" id="modelBtn" onclick="pullRecommendedModel()">
+        Pull Recommended Model
+      </button>
+    </div>
+
+    <div class="status-text" id="statusMsg">Connecting to live itsLARP workspace...</div>
   </div>
 
   <script>
-    async function loadSpecs() {
-      if (window.electronAPI) {
-        try {
-          const specs = await window.electronAPI.getHardwareSpecs();
-          const ollama = await window.electronAPI.checkOllamaStatus();
-          const el = document.getElementById("specs");
-          el.innerHTML = `
-            <div><strong>Device:</strong> ${specs.cpuModel} (${specs.cores} cores)</div>
-            <div><strong>Architecture:</strong> ${specs.tier} · ${specs.totalRamGb} GB RAM</div>
-            <div><strong>Ollama Engine:</strong> ${ollama.running ? "✓ Online (Port 11434)" : "Not running (start Ollama or click Auto-Install)"}</div>
-            <div><strong>Models Available:</strong> ${ollama.models && ollama.models.length ? ollama.models.join(", ") : "None loaded"}</div>
-          `;
-        } catch (e) {
-          console.error("Specs detection error", e);
-        }
-      }
-    }
+    let hardware = null;
+    let ollamaStatus = null;
+    let autoRedirectTimeout = null;
+    let countdown = 3;
 
-    async function tryConnect() {
-      document.getElementById("statusMsg").innerText = "Connecting...";
+    async function init() {
+      if (!window.electronAPI) {
+        document.getElementById("statusMsg").innerText = "Web mode: Redirecting to dashboard...";
+        window.location.href = "/dashboard";
+        return;
+      }
+
       try {
-        const res = await fetch("http://localhost:3000/dashboard", { mode: "no-cors" });
-        window.location.href = "http://localhost:3000/dashboard";
+        hardware = await window.electronAPI.getHardwareSpecs();
+        ollamaStatus = await window.electronAPI.checkOllamaStatus();
+        renderSpecs();
+
+        // Listen for model pull progress
+        window.electronAPI.onPullProgress((data) => {
+          const wrap = document.getElementById("progressWrap");
+          const bar = document.getElementById("progressBar");
+          const status = document.getElementById("pullStatus");
+          wrap.style.display = "block";
+          status.style.display = "block";
+
+          if (data.total && data.completed) {
+            const pct = Math.round((data.completed / data.total) * 100);
+            bar.style.width = pct + "%";
+            status.innerText = `Downloading ${data.status || ""}: ${pct}%`;
+          } else {
+            status.innerText = data.status || "Downloading model...";
+          }
+        });
+
+        // Test workspace connectivity and auto-launch if ready
+        const ws = await window.electronAPI.getWorkspaceStatus();
+        if (ws.localReachable) {
+          document.getElementById("statusMsg").innerText = "Local workspace online. Redirecting...";
+          window.electronAPI.navigateWorkspace("local");
+        } else if (ws.cloudReachable) {
+          startCountdown("cloud");
+        } else {
+          document.getElementById("statusMsg").innerText = "Standby mode: Choose workspace or start local engine.";
+        }
       } catch (err) {
-        document.getElementById("statusMsg").innerText = "Local web service not ready yet. Retrying...";
+        console.error("Init error:", err);
       }
     }
 
-    loadSpecs();
-    setInterval(tryConnect, 2000);
+    function renderSpecs() {
+      const el = document.getElementById("specs");
+      if (!hardware || !ollamaStatus) return;
+
+      const running = ollamaStatus.running;
+      const dot = document.getElementById("headerDot");
+      dot.className = running ? "dot" : "dot dot-amber";
+
+      el.innerHTML = `
+        <div><strong>Device:</strong> ${hardware.cpuModel} (${hardware.cores} Cores)</div>
+        <div><strong>Architecture:</strong> ${hardware.tier} · ${hardware.totalRamGb} GB RAM</div>
+        <div><strong>Ollama Engine:</strong> ${running ? "✓ Online (Port 11434)" : (ollamaStatus.installed ? "Installed (Stopped)" : "Not Installed")}</div>
+        <div><strong>Installed Models:</strong> ${ollamaStatus.models?.length ? ollamaStatus.models.join(", ") : "None loaded"}</div>
+        <div><strong>Recommended AI:</strong> ${hardware.recommendedModel} (Optimized for your hardware)</div>
+      `;
+
+      const ollamaBtn = document.getElementById("ollamaBtn");
+      if (running) {
+        ollamaBtn.innerText = "✓ Ollama Running";
+        ollamaBtn.disabled = true;
+      } else if (ollamaStatus.installed) {
+        ollamaBtn.innerText = "▶ Start Ollama Daemon";
+        ollamaBtn.disabled = false;
+      } else {
+        ollamaBtn.innerText = "⬇ Install Ollama (" + hardware.platform + ")";
+        ollamaBtn.disabled = false;
+      }
+    }
+
+    function startCountdown(target) {
+      const msg = document.getElementById("statusMsg");
+      msg.innerHTML = `Auto-entering Cloud Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
+      autoRedirectTimeout = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(autoRedirectTimeout);
+          window.electronAPI.navigateWorkspace(target);
+        } else {
+          msg.innerHTML = `Auto-entering Cloud Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
+        }
+      }, 1000);
+    }
+
+    function cancelCountdown(e) {
+      if (e) e.preventDefault();
+      clearInterval(autoRedirectTimeout);
+      document.getElementById("statusMsg").innerText = "Auto-launch cancelled. Ready.";
+    }
+
+    function launchCloud() {
+      cancelCountdown();
+      window.electronAPI.navigateWorkspace("cloud");
+    }
+
+    function launchLocal() {
+      cancelCountdown();
+      window.electronAPI.navigateWorkspace("local");
+    }
+
+    async function handleOllamaAction() {
+      cancelCountdown();
+      if (!ollamaStatus.running && ollamaStatus.installed) {
+        document.getElementById("statusMsg").innerText = "Starting Ollama daemon in background...";
+        await window.electronAPI.startOllama();
+        setTimeout(async () => {
+          ollamaStatus = await window.electronAPI.checkOllamaStatus();
+          renderSpecs();
+        }, 1500);
+      } else if (!ollamaStatus.installed) {
+        document.getElementById("statusMsg").innerText = "Triggering automated OS installation...";
+        await window.electronAPI.installOllama();
+      }
+    }
+
+    async function pullRecommendedModel() {
+      cancelCountdown();
+      const model = hardware ? hardware.recommendedModel : "qwen2.5:1.5b";
+      document.getElementById("statusMsg").innerText = `Requesting download for ${model}...`;
+      const res = await window.electronAPI.pullModel(model);
+      if (res.ok) {
+        document.getElementById("statusMsg").innerText = `✓ ${model} successfully installed!`;
+        ollamaStatus = await window.electronAPI.checkOllamaStatus();
+        renderSpecs();
+      } else {
+        document.getElementById("statusMsg").innerText = `Pull failed: ${res.error || "Unknown error"}`;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from services import jobs, tailoring
 from services.database import SessionLocal, ApplicationRecord
 
@@ -95,8 +95,8 @@ def approve_application(b: ApproveIn):
             (ApplicationRecord.id == app_id) | (ApplicationRecord.job_id == b.job_id)
         ).first()
 
-        now_iso = datetime.utcnow().isoformat()
-        today_str = datetime.utcnow().strftime("%Y-%m-%d")
+        now_iso = datetime.now(timezone.utc).isoformat()
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         # Duplicate check: If application is already ongoing and user didn't force re-apply
         if rec and rec.status in ONGOING_STATUSES and not b.force_reapply:
@@ -152,7 +152,7 @@ def application_reapply(app_id: str):
 
         old_status = rec.status
         rec.status = "READY"
-        now_iso = datetime.utcnow().isoformat()
+        now_iso = datetime.now(timezone.utc).isoformat()
         evs = rec.events or []
         rec.events = [{"at": now_iso, "text": f"User initiated Re-Application (Previous status: {old_status})"}] + evs
         db.commit()
