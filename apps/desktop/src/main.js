@@ -146,7 +146,19 @@ function autoStartOllamaIfAvailable() {
   req.setTimeout(1000, () => req.destroy());
 }
 
+/**
+ * Resolves the application icon for BrowserWindow and macOS dock.
+ */
+function getAppIconPath() {
+  const srcIcon = path.join(__dirname, "icon.png");
+  if (fs.existsSync(srcIcon)) return srcIcon;
+  const buildIcon = path.join(__dirname, "..", "build", "icon.png");
+  if (fs.existsSync(buildIcon)) return buildIcon;
+  return null;
+}
+
 function createWindow() {
+  const iconPath = getAppIconPath();
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 860,
@@ -154,6 +166,7 @@ function createWindow() {
     minHeight: 700,
     title: "itsLARP - AI Job-Hunting Workforce",
     backgroundColor: "#ffffff",
+    icon: iconPath || undefined,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -187,6 +200,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  const iconPath = getAppIconPath();
+  if (process.platform === "darwin" && app.dock && iconPath) {
+    try {
+      app.dock.setIcon(iconPath);
+    } catch {}
+  }
   setupIpcHandlers();
   autoStartOllamaIfAvailable();
   createWindow();
