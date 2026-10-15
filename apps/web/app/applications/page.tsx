@@ -36,6 +36,8 @@ export default function ApplicationsPage() {
   const [syncing, setSyncing] = useState(false);
   const [showNotionModal, setShowNotionModal] = useState(false);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+  const [dnaTargetCount, setDnaTargetCount] = useState<number>(25);
+  const [syncingDna, setSyncingDna] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -75,6 +77,33 @@ export default function ApplicationsPage() {
       setTimeout(() => setBannerNotice(null), 5000);
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleSyncDnaToNotion = async () => {
+    setSyncingDna(true);
+    try {
+      const res = await api<{
+        ok: boolean;
+        total_generated: number;
+        synced_to_notion: number;
+        backfilled: number;
+        database_url: string;
+      }>("/integrations/notion/sync-dna-applications", {
+        target_count: dnaTargetCount,
+      });
+      if (res.ok) {
+        setBannerNotice(
+          `Synchronized ${res.synced_to_notion} Career DNA applications into Notion! (${res.backfilled} existing pages backfilled with accurate company data)`
+        );
+        setTimeout(() => setBannerNotice(null), 7000);
+        await loadData();
+      }
+    } catch (e: any) {
+      setBannerNotice(e.message || "Failed to sync Career DNA to Notion.");
+      setTimeout(() => setBannerNotice(null), 6000);
+    } finally {
+      setSyncingDna(false);
     }
   };
 
@@ -178,9 +207,34 @@ export default function ApplicationsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {notion.connected ? (
             <>
+              <div className="flex items-center gap-1 bg-white border border-neutral-300 rounded p-0.5">
+                <select
+                  className="bg-transparent text-xs py-0.5 px-1.5 font-mono text-black outline-none cursor-pointer"
+                  value={dnaTargetCount}
+                  onChange={(e) => setDnaTargetCount(Number(e.target.value))}
+                  disabled={syncingDna}
+                >
+                  <option value={10}>10 Targets</option>
+                  <option value={25}>25 Targets</option>
+                  <option value={50}>50 Targets</option>
+                  <option value={100}>100 Targets</option>
+                  <option value={1000}>1k Targets</option>
+                  <option value={10000}>10k Targets</option>
+                  <option value={50000}>50k Targets</option>
+                </select>
+                <button
+                  className="btn btn-primary text-xs py-1 px-2.5 flex items-center gap-1 font-sans"
+                  disabled={syncingDna}
+                  onClick={handleSyncDnaToNotion}
+                >
+                  <Zap className={`w-3 h-3 ${syncingDna ? "animate-spin" : ""}`} />
+                  <span>{syncingDna ? "Syncing..." : "Sync Career DNA to Notion"}</span>
+                </button>
+              </div>
+
               <button
                 className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
                 disabled={syncing}
