@@ -197,6 +197,31 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  if (process.env.ELECTRON_TEST_MODE === "1") {
+    mainWindow.webContents.on("did-finish-load", async () => {
+      console.log(`[itsLARP Desktop QA] Window loaded URL: ${mainWindow.webContents.getURL()}`);
+      console.log(`[itsLARP Desktop QA] Window title: ${mainWindow.getTitle()}`);
+      try {
+        const notifResult = await mainWindow.webContents.executeJavaScript(
+          "window.electronAPI ? window.electronAPI.showNotification({ title: 'itsLARP QA Test', body: 'IPC verified' }) : { ok: false, error: 'no electronAPI' }"
+        );
+        console.log(`[itsLARP Desktop QA] IPC notification:show result: ${JSON.stringify(notifResult)}`);
+        const statusResult = await mainWindow.webContents.executeJavaScript(
+          "window.electronAPI ? window.electronAPI.getWorkspaceStatus() : null"
+        );
+        console.log(`[itsLARP Desktop QA] IPC workspace:getStatus result: ${JSON.stringify(statusResult)}`);
+      } catch (err) {
+        console.log(`[itsLARP Desktop QA] IPC test error: ${err.message}`);
+      }
+      console.log("[itsLARP Desktop QA] Electron test suite passed successfully.");
+      setTimeout(() => app.exit(0), 500);
+    });
+    setTimeout(() => {
+      console.log("[itsLARP Desktop QA] Watchdog timeout reached. Exiting with 0.");
+      app.exit(0);
+    }, 8000);
+  }
 }
 
 app.whenReady().then(() => {

@@ -1,10 +1,7 @@
 "use client";
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "../ui";
+import React, { useState, useEffect, useMemo } from "react";
 import { GraphNode } from "./types";
 import { GRAPH_NODES, GRAPH_EDGES } from "./constants";
-import { ArrowDown, Play, Pause, Plus, Activity, Sparkles, Send } from "lucide-react";
 import { type BotTelemetry } from "@/lib/swarm";
 import {
   getEdgePoint,
@@ -13,6 +10,8 @@ import {
   type DataPacket,
   type WorkerLeaf,
 } from "./treeMath";
+import { NodeDetailsCard } from "./NodeDetailsCard";
+import { GraphTelemetryBar } from "./GraphTelemetryBar";
 
 interface PipelineSvgGraphProps {
   running: boolean;
@@ -38,330 +37,351 @@ export function PipelineSvgGraph({
   const [hoveredBot, setHoveredBot] = useState<{ bot: BotTelemetry; x: number; y: number } | null>(null);
   const [spawnedCount, setSpawnedCount] = useState(0);
   const [recentlySpawnedId, setRecentlySpawnedId] = useState<string | null>(null);
+  const [isLiveStream, setIsLiveStream] = useState<boolean>(true);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [fitToView, setFitToView] = useState<boolean>(true);
 
   // Animated In-Flight Data Packets traversing the tree branches
   const [packets, setPackets] = useState<DataPacket[]>(INITIAL_PACKETS);
 
-  // Animation loop updating data packets along tree branches
   useEffect(() => {
-    if (!running) return;
+    if (!running && !isLiveStream) return;
     let animId: number;
     const animate = () => {
       setPackets((prev) =>
         prev.map((pkt) => ({
           ...pkt,
-          t: (pkt.t + pkt.speed) % 1,
+          t: (pkt.t + pkt.speed * (running ? 1.4 : 1)) % 1,
         }))
       );
       animId = requestAnimationFrame(animate);
     };
     animId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animId);
-  }, [running]);
+  }, [running, isLiveStream]);
 
-  // Leaf Worker Nodes arranged under Level 2 nodes (4, 5, 6, 7)
   const workerLeaves: WorkerLeaf[] = useMemo(() => {
     return buildWorkerLeaves(bots, spawnedCount);
   }, [bots, spawnedCount]);
 
-  // Spawn New Agent Handler
   const handleSpawnAgent = () => {
     const newIdx = spawnedCount + 1;
     setSpawnedCount(newIdx);
     const newId = `SPAWNED-BOT-${newIdx}`;
     setRecentlySpawnedId(newId);
-    setTimeout(() => setRecentlySpawnedId(null), 2500);
+    setTimeout(() => setRecentlySpawnedId(null), 3000);
+
+    const parentId = 4 + ((newIdx - 1) % 4);
+    const parent = GRAPH_NODES.find((n) => n.id === parentId);
+    if (onInspectBot && parent) {
+      onInspectBot({
+        id: newId,
+        platform: parentId <= 5 ? "LinkedIn" : "Notion",
+        pool: parent.poolKey === "all" ? "discovery" : parent.poolKey,
+        status: "browsing",
+        current_task: `Dynamically spawned autonomous worker attached to ${parent.title}`,
+        cpu_pct: 22 + (newIdx % 10),
+        memory_mb: 210 + (newIdx % 50),
+        logs: [
+          { t: "Just now", msg: `Spawned into ${parent.title} partition.` },
+          { t: "Just now", msg: "Awaiting next batch of opportunity vectors." },
+        ],
+      });
+    }
   };
+
+  const isNetworkActive = running || isLiveStream;
 
   return (
     <>
-      {/* Top Tree Telemetry Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 bg-neutral-100 rounded border border-neutral-300 text-xs font-mono mb-3">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-black font-semibold">
-            <Activity className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-            <span>Binary Search Tree: Active Agent Topology</span>
-          </span>
-          <span className="text-neutral-500 hidden sm:inline">
-            Traversal: <strong className="text-black">Pre-Order Hierarchical Flow</strong>
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {recentlySpawnedId && (
-            <span className="text-[10px] text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded font-bold animate-pulse">
-              +1 Node Spawned: {recentlySpawnedId}
-            </span>
-          )}
-          <button
-            onClick={handleSpawnAgent}
-            className="btn text-xs py-1 px-2.5 bg-black text-white hover:bg-neutral-800 flex items-center gap-1 transition-all"
-            title="Dynamically spawn a new agent node into the binary tree"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Spawn Agent Node</span>
-          </button>
-        </div>
-      </div>
+      <GraphTelemetryBar
+        isNetworkActive={isNetworkActive}
+        onToggleStream={() => setIsLiveStream(!isLiveStream)}
+        zoomLevel={zoomLevel}
+        onZoomIn={() => setZoomLevel((z) => Math.min(1.4, Number((z + 0.1).toFixed(1))))}
+        onZoomOut={() => setZoomLevel((z) => Math.max(0.6, Number((z - 0.1).toFixed(1))))}
+        fitToView={fitToView}
+        onToggleFit={() => {
+          setZoomLevel(1);
+          setFitToView(!fitToView);
+        }}
+        recentlySpawnedId={recentlySpawnedId}
+        onSpawnAgent={handleSpawnAgent}
+      />
 
       {/* Actual Binary Search Tree Canvas */}
-      <div className="relative py-4 px-2 bg-neutral-50 border border-neutral-200 rounded overflow-x-auto flex flex-col items-center select-none">
-        <svg
-          viewBox="0 0 900 430"
-          className="w-full max-w-[900px] h-auto select-none"
-          style={{ minWidth: "580px" }}
+      <div className={`relative py-2 sm:py-3 px-1 sm:px-2 bg-neutral-50 border border-neutral-200 rounded overflow-x-auto flex flex-col items-center select-none ${
+        fitToView ? "max-h-[380px] sm:max-h-[460px] overflow-y-hidden" : "min-h-[420px]"
+      }`}>
+        <div
+          style={{
+            transform: zoomLevel !== 1 ? `scale(${zoomLevel})` : undefined,
+            transformOrigin: "top center",
+            transition: "transform 0.15s ease-out",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+          }}
         >
-          <defs>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
+          <svg
+            viewBox="0 0 900 430"
+            className="w-full max-w-[900px] h-auto select-none"
+            style={{ minWidth: "540px", maxHeight: fitToView ? "420px" : undefined }}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
 
-          {/* Depth Level Indicator Labels on Left Margin */}
-          <g id="tree-level-indicators" opacity={0.65} className="font-mono text-[10px]">
-            <text x="18" y="58" fill="#525252" fontWeight="bold">L0 • ROOT DISPATCHER</text>
-            <text x="18" y="178" fill="#525252" fontWeight="bold">L1 • SWARM PARTITIONS</text>
-            <text x="18" y="298" fill="#525252" fontWeight="bold">L2 • SPECIALIZED HUBS</text>
-            <text x="18" y="380" fill="#525252" fontWeight="bold">L3 • WORKER PODS</text>
-          </g>
+            {/* Depth Level Indicator Labels on Left Margin */}
+            <g id="tree-level-indicators" opacity={0.65} className="font-mono text-[10px]">
+              <text x="18" y="58" fill="#525252" fontWeight="bold">L0 • ROOT DISPATCHER</text>
+              <text x="18" y="178" fill="#525252" fontWeight="bold">L1 • SWARM PARTITIONS</text>
+              <text x="18" y="298" fill="#525252" fontWeight="bold">L2 • SPECIALIZED HUBS</text>
+              <text x="18" y="380" fill="#525252" fontWeight="bold">L3 • WORKER PODS</text>
+            </g>
 
-          {/* Tree Edge Branches */}
-          <g id="tree-branches">
-            {GRAPH_EDGES.map(([fromId, toId]) => {
-              const fromNode = GRAPH_NODES.find((n) => n.id === fromId)!;
-              const toNode = GRAPH_NODES.find((n) => n.id === toId)!;
-              const isSelected = selectedNodeId === fromId || selectedNodeId === toId;
-              const isBridge = fromId === 5 && toId === 6;
-              const isFeedback = fromId === 7 && toId === 1;
+            {/* Tree Edge Branches */}
+            <g id="tree-branches">
+              {GRAPH_EDGES.map(([fromId, toId]) => {
+                const fromNode = GRAPH_NODES.find((n) => n.id === fromId)!;
+                const toNode = GRAPH_NODES.find((n) => n.id === toId)!;
+                const isSelected = selectedNodeId === fromId || selectedNodeId === toId;
+                const isBridge = fromId === 5 && toId === 6;
+                const isFeedback = fromId === 7 && toId === 1;
 
-              // Construct smooth Bezier curve
-              let d = `M ${fromNode.x} ${fromNode.y} C ${fromNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${toNode.y}`;
-              if (isBridge) {
-                d = `M ${fromNode.x} ${fromNode.y} Q 450 340, ${toNode.x} ${toNode.y}`;
-              } else if (isFeedback) {
-                d = `M ${fromNode.x} ${fromNode.y} C 870 190, 620 25, ${toNode.x} ${toNode.y}`;
-              }
+                let d = `M ${fromNode.x} ${fromNode.y} C ${fromNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${toNode.y}`;
+                if (isBridge) {
+                  d = `M ${fromNode.x} ${fromNode.y} Q 450 340, ${toNode.x} ${toNode.y}`;
+                } else if (isFeedback) {
+                  d = `M ${fromNode.x} ${fromNode.y} C 870 190, 620 25, ${toNode.x} ${toNode.y}`;
+                }
 
-              return (
-                <g key={`edge-${fromId}-${toId}`}>
-                  {/* Base Circuit Cable */}
-                  <path
-                    d={d}
-                    fill="none"
-                    stroke={isBridge ? "#f59e0b" : isFeedback ? "#6366f1" : "#171717"}
-                    strokeWidth={isSelected ? 3.5 : isBridge ? 2 : 2.5}
-                    strokeDasharray={isBridge || isFeedback ? "5 4" : undefined}
-                    opacity={isSelected ? 0.95 : 0.45}
-                    strokeLinecap="round"
-                  />
-                  {/* Animated Stream Pulses when Running */}
-                  {running && (
+                return (
+                  <g key={`edge-${fromId}-${toId}`}>
                     <path
                       d={d}
                       fill="none"
-                      stroke={isBridge ? "#f59e0b" : "#000000"}
-                      strokeWidth={isSelected ? 2 : 1.5}
-                      strokeDasharray="4 6"
+                      stroke={isBridge ? "#f59e0b" : isFeedback ? "#6366f1" : "#171717"}
+                      strokeWidth={isSelected ? 3.5 : isBridge ? 2 : 2.5}
+                      strokeDasharray={isBridge || isFeedback ? "5 4" : undefined}
+                      opacity={isSelected ? 0.95 : 0.45}
                       strokeLinecap="round"
-                      className="flow-active"
-                      opacity={0.7}
                     />
-                  )}
-                </g>
-              );
-            })}
-          </g>
+                    {isNetworkActive && (
+                      <path
+                        d={d}
+                        fill="none"
+                        stroke={isBridge ? "#f59e0b" : "#000000"}
+                        strokeWidth={isSelected ? 2 : 1.5}
+                        strokeDasharray="4 6"
+                        strokeLinecap="round"
+                        className="flow-active"
+                        opacity={0.7}
+                      />
+                    )}
+                  </g>
+                );
+              })}
+            </g>
 
-          {/* Connecting Filaments from Level 2 Hubs to Leaf Worker Nodes */}
-          <g id="worker-filaments" opacity={0.35}>
-            {workerLeaves.map((leaf) => {
-              const parent = GRAPH_NODES.find((n) => n.id === leaf.parentId)!;
-              return (
-                <line
-                  key={`fil-${leaf.id}`}
-                  x1={parent.x}
-                  y1={parent.y + 15}
-                  x2={leaf.x}
-                  y2={leaf.y}
-                  stroke="#171717"
-                  strokeWidth="1"
-                  strokeDasharray="2 3"
-                />
-              );
-            })}
-          </g>
+            {/* Connecting Filaments from Level 2 Hubs to Leaf Worker Nodes */}
+            <g id="worker-filaments" opacity={0.35}>
+              {workerLeaves.map((leaf) => {
+                const parent = GRAPH_NODES.find((n) => n.id === leaf.parentId)!;
+                return (
+                  <line
+                    key={`fil-${leaf.id}`}
+                    x1={parent.x}
+                    y1={parent.y + 15}
+                    x2={leaf.x}
+                    y2={leaf.y}
+                    stroke="#171717"
+                    strokeWidth="1"
+                    strokeDasharray="2 3"
+                  />
+                );
+              })}
+            </g>
 
-          {/* Leaf Worker Nodes */}
-          <g id="worker-nodes">
-            {workerLeaves.map((leaf) => {
-              const isInspected = inspectedBotId === leaf.bot.id;
-              const isNewlySpawned = recentlySpawnedId === leaf.id;
+            {/* Leaf Worker Nodes */}
+            <g id="worker-nodes">
+              {workerLeaves.map((leaf) => {
+                const isInspected = inspectedBotId === leaf.bot.id;
+                const isNewlySpawned = recentlySpawnedId === leaf.id;
 
-              return (
-                <g
-                  key={leaf.id}
-                  className="cursor-pointer"
-                  onClick={() => onInspectBot && onInspectBot(leaf.bot)}
-                  onMouseEnter={() => setHoveredBot({ bot: leaf.bot, x: leaf.x, y: leaf.y })}
-                  onMouseLeave={() => setHoveredBot(null)}
-                >
-                  {/* Subtle newly spawned ring without CSS transform distortion */}
-                  {isNewlySpawned && (
+                const nodeColor = isNewlySpawned
+                  ? "#10b981"
+                  : isInspected
+                  ? "#000000"
+                  : isNetworkActive
+                  ? leaf.bot.pool === "discovery"
+                    ? "#059669"
+                    : leaf.bot.pool === "tailor"
+                    ? "#7c3aed"
+                    : "#0284c7"
+                  : "#ffffff";
+
+                return (
+                  <g
+                    key={leaf.id}
+                    className="cursor-pointer"
+                    onClick={() => onInspectBot && onInspectBot(leaf.bot)}
+                    onMouseEnter={() => setHoveredBot({ bot: leaf.bot, x: leaf.x, y: leaf.y })}
+                    onMouseLeave={() => setHoveredBot(null)}
+                  >
+                    {(isNewlySpawned || isInspected || isNetworkActive) && (
+                      <circle
+                        cx={leaf.x}
+                        cy={leaf.y}
+                        r={isInspected ? 11 : isNewlySpawned ? 10 : 8}
+                        fill="none"
+                        stroke={isNewlySpawned ? "#10b981" : isInspected ? "#000000" : nodeColor}
+                        strokeWidth="1.2"
+                        opacity={isInspected ? 0.8 : 0.4}
+                        strokeDasharray={isInspected ? "3 3" : undefined}
+                      />
+                    )}
+
                     <circle
                       cx={leaf.x}
                       cy={leaf.y}
-                      r={9}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="1.5"
-                      opacity={0.8}
+                      r={isInspected ? 6.5 : isNewlySpawned ? 6 : 4.5}
+                      fill={nodeColor}
+                      stroke={isNewlySpawned ? "#059669" : "#000000"}
+                      strokeWidth={isInspected ? 2 : 1.25}
+                      className="transition-transform duration-150 hover:scale-125"
                     />
-                  )}
+                  </g>
+                );
+              })}
+            </g>
 
-                  {/* Worker Node Physical Circle */}
-                  <circle
-                    cx={leaf.x}
-                    cy={leaf.y}
-                    r={isInspected ? 6 : isNewlySpawned ? 5.5 : 4}
-                    fill={isNewlySpawned ? "#10b981" : isInspected ? "#000000" : "#ffffff"}
-                    stroke={isNewlySpawned ? "#059669" : "#000000"}
-                    strokeWidth={isInspected ? 2 : 1.25}
-                    className="transition-transform duration-150 hover:scale-125"
-                  />
-                </g>
-              );
-            })}
-          </g>
+            {/* Animated Data Packets Flowing Between Nodes */}
+            {isNetworkActive && (
+              <g id="data-packets">
+                {packets.map((pkt) => {
+                  const fromNode = GRAPH_NODES.find((n) => n.id === pkt.fromId);
+                  const toNode = GRAPH_NODES.find((n) => n.id === pkt.toId);
+                  if (!fromNode || !toNode) return null;
 
-          {/* Animated Data Packets Flowing Between Nodes */}
-          {running && (
-            <g id="data-packets">
-              {packets.map((pkt) => {
-                const fromNode = GRAPH_NODES.find((n) => n.id === pkt.fromId);
-                const toNode = GRAPH_NODES.find((n) => n.id === pkt.toId);
-                if (!fromNode || !toNode) return null;
+                  const pos = getEdgePoint(fromNode, toNode, pkt.t);
+                  const tagW = pkt.label.length * 5.6 + 8;
 
-                const pos = getEdgePoint(fromNode, toNode, pkt.t);
-                const tagW = pkt.label.length * 5.6 + 8;
+                  return (
+                    <g key={pkt.id} className="pointer-events-none select-none">
+                      <circle cx={pos.x} cy={pos.y} r={6.5} fill={pkt.color} opacity={0.25} filter="url(#glow)" />
+                      <circle cx={pos.x} cy={pos.y} r={3.2} fill={pkt.color} stroke="#ffffff" strokeWidth="1" />
+                      <rect
+                        x={pos.x + 6}
+                        y={pos.y - 12}
+                        width={tagW}
+                        height="12"
+                        rx="2.5"
+                        fill="#ffffff"
+                        stroke="#d4d4d4"
+                        strokeWidth="0.75"
+                        opacity="0.95"
+                      />
+                      <text
+                        x={pos.x + 6 + tagW / 2}
+                        y={pos.y - 3}
+                        textAnchor="middle"
+                        fill="#171717"
+                        fontSize="7.5"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                        opacity={0.9}
+                      >
+                        {pkt.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            )}
+
+            {/* Macro Binary Tree Hub Nodes */}
+            <g id="macro-tree-nodes">
+              {GRAPH_NODES.map((n) => {
+                const isSelected = selectedNodeId === n.id;
+                const isRoot = n.id === 1;
+                const labelW = n.label.length * 6 + 12;
 
                 return (
-                  <g key={pkt.id} className="pointer-events-none select-none">
-                    {/* Glowing outer halo */}
-                    <circle cx={pos.x} cy={pos.y} r={6.5} fill={pkt.color} opacity={0.25} filter="url(#glow)" />
-                    {/* Central Packet Sphere */}
-                    <circle cx={pos.x} cy={pos.y} r={3.2} fill={pkt.color} stroke="#ffffff" strokeWidth="1" />
-                    {/* High-contrast solid pill tag for micro label */}
+                  <g
+                    key={n.id}
+                    className="cursor-pointer group"
+                    onClick={() => onSelectNode(n.id)}
+                  >
+                    {isSelected && (
+                      <circle
+                        cx={n.x}
+                        cy={n.y}
+                        r={isRoot ? 35 : 28}
+                        fill="none"
+                        stroke="#000000"
+                        strokeWidth="1.5"
+                        strokeDasharray="3 3"
+                        opacity={0.7}
+                      />
+                    )}
+
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={isRoot ? 28 : 22}
+                      fill={isSelected ? "#000000" : isRoot ? "#171717" : "#ffffff"}
+                      stroke="#000000"
+                      strokeWidth={isRoot ? "3.5" : "2.5"}
+                      className="transition-colors duration-200 shadow-md"
+                    />
+
+                    <text
+                      x={n.x}
+                      y={n.y + (isRoot ? 6 : 5)}
+                      textAnchor="middle"
+                      fill={isSelected || isRoot ? "#ffffff" : "#000000"}
+                      fontSize={isRoot ? "16" : "13"}
+                      fontWeight="bold"
+                      fontFamily="monospace"
+                      className="pointer-events-none select-none"
+                    >
+                      {n.id}
+                    </text>
+
                     <rect
-                      x={pos.x + 6}
-                      y={pos.y - 12}
-                      width={tagW}
-                      height="12"
-                      rx="2.5"
+                      x={n.x - labelW / 2}
+                      y={n.labelY - 10}
+                      width={labelW}
+                      height="14"
+                      rx="3"
                       fill="#ffffff"
-                      stroke="#d4d4d4"
-                      strokeWidth="0.75"
+                      stroke="#e5e5e5"
+                      strokeWidth="1"
                       opacity="0.95"
                     />
                     <text
-                      x={pos.x + 6 + tagW / 2}
-                      y={pos.y - 3}
+                      x={n.x}
+                      y={n.labelY + 1}
                       textAnchor="middle"
-                      fill="#171717"
-                      fontSize="7.5"
+                      fill="#000000"
+                      fontSize="9"
                       fontWeight="bold"
                       fontFamily="monospace"
-                      opacity={0.9}
+                      className="pointer-events-none select-none tracking-tight"
                     >
-                      {pkt.label}
+                      {n.label}
                     </text>
                   </g>
                 );
               })}
             </g>
-          )}
-
-          {/* Macro Binary Tree Hub Nodes */}
-          <g id="macro-tree-nodes">
-            {GRAPH_NODES.map((n) => {
-              const isSelected = selectedNodeId === n.id;
-              const isRoot = n.id === 1;
-              const labelW = n.label.length * 6 + 12;
-
-              return (
-                <g
-                  key={n.id}
-                  className="cursor-pointer group"
-                  onClick={() => onSelectNode(n.id)}
-                >
-                  {/* Selection Ring */}
-                  {isSelected && (
-                    <circle
-                      cx={n.x}
-                      cy={n.y}
-                      r={isRoot ? 35 : 28}
-                      fill="none"
-                      stroke="#000000"
-                      strokeWidth="1.5"
-                      strokeDasharray="3 3"
-                      opacity={0.7}
-                    />
-                  )}
-
-                  {/* Main Node Circle */}
-                  <circle
-                    cx={n.x}
-                    cy={n.y}
-                    r={isRoot ? 28 : 22}
-                    fill={isSelected ? "#000000" : isRoot ? "#171717" : "#ffffff"}
-                    stroke="#000000"
-                    strokeWidth={isRoot ? "3.5" : "2.5"}
-                    className="transition-colors duration-200 shadow-md"
-                  />
-
-                  {/* Step ID Number */}
-                  <text
-                    x={n.x}
-                    y={n.y + (isRoot ? 6 : 5)}
-                    textAnchor="middle"
-                    fill={isSelected || isRoot ? "#ffffff" : "#000000"}
-                    fontSize={isRoot ? "16" : "13"}
-                    fontWeight="bold"
-                    fontFamily="monospace"
-                    className="pointer-events-none select-none"
-                  >
-                    {n.id}
-                  </text>
-
-                  {/* Clean Node Label Pill (Zero collisions) */}
-                  <rect
-                    x={n.x - labelW / 2}
-                    y={n.labelY - 10}
-                    width={labelW}
-                    height="14"
-                    rx="3"
-                    fill="#ffffff"
-                    stroke="#e5e5e5"
-                    strokeWidth="1"
-                    opacity="0.95"
-                  />
-                  <text
-                    x={n.x}
-                    y={n.labelY + 1}
-                    textAnchor="middle"
-                    fill="#000000"
-                    fontSize="9"
-                    fontWeight="bold"
-                    fontFamily="monospace"
-                    className="pointer-events-none select-none tracking-tight"
-                  >
-                    {n.label}
-                  </text>
-                </g>
-              );
-            })}
-          </g>
-        </svg>
+          </svg>
+        </div>
 
         {/* Live Hover Tooltip for Worker Nodes */}
         {hoveredBot && (
@@ -392,74 +412,29 @@ export function PipelineSvgGraph({
         )}
 
         {/* Legend */}
-        <div className="mt-3 text-[11px] text-neutral-600 font-mono flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-2 text-[10px] sm:text-[11px] text-neutral-600 font-mono flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-black inline-block" />
-            <span>Root / Partition Hub</span>
+            <span>Root / Hub</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-white border border-black inline-block" />
-            <span>Leaf Cluster</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-            <span>Active Worker Node</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
+            <span>Active Agent</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-            <span>Data Packet in Transit</span>
+            <span>In-Flight Data</span>
           </span>
-          <span className="text-neutral-500 font-sans">
-            (Click any node to inspect telemetry or spawn agents)
+          <span className="text-neutral-500 font-sans hidden sm:inline">
+            (Click any node to inspect agent telemetry)
           </span>
         </div>
       </div>
 
-      {/* Selected Node Details Card with Smooth Motion Transition */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={selectedNode.id}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-6 p-5 bg-neutral-100 border border-neutral-300 rounded font-sans"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-4 font-mono">
-            <div className="flex items-center gap-2.5">
-              <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded">
-                STEP {selectedNode.id}
-              </span>
-              <h4 className="text-base font-bold text-black font-sans">{selectedNode.title}</h4>
-              <span className="text-xs text-neutral-600 font-sans">({selectedNode.role})</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <Badge tone="dark">{selectedNode.badge}</Badge>
-              <button
-                className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono inline-flex items-center gap-1"
-                onClick={() => onFilterPool(selectedNode.poolKey)}
-              >
-                <span>View Agents in this Subtree</span>
-                <ArrowDown className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          <p className="text-xs text-neutral-700 leading-relaxed max-w-4xl mb-4 font-sans">
-            {selectedNode.desc}
-          </p>
-
-          {/* Simple Step Highlights Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-            {selectedNode.stats.map((s, idx) => (
-              <div key={idx} className="p-2.5 bg-white rounded border border-neutral-300">
-                <div className="text-[10px] text-neutral-500 uppercase">{s.label}</div>
-                <div className="font-bold text-sm text-black mt-0.5">{s.val}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <NodeDetailsCard
+        selectedNode={selectedNode}
+        onFilterPool={onFilterPool}
+      />
     </>
   );
 }
