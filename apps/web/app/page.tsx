@@ -1,4 +1,3 @@
-"use client";
 import { ScrollProgressBar, InfiniteLoopMarquee } from "@/components/motion";
 import {
   LandingHeader,
@@ -15,16 +14,14 @@ import {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg text-ink selection:bg-black selection:text-white relative">
-      {/* Top Scroll Motion Progress Bar */}
       <ScrollProgressBar />
-
       {/* Top Navigation Header */}
       <LandingHeader />
 
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Brand Logo Carousel (Carousell, LinkedIn, JobStreet, Indeed, Notion, etc.) */}
+      {/* Brand Logo Carousel */}
       <BrandLogoCarousel />
 
       {/* Real Demo Screen Recordings Showcase */}
@@ -47,31 +44,16 @@ export default function LandingPage() {
         speed={28}
       />
 
-      {/* Live Interactive Workforce Demo Section */}
+      {/* Workforce Interactive Demo / Pipeline Section */}
       <WorkforceDemoSection />
 
-      {/* The 6 Core Guarantees Grid */}
+      {/* Guarantees & Operating Principles */}
       <PrinciplesSection />
 
-      {/* Simple 4-Step Process Section */}
+      {/* Step-by-Step Architecture Pipeline */}
       <ProcessStepsSection />
 
-      {/* Second Infinite Looping Text Marquee Strip */}
-      <InfiniteLoopMarquee
-        items={[
-          "Carousell Jobs Search",
-          "LinkedIn Auto-Search",
-          "JobStreet Integration",
-          "Indeed Job Matching",
-          "Tailored Resume Creation",
-          "1-Click Notion Tracking",
-          "Zero Fake Skills",
-          "1-Tap Review & Approval",
-        ]}
-        speed={24}
-      />
-
-      {/* Call to Action */}
+      {/* Ready to Start CTA Banner */}
       <CtaSection />
 
       {/* Footer */}
