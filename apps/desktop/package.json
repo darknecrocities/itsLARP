@@ -1,0 +1,56 @@
+{
+  "name": "itslarp-desktop",
+  "version": "1.0.0",
+  "description": "itsLARP - Native AI Job-Hunting Workforce & Career OS",
+  "main": "src/main.js",
+  "author": "itsLARP Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron src/main.js",
+    "dev": "cross-env DESKTOP_DEV=1 electron src/main.js",
+    "pack": "electron-builder --dir",
+    "dist:mac": "electron-builder --mac dmg zip --arm64",
+    "dist:all": "electron-builder -m --arm64 --x64",
+    "verify": "node scripts/verify-builds.js"
+  },
+  "build": {
+    "appId": "com.itslarp.desktop",
+    "productName": "itsLARP",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "dmg": {
+      "title": "itsLARP Desktop",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    }
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "devDependencies": {
+    "electron": "^34.5.8",
+    "electron-builder": "^26.15.3"
+  }
+}
