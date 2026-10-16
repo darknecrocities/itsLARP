@@ -111,6 +111,67 @@ export type JobPreferences = {
   blacklistedCompanies: string[];
 };
 
+export type ResumeFormatKey =
+  | "apa_7th"
+  | "harvard_executive"
+  | "silicon_valley_modern"
+  | "ieee_engineering"
+  | "ats_strict";
+
+export type ApplicationConfig = {
+  // Group A: Resume Design & Tailoring (1-7)
+  resumeFormat: ResumeFormatKey;
+  bulletRewriteAggressiveness: "conservative" | "balanced" | "aggressive";
+  skillGroupingMode: "categorized" | "flat" | "relevance_first";
+  projectHighlightCount: number;
+  quantifiableMetricsEmphasis: boolean;
+  keywordMirroringLevel: "exact" | "semantic" | "minimal";
+  pageDensity: "compact" | "comfortable";
+  // Group B: Cover Letter & Screening Defaults (8-14)
+  coverLetterTone: "formal" | "direct_technical" | "executive" | "none";
+  coverLetterMaxWords: number;
+  compensationStrategy: "market_aligned" | "explicit_floor" | "negotiable";
+  minimumBaseSalary: number;
+  workAuthorization:
+    | "authorized_no_sponsor"
+    | "requires_sponsorship"
+    | "citizen_permanent"
+    | "global_contractor";
+  noticePeriod: "immediate" | "2_weeks" | "30_days" | "flexible";
+  relocationWillingness: "no_remote_only" | "open_with_assistance" | "open_self_funded";
+  // Group C: Job Filtering & Guardrails (15-18)
+  minMatchThreshold: number;
+  remoteWorkplacePreference: "remote_only" | "remote_preferred" | "hybrid_ok" | "onsite_ok";
+  companyBlacklist: string;
+  maxDailyApplications: number;
+  // Group D: Autonomous Agent Behavior (19-20)
+  autoApproveThreshold: number;
+  humanInTheLoopPause: boolean;
+};
+
+export const DEFAULT_APP_CONFIG: ApplicationConfig = {
+  resumeFormat: "apa_7th",
+  bulletRewriteAggressiveness: "balanced",
+  skillGroupingMode: "relevance_first",
+  projectHighlightCount: 3,
+  quantifiableMetricsEmphasis: true,
+  keywordMirroringLevel: "semantic",
+  pageDensity: "comfortable",
+  coverLetterTone: "direct_technical",
+  coverLetterMaxWords: 200,
+  compensationStrategy: "market_aligned",
+  minimumBaseSalary: 120000,
+  workAuthorization: "authorized_no_sponsor",
+  noticePeriod: "2_weeks",
+  relocationWillingness: "no_remote_only",
+  minMatchThreshold: 60,
+  remoteWorkplacePreference: "remote_preferred",
+  companyBlacklist: "",
+  maxDailyApplications: 100,
+  autoApproveThreshold: 70,
+  humanInTheLoopPause: false,
+};
+
 export type AgentQuestion = {
   id: string;
   run_id?: string;
@@ -159,6 +220,8 @@ type S = {
   fetchEmailStatus: () => Promise<void>;
   jobPreferences: JobPreferences;
   setJobPreferences: (p: Partial<JobPreferences>) => void;
+  appConfig: ApplicationConfig;
+  setAppConfig: (c: Partial<ApplicationConfig>) => void;
 };
 
 export const useStore = create<S>()(
@@ -310,6 +373,9 @@ export const useStore = create<S>()(
       },
       setJobPreferences: (p) =>
         set((s) => ({ jobPreferences: { ...s.jobPreferences, ...p } })),
+      appConfig: DEFAULT_APP_CONFIG,
+      setAppConfig: (c) =>
+        set((s) => ({ appConfig: { ...s.appConfig, ...c } })),
     }),
     {
       name: "howtolarped_state",
@@ -322,6 +388,7 @@ export const useStore = create<S>()(
           notion: { ...s.notion, token: "" },
           emailIntegration: s.emailIntegration,
           jobPreferences: s.jobPreferences,
+          appConfig: s.appConfig,
         }) as unknown as S,
     }
   )
