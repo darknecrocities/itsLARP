@@ -27,6 +27,7 @@ apps/web/public/releases/*.exe
 *.log
 npm-debug.log*
 yarn-debug.log*
+apps/api/data/screenshots/*.png
 
 # Environment
 .env
