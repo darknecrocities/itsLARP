@@ -161,6 +161,27 @@ def get_or_create_screenshot(
             f.write(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc`\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82")
         return target_png
 
+    # Attempt 1: If real live job URL is provided, capture actual live job posting webpage
+    if url and url.startswith("http") and not any(h in url for h in ["localhost", "127.0.0.1"]):
+        try:
+            cmd = [
+                chrome,
+                "--headless=new",
+                "--disable-gpu",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--virtual-time-budget=3500",
+                "--window-size=1280,820",
+                f"--screenshot={target_png}",
+                url,
+            ]
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
+            if os.path.exists(target_png) and os.path.getsize(target_png) > 15000:
+                return target_png
+        except Exception:
+            pass
+
+    # Attempt 2: Render authentic browser-viewport application submission portal
     temp_html = f"/tmp/{clean_app_id}_portal.html"
     try:
         html_content = _build_submission_html(

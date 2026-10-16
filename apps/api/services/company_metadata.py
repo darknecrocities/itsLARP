@@ -10,7 +10,7 @@ COMPANIES_DB: Dict[str, Dict[str, Any]] = {
         "background": "Frontier AI safety and research company developing Claude, constitutional AI models, and scalable alignment infrastructure.",
         "linkedin": "https://www.linkedin.com/company/anthropicresearch",
         "website": "https://anthropic.com",
-        "careers": "https://jobs.anthropic.com",
+        "careers": "https://www.anthropic.com/careers",
         "roles": ["Lead AI Systems Engineer", "Principal Researcher", "Distributed Inference Engineer", "Safety Alignment Engineer"]
     },
     "OpenAI": {
@@ -18,7 +18,7 @@ COMPANIES_DB: Dict[str, Dict[str, Any]] = {
         "background": "AI research and deployment company developing general-purpose artificial intelligence, GPT models, and ChatGPT systems.",
         "linkedin": "https://www.linkedin.com/company/openai",
         "website": "https://openai.com",
-        "careers": "https://openai.com/careers",
+        "careers": "https://jobs.ashbyhq.com/openai",
         "roles": ["Staff AI Engineer", "Kernel Engineer", "Distributed Training Architect", "Full Stack Platform Engineer"]
     },
     "Vercel": {
@@ -178,6 +178,6 @@ def get_company_info(raw_company: str) -> Dict[str, Any]:
         "background": f"{clean_name} is a high-growth technology organization engineering scalable distributed systems, cloud infrastructure, and data platforms.",
         "linkedin": f"https://www.linkedin.com/company/{slug}",
         "website": f"https://{slug}.com",
-        "careers": f"https://jobs.{slug}.com",
+        "careers": f"https://{slug}.com/careers",
         "roles": ["Senior Systems Engineer", "AI Platform Specialist", "Full Stack Developer"]
     }

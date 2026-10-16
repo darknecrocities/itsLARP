@@ -203,11 +203,14 @@ async def backfill_notion_pages(token: str, database_id: str) -> dict:
                 if not curr_pdf:
                     patch_props["Resume PDF"] = {"url": "http://localhost:8000/profile/apa-resume/download?format=html"}
 
+            if "URL" in db_props:
+                curr_url = props.get("URL", {}).get("url") or ""
+                if not curr_url or "jobs.anthropic.com" in curr_url or curr_url.startswith("http://localhost"):
+                    patch_props["URL"] = {"url": info["careers"]}
+
             if "Submission Screenshot" in db_props:
-                curr_ss = props.get("Submission Screenshot", {}).get("url")
-                if not curr_ss:
-                    app_id = f"dna_{company.lower().replace(' ', '')}"
-                    patch_props["Submission Screenshot"] = {"url": f"http://localhost:8000/applications/{app_id}/screenshot"}
+                app_id = f"dna_{company.lower().replace(' ', '')}"
+                patch_props["Submission Screenshot"] = {"url": f"http://localhost:8000/applications/{app_id}/screenshot"}
 
             if patch_props:
                 res = await c.patch(f"{API}/pages/{p['id']}", headers=_h(token), json={"properties": patch_props})
