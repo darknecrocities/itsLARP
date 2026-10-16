@@ -7,32 +7,24 @@ import { FIELDS, type Job } from "@/lib/data";
 import { type Change } from "@/lib/profile";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, ErrorBox, PageHeader } from "@/components/ui";
-import { Check, X, ExternalLink, RotateCcw, AlertCircle, ShieldAlert } from "lucide-react";
+import { Check, ExternalLink, RotateCcw, AlertCircle, ShieldAlert, SlidersHorizontal } from "lucide-react";
 import { ClaimVerificationTable, type ClaimItem } from "@/components/apply/ClaimVerificationTable";
+import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 
-type VerificationResult = {
-  passed: boolean;
-  blocked: number;
-  claims: ClaimItem[];
-};
-
+type VerificationResult = { passed: boolean; blocked: number; claims: ClaimItem[] };
 type PrepareResponse = {
   job_id: string;
-  match: {
-    score: number;
-    label: string;
-    breakdown: Record<string, number>;
-    strong: string[];
-    missing: string[];
-  };
+  match: { score: number; label: string; breakdown: Record<string, number>; strong: string[]; missing: string[] };
+  resume_format?: string;
+  resume_format_label?: string;
+  resume_text?: string;
+  resume_html?: string;
   changes: Change[];
   cover: string;
   answers: Record<string, string>;
   verification: VerificationResult;
 };
-
 type Phase = "idle" | "running" | "verifying" | "done" | "failed";
-
 type DuplicateCheckInfo = {
   has_application: boolean;
   app_id?: string;
@@ -46,19 +38,16 @@ type DuplicateCheckInfo = {
 
 export default function ApplyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { profile, upsertApp, notion } = useStore();
-
-  const {
-    data: job,
-    isLoading: jobLoading,
-    error: jobError,
-  } = useQuery({
+  const { profile, upsertApp, appConfig } = useStore();
+  const { data: job, isLoading: jobLoading, error: jobError } = useQuery({
     queryKey: ["job", id],
     queryFn: () => apiGet<Job>(`/jobs/${id}`),
     retry: 1,
   });
 
   const [changes, setChanges] = useState<Change[]>([]);
+  const [resumeText, setResumeText] = useState("");
+  const [resumeFormatLabel, setResumeFormatLabel] = useState("APA 7th Edition");
   const [cover, setCover] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [ver, setVer] = useState<VerificationResult | null>(null);
@@ -68,8 +57,8 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
   const [approved, setApproved] = useState(false);
   const [dupInfo, setDupInfo] = useState<DuplicateCheckInfo | null>(null);
   const [forceReapply, setForceReapply] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
-  // Check duplicate status whenever job is loaded
   useEffect(() => {
     if (job) {
       if (job.match) setMatchData(job.match);
@@ -95,9 +84,12 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
       const res = await api<PrepareResponse>("/applications/prepare", {
         profile,
         job_id: job.id,
+        config: appConfig,
       });
 
-      setChanges(res.changes);
+      setChanges(res.changes.map((c) => ({ ...c, status: "accepted" })));
+      setResumeText(res.resume_text || "");
+      setResumeFormatLabel(res.resume_format_label || appConfig.resumeFormat);
       setCover(res.cover);
       setAnswers(res.answers);
       setVer(res.verification);
@@ -121,7 +113,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
   async function approve() {
     if (!job) return;
     setApproved(true);
-    const tailoredResume = accepted.map((c) => `${c.section}:\n${c.proposed}`).join("\n\n");
+    const tailoredResume = resumeText || accepted.map((c) => `${c.section}:\n${c.proposed}`).join("\n\n");
 
     try {
       const res = await api<{ ok: boolean; duplicate?: boolean; message?: string }>("/applications/approve", {
@@ -161,7 +153,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
           at: new Date().toISOString(),
           text: forceReapply
             ? `Re-applied to position after previous ${dupInfo?.status || "attempt"}`
-            : "Approved by candidate and recorded in tracker",
+            : `Approved ${resumeFormatLabel} tailored package and recorded in tracker`,
         },
       ],
     });
@@ -192,7 +184,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
   if (!profile.skills.length) {
     return (
       <Empty title="Career DNA required" hint="Upload your resume or connect GitHub first to unlock tailoring.">
-        <Link href="/onboarding" className="btn btn-primary">Build Career DNA</Link>
+        <Link href="/profile" className="btn btn-primary">Build Career DNA</Link>
       </Empty>
     );
   }
@@ -201,9 +193,17 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
     <>
       <PageHeader
         title={`${job.title} — ${job.company}`}
-        sub={`${job.location} · ${job.salary || "Salary not listed"} · Source: ${job.source}`}
+        sub={`${job.location} · ${job.salary || "Salary not listed"} · Source: ${job.source} · Active Format: ${appConfig.resumeFormat}`}
         action={
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setShowConfig(!showConfig)}
+              className={`btn text-xs inline-flex items-center gap-1.5 ${showConfig ? "bg-black text-white" : ""}`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>20 Apply Configs</span>
+            </button>
             {job.url && (
               <a
                 href={job.url}
@@ -225,6 +225,12 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
           </div>
         }
       />
+
+      {showConfig && (
+        <div className="mb-6">
+          <ApplicationConfigPanel compact />
+        </div>
+      )}
 
       {/* Duplicate Application Guard Notification */}
       {dupInfo?.has_application && dupInfo.is_ongoing && !forceReapply && (

@@ -6,34 +6,29 @@ import { useStore } from "@/lib/store";
 import { Badge, PageHeader, Stat, Reveal, ErrorBox } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
-import { api } from "@/lib/api";
-import { Key, Zap, X } from "lucide-react";
-
+import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
+import { Key, Zap, X, SlidersHorizontal } from "lucide-react";
 
 const STAGE_LABELS: Record<Stage, string> = {
   discovery: "300 Discovery Agents (LinkedIn, JobStreet, Indeed, Glassdoor)",
   analysis: "Local LLM Analysis (Requirement extraction)",
   matching: "Candidate Compatibility (Deterministic 6-factor score)",
-  resumes: "300 Resume Tailoring Agents (APA 7th format, anti-hallucination)",
-  applications: "400 Independent Application Agents (Form autofill & staged review)",
+  resumes: "300 Resume Tailoring Agents (Multi-format per-job tailoring, anti-hallucination)",
+  applications: "400 Independent Application Agents (Form autofill & parallel apply)",
 };
 
 export default function AgentsPage() {
   const {
     running,
-    status,
     workers,
     active,
     counts,
     feed,
     elapsed,
-    discoveredCount,
     readyCount,
-    blockedCount,
     results,
     bots,
     pools,
-    alerts,
     start,
     stop,
     fetchResults,
@@ -41,13 +36,13 @@ export default function AgentsPage() {
   } = useSwarm();
 
   const profile = useStore((s) => s.profile);
-  const notion = useStore((s) => s.notion);
   const setNotion = useStore((s) => s.setNotion);
-  const apps = useStore((s) => s.apps);
+  const appConfig = useStore((s) => s.appConfig);
 
   const [selectedWorkers, setSelectedWorkers] = useState(1000);
   const [targetQuery, setTargetQuery] = useState(profile.headline || "AI Engineer, Full Stack, Machine Learning");
   const [activeTab, setActiveTab] = useState<"diagram" | "stages" | "results">("diagram");
+  const [showAppConfig, setShowAppConfig] = useState(false);
 
   // Platform Login Credentials Modal
   const [showCreds, setShowCreds] = useState(false);
@@ -57,7 +52,6 @@ export default function AgentsPage() {
 
   // Notion database modal
   const [showNotionModal, setShowNotionModal] = useState(false);
-
   const [targetJobsGoal, setTargetJobsGoal] = useState<number>(1000);
 
   const totQ = Object.values(counts).reduce((acc, c) => acc + c.queued, 0);
@@ -74,15 +68,13 @@ export default function AgentsPage() {
     await start(num, queries.length ? queries : ["AI Engineer"], creds, targetJobsGoal);
   };
 
-
   return (
     <>
       <PageHeader
         title="Your Auto-Apply Agents"
-        sub="Parallel dynamic workforce scaling up to 50,000 agents: high-speed discovery, Local LLM tailoring, independent application staging, and real Notion synchronization."
+        sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
-            {/* Segmented worker size control */}
             <div className="inline-flex rounded border border-line bg-bg2/80 p-0.5">
               {[100, 1000, 5000, 10000, 50000].map((n) => (
                 <button
@@ -104,18 +96,21 @@ export default function AgentsPage() {
                 Stop Agents
               </button>
             ) : (
-              <button
-                className="btn btn-primary text-xs"
-                onClick={() => handleStart(selectedWorkers)}
-              >
+              <button className="btn btn-primary text-xs" onClick={() => handleStart(selectedWorkers)}>
                 Launch {selectedWorkers.toLocaleString()} Agents ({targetJobsGoal.toLocaleString()} Targets)
               </button>
             )}
 
             <button
-              className="btn text-xs flex items-center gap-1.5"
-              onClick={() => setShowCreds(true)}
+              type="button"
+              className={`btn text-xs flex items-center gap-1.5 ${showAppConfig ? "bg-black text-white" : ""}`}
+              onClick={() => setShowAppConfig(!showAppConfig)}
             >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>20 Apply Configs ({appConfig.resumeFormat})</span>
+            </button>
+
+            <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
               <Key className="w-3.5 h-3.5" />
               <span>Logins</span>
             </button>
@@ -129,6 +124,12 @@ export default function AgentsPage() {
           </div>
         }
       />
+
+      {showAppConfig && (
+        <div className="mb-4">
+          <ApplicationConfigPanel />
+        </div>
+      )}
 
       {/* Target query & platform liking configure */}
       {!running && (
@@ -425,9 +426,12 @@ export default function AgentsPage() {
                         )}
                       </td>
                       <td>
-                        <Badge tone={r.state === "READY_FOR_REVIEW" ? "ok" : r.state === "BLOCKED" ? "err" : "n"}>
-                          {r.state || "PROCESSING"}
-                        </Badge>
+                        <div className="flex flex-col gap-1 items-start">
+                          <Badge tone={r.state === "READY_FOR_REVIEW" || r.state === "APPLIED" ? "ok" : r.state === "BLOCKED" ? "err" : "n"}>
+                            {r.state || "PROCESSING"}
+                          </Badge>
+                          {r.resume_format && <span className="text-[10px] font-mono text-muted">{r.resume_format}</span>}
+                        </div>
                       </td>
                       <td className="text-right">
                         <Link href={`/apply/${r.job.id}`} className="btn text-xs py-1 px-3">
