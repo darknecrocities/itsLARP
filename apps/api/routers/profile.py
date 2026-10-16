@@ -1,7 +1,8 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Response
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from services import resume_parser, apa_resume
+from services import resume_parser, apa_resume, profile_crawler, resume_formats
 from services.database import SessionLocal, ProfileRecord
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -42,23 +43,92 @@ async def profile_extract_candidate_llm(b: ExtractCandidateIn):
     )
 
 
+class CrawlAndConstructIn(BaseModel):
+    github_url: str = ""
+    linkedin_url: str = ""
+    linkedin_text: str = ""
+    portfolio_url: str = ""
+    resume_text: str = ""
+    custom_instructions: str = ""
+    notes: str = ""
+    full_name: str = ""
+    headline: str = ""
+
+
+@router.post("/crawl-and-construct")
+async def profile_crawl_and_construct(b: CrawlAndConstructIn):
+    inst = (b.custom_instructions or b.notes or "").strip()
+    current_p = {}
+    if b.full_name:
+        current_p["name"] = b.full_name
+    if b.headline:
+        current_p["headline"] = b.headline
+    return await profile_crawler.construct_dna_with_llm(
+        current_profile=current_p or None,
+        github_url=b.github_url,
+        linkedin_url=b.linkedin_url,
+        linkedin_text=b.linkedin_text,
+        portfolio_url=b.portfolio_url,
+        resume_text=b.resume_text,
+        custom_instructions=inst,
+    )
+
+
+class RefineSectionIn(BaseModel):
+    section: str
+    current_value: str = ""
+    instruction: str = "Improve clarity, technical precision, and measurable engineering impact."
+    profile_context: Optional[dict] = None
+
+
+@router.post("/refine-section")
+async def profile_refine_section(b: RefineSectionIn):
+    return await profile_crawler.refine_section_with_llm(
+        section=b.section,
+        current_value=b.current_value,
+        instruction=b.instruction,
+        profile_context=b.profile_context or {},
+    )
+
+
+class RenderResumeIn(BaseModel):
+    profile: dict
+    format: str = "apa_7th"
+    job: Optional[dict] = None
+    config: Optional[dict] = None
+
+
+@router.post("/render-resume")
+def profile_render_resume(b: RenderResumeIn):
+    cfg = dict(b.config or {})
+    cfg["resumeFormat"] = b.format or cfg.get("resumeFormat", "apa_7th")
+    return resume_formats.tailor_resume_to_job(b.profile, b.job, cfg)
+
+
 class APAResumeIn(BaseModel):
     profile: dict
+    format: str = "apa_7th"
+    job: Optional[dict] = None
+    config: Optional[dict] = None
 
 
 @router.post("/apa-resume")
 def profile_apa_resume(b: APAResumeIn):
-    text = apa_resume.generate_apa_text(b.profile)
-    html = apa_resume.generate_apa_html(b.profile)
+    cfg = dict(b.config or {})
+    fmt = b.format or cfg.get("resumeFormat", "apa_7th")
+    cfg["resumeFormat"] = fmt
+    res = resume_formats.tailor_resume_to_job(b.profile, b.job, cfg)
     return {
-        "text": text,
-        "html": html,
-        "format": "APA 7th Edition"
+        "text": res["text"],
+        "html": res["html"],
+        "format": res["format_label"],
+        "format_key": res["format"],
+        "tailored_profile": res["tailored_profile"],
     }
 
 
 @router.get("/apa-resume/download")
-def profile_apa_resume_download(format: str = "html"):
+def profile_apa_resume_download(format: str = "html", style: str = "apa_7th"):
     db = SessionLocal()
     try:
         rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
@@ -66,22 +136,25 @@ def profile_apa_resume_download(format: str = "html"):
             "name": rec.name if rec else "Candidate Name",
             "headline": rec.headline if rec else "Software Engineer",
             "email": rec.email if rec else "",
+            "phone": (rec.phone or "") if rec else "",
             "location": rec.location if rec else "Remote",
             "years": rec.years if rec else 2,
             "education": rec.education if rec else "Bachelor of Science in Computer Science",
+            "summary": (rec.summary or "") if rec else "",
             "skills": (rec.skills or []) if rec else [],
             "experience": (rec.experience or []) if rec else [],
             "projects": (rec.projects or []) if rec else [],
             "links": (rec.links or {}) if rec else {},
             "evidence": (rec.evidence or []) if rec else [],
         }
+        rendered = resume_formats.tailor_resume_to_job(p, None, {"resumeFormat": style})
         if format == "txt":
             return Response(
-                content=apa_resume.generate_apa_text(p),
+                content=rendered["text"],
                 media_type="text/plain",
-                headers={"Content-Disposition": 'attachment; filename="Resume_APA_Format.txt"'}
+                headers={"Content-Disposition": f'attachment; filename="Resume_{style}.txt"'}
             )
-        return HTMLResponse(content=apa_resume.generate_apa_html(p))
+        return HTMLResponse(content=rendered["html"])
     finally:
         db.close()
 

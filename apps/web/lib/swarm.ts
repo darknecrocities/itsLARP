@@ -71,6 +71,9 @@ export type SwarmResultItem = {
   state?: string;
   blocked?: number;
   cover?: string;
+  resume_format?: string;
+  resume_text?: string;
+  app_id?: string;
 };
 
 const zeroCounts = () =>
@@ -151,7 +154,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     }
 
     const finalTarget = Math.max(1, Math.min(targetJobs || get().targetJobs || workerCount, 50000));
-    const profile = useStore.getState().profile;
+    const { profile, appConfig } = useStore.getState();
     const defaultQueries = profile.headline
       ? [profile.headline]
       : ["AI Engineer", "Software Engineer", "Full Stack Developer"];
@@ -167,6 +170,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         target_roles: profile.target_roles || ["all"],
         target_companies: profile.target_companies || ["all"],
         work_types: profile.work_types || ["fulltime", "remote"],
+        app_config: appConfig,
       });
 
       set({
@@ -227,6 +231,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
         pollTimer = null;
         get().fetchResults();
         get().fetchBots();
+        useStore.getState().fetchApps();
       }
     } catch (err) {
       if (pollTimer) {
@@ -251,6 +256,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     set({ running: false, status: "stopped" });
     get().fetchResults();
     get().fetchBots();
+    useStore.getState().fetchApps();
   },
 
   fetchResults: async () => {
@@ -259,6 +265,7 @@ export const useSwarm = create<SwarmState>((set, get) => ({
     try {
       const rows = await apiGet<SwarmResultItem[]>(`/swarm/${runId}/results`);
       set({ results: rows });
+      useStore.getState().fetchApps();
     } catch (err) {
       console.error("Failed to fetch swarm results:", err);
     }

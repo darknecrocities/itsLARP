@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { useStore, type ExperienceItem } from "@/lib/store";
-import { Empty, PageHeader, Reveal, Badge } from "@/components/ui";
+import { useStore, type ExperienceItem, type ProjectItem } from "@/lib/store";
+import { PageHeader, Reveal } from "@/components/ui";
 import { TargetingPreferences } from "@/components/TargetingPreferences";
-import { Plus, X, Trash2, Briefcase, FileText, Shield, ExternalLink } from "lucide-react";
+import { CareerDnaLlmBuilder } from "@/components/profile/CareerDnaLlmBuilder";
+import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
+import { X, Trash2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { profile: p, setProfile, addEvidence, clearProfile } = useStore();
@@ -23,27 +25,12 @@ export default function ProfilePage() {
   const [expText, setExpText] = useState("");
   const [expMetrics, setExpMetrics] = useState("");
 
-  if (!p.skills.length && !p.name) {
-    return (
-      <>
-        <PageHeader title="Career DNA Studio" sub="Structured single source of truth for your entire career." />
-        <Empty title="No Career DNA Created Yet" hint="Upload your resume (PDF/TXT) or extract your background from GitHub/LinkedIn to build your verified profile.">
-          <div className="flex gap-2 justify-center">
-            <Link href="/onboarding" className="btn btn-primary">
-              Upload Resume & Start Onboarding
-            </Link>
-            <button
-              type="button"
-              onClick={() => setProfile({ name: "Candidate", headline: "Software Engineer", skills: ["Python"] })}
-              className="btn"
-            >
-              Enter Manually
-            </button>
-          </div>
-        </Empty>
-      </>
-    );
-  }
+  // Project form state
+  const [showAddProj, setShowAddProj] = useState(false);
+  const [projName, setProjName] = useState("");
+  const [projTech, setProjTech] = useState("");
+  const [projText, setProjText] = useState("");
+  const [projUrl, setProjUrl] = useState("");
 
   const handleAddSkill = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,8 +63,7 @@ export default function ProfilePage() {
       text: expText.trim(),
       metrics: expMetrics.trim() || undefined,
     };
-    const updated = [item, ...(p.experience || [])];
-    setProfile({ experience: updated });
+    setProfile({ experience: [item, ...(p.experience || [])] });
     addEvidence([
       {
         source: `Employment Record: ${item.company}`,
@@ -93,14 +79,43 @@ export default function ProfilePage() {
     setShowAddExp(false);
   };
 
+  const handleAddProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projName.trim()) return;
+    const techList = projTech
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const item: ProjectItem = {
+      name: projName.trim(),
+      tech: techList,
+      text: projText.trim() || "Verified software engineering project.",
+      url: projUrl.trim() || undefined,
+    };
+    setProfile({ projects: [item, ...(p.projects || [])] });
+    addEvidence([
+      {
+        source: `Project Artifact: ${item.name}`,
+        text: `${item.name} [${techList.join(", ")}]: ${item.text}`,
+      },
+    ]);
+    setProjName("");
+    setProjTech("");
+    setProjText("");
+    setProjUrl("");
+    setShowAddProj(false);
+  };
+
   const handleRemoveExperience = (idx: number) => {
-    const updated = (p.experience || []).filter((_, i) => i !== idx);
-    setProfile({ experience: updated });
+    setProfile({ experience: (p.experience || []).filter((_, i) => i !== idx) });
+  };
+
+  const handleRemoveProject = (idx: number) => {
+    setProfile({ projects: (p.projects || []).filter((_, i) => i !== idx) });
   };
 
   const handleRemoveEvidence = (idx: number) => {
-    const updated = p.evidence.filter((_, i) => i !== idx);
-    setProfile({ evidence: updated });
+    setProfile({ evidence: p.evidence.filter((_, i) => i !== idx) });
   };
 
   const filteredEvidence = p.evidence.filter(
@@ -113,9 +128,9 @@ export default function ProfilePage() {
     <>
       <PageHeader
         title="Career DNA Studio"
-        sub="The verified single source of truth for your entire professional background. All autonomous agents ground their applications in this evidence."
+        sub="The verified single source of truth for your professional background. Crawl GitHub, LinkedIn, and Portfolio links with LLM assistance or edit every field directly."
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
@@ -124,15 +139,14 @@ export default function ProfilePage() {
                   clearProfile();
                 }
               }}
-              title="Reset Career DNA profile"
             >
               Reset Profile
             </button>
             <Link href="/resume" className="btn text-xs">
-              View Complete Resume
+              Resume Studio (5 Formats)
             </Link>
             <Link href="/onboarding" className="btn text-xs">
-              Upload Sources
+              Upload PDF / Sources
             </Link>
             <button className="btn btn-primary text-xs" onClick={() => setShowAddEvidence(!showAddEvidence)}>
               + Add Evidence
@@ -141,13 +155,20 @@ export default function ProfilePage() {
         }
       />
 
+      {/* Live Web Crawler & LLM Career DNA Constructor */}
+      <section className="mb-6">
+        <CareerDnaLlmBuilder />
+      </section>
+
+      {/* 20-Feature Application & Resume Format Configuration */}
+      <section className="mb-6">
+        <ApplicationConfigPanel compact />
+      </section>
+
       {/* Manual Evidence Modal */}
       {showAddEvidence && (
-        <div className="card p-5 mb-8 border-2 border-black bg-bg2/50 rise">
+        <div className="card p-5 mb-6 border-2 border-black bg-bg2/50 rise">
           <h3 className="text-base font-semibold mb-2">Record Verified Career Evidence</h3>
-          <p className="text-xs text-muted mb-3">
-            Add a project doc, certification, or reference excerpt. This prevents AI hallucination during resume tailoring.
-          </p>
           <form onSubmit={handleAddEvidence} className="space-y-3">
             <div>
               <label className="label-xs" htmlFor="esrc">Evidence Source</label>
@@ -165,7 +186,7 @@ export default function ProfilePage() {
                 id="etxt"
                 rows={3}
                 className="input mt-1"
-                placeholder="Passed certification demonstrating distributed system architecture, VPC, and S3..."
+                placeholder="Passed certification demonstrating distributed system architecture..."
                 value={newEvidenceText}
                 onChange={(e) => setNewEvidenceText(e.target.value)}
               />
@@ -183,71 +204,44 @@ export default function ProfilePage() {
       )}
 
       {/* Targeting & Preferences Component */}
-      <section className="mb-8">
+      <section className="mb-6">
         <TargetingPreferences />
       </section>
 
-      {/* Identity & Core DNA */}
+      {/* Candidate Identity & Summary */}
       <Reveal>
-        <section className="card p-6 mb-8">
+        <section className="card p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">Candidate Identity & Summary</h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
               <label className="label-xs" htmlFor="pname">Full Name</label>
-              <input
-                id="pname"
-                className="input mt-1"
-                value={p.name}
-                onChange={(e) => setProfile({ name: e.target.value })}
-              />
+              <input id="pname" className="input mt-1" value={p.name} onChange={(e) => setProfile({ name: e.target.value })} />
             </div>
             <div>
               <label className="label-xs" htmlFor="phline">Professional Headline</label>
-              <input
-                id="phline"
-                className="input mt-1"
-                value={p.headline}
-                onChange={(e) => setProfile({ headline: e.target.value })}
-              />
+              <input id="phline" className="input mt-1" value={p.headline} onChange={(e) => setProfile({ headline: e.target.value })} />
             </div>
             <div>
               <label className="label-xs" htmlFor="pemail">Email Address</label>
-              <input
-                id="pemail"
-                className="input mt-1"
-                value={p.email}
-                onChange={(e) => setProfile({ email: e.target.value })}
-              />
+              <input id="pemail" className="input mt-1" value={p.email} onChange={(e) => setProfile({ email: e.target.value })} />
             </div>
             <div>
               <label className="label-xs" htmlFor="pphone">Phone Number</label>
-              <input
-                id="pphone"
-                className="input mt-1"
-                placeholder="+1 (555) 000-0000"
-                value={p.phone || ""}
-                onChange={(e) => setProfile({ phone: e.target.value })}
-              />
+              <input id="pphone" className="input mt-1" placeholder="+1 (555) 000-0000" value={p.phone || ""} onChange={(e) => setProfile({ phone: e.target.value })} />
             </div>
             <div>
               <label className="label-xs" htmlFor="ploc">Location</label>
-              <input
-                id="ploc"
-                className="input mt-1"
-                value={p.location}
-                onChange={(e) => setProfile({ location: e.target.value })}
-              />
+              <input id="ploc" className="input mt-1" value={p.location} onChange={(e) => setProfile({ location: e.target.value })} />
             </div>
             <div>
-              <label className="label-xs" htmlFor="pedu">Education & Credentials</label>
-              <input
-                id="pedu"
-                className="input mt-1"
-                value={p.education}
-                onChange={(e) => setProfile({ education: e.target.value })}
-              />
+              <label className="label-xs" htmlFor="pyears">Years of Experience</label>
+              <input id="pyears" type="number" min={0} max={50} className="input mt-1" value={p.years || 0} onChange={(e) => setProfile({ years: Number(e.target.value) || 0 })} />
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
+              <label className="label-xs" htmlFor="pedu">Education & Academic Credentials</label>
+              <input id="pedu" className="input mt-1" value={p.education} onChange={(e) => setProfile({ education: e.target.value })} />
+            </div>
+            <div className="md:col-span-3">
               <label className="label-xs" htmlFor="psummary">Professional Abstract / Summary Statement</label>
               <textarea
                 id="psummary"
@@ -264,10 +258,10 @@ export default function ProfilePage() {
 
       {/* Employment History */}
       <Reveal i={1}>
-        <section className="card p-6 mb-8">
+        <section className="card p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Employment History & Roles</h2>
+              <h2 className="text-lg font-semibold">Employment History & Roles ({(p.experience || []).length})</h2>
               <p className="text-xs text-muted">Past positions with verified achievements and impact metrics.</p>
             </div>
             <button className="btn text-xs" onClick={() => setShowAddExp(!showAddExp)}>
@@ -278,99 +272,36 @@ export default function ProfilePage() {
           {showAddExp && (
             <form onSubmit={handleAddExperience} className="p-4 bg-bg2 rounded border border-line mb-4 space-y-3">
               <div className="grid md:grid-cols-2 gap-3">
-                <div>
-                  <label className="label-xs">Company Name</label>
-                  <input
-                    className="input text-xs mt-1"
-                    placeholder="e.g. Stripe, Anthropic"
-                    value={expCompany}
-                    onChange={(e) => setExpCompany(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-xs">Position Title</label>
-                  <input
-                    className="input text-xs mt-1"
-                    placeholder="e.g. Senior Software Engineer"
-                    value={expTitle}
-                    onChange={(e) => setExpTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-xs">Start Date</label>
-                  <input
-                    className="input text-xs mt-1"
-                    placeholder="e.g. Jan 2022"
-                    value={expStartDate}
-                    onChange={(e) => setExpStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-xs">End Date</label>
-                  <input
-                    className="input text-xs mt-1"
-                    placeholder="e.g. Present"
-                    value={expEndDate}
-                    onChange={(e) => setExpEndDate(e.target.value)}
-                  />
-                </div>
+                <input className="input text-xs" placeholder="Company Name (e.g. Stripe)" value={expCompany} onChange={(e) => setExpCompany(e.target.value)} />
+                <input className="input text-xs" placeholder="Position Title (e.g. Senior Engineer)" value={expTitle} onChange={(e) => setExpTitle(e.target.value)} />
+                <input className="input text-xs" placeholder="Start Date (e.g. Jan 2022)" value={expStartDate} onChange={(e) => setExpStartDate(e.target.value)} />
+                <input className="input text-xs" placeholder="End Date (e.g. Present)" value={expEndDate} onChange={(e) => setExpEndDate(e.target.value)} />
               </div>
-              <div>
-                <label className="label-xs">Responsibilities & Achievements</label>
-                <textarea
-                  rows={2}
-                  className="input text-xs mt-1"
-                  placeholder="Architected distributed event streaming platform serving 2M users..."
-                  value={expText}
-                  onChange={(e) => setExpText(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="label-xs">Measurable Metrics / Impact</label>
-                <input
-                  className="input text-xs mt-1 font-mono"
-                  placeholder="e.g. Reduced p99 latency by 45%, $1.2M annual cloud savings"
-                  value={expMetrics}
-                  onChange={(e) => setExpMetrics(e.target.value)}
-                />
-              </div>
+              <textarea rows={2} className="input text-xs" placeholder="Responsibilities & engineering impact..." value={expText} onChange={(e) => setExpText(e.target.value)} />
+              <input className="input text-xs font-mono" placeholder="Measurable Metrics (e.g. Reduced p99 latency by 45%)" value={expMetrics} onChange={(e) => setExpMetrics(e.target.value)} />
               <div className="flex justify-end gap-2">
-                <button type="button" className="btn text-xs" onClick={() => setShowAddExp(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary text-xs">
-                  Save Position
-                </button>
+                <button type="button" className="btn text-xs" onClick={() => setShowAddExp(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary text-xs">Save Position</button>
               </div>
             </form>
           )}
 
           {(!p.experience || p.experience.length === 0) ? (
-            <p className="text-muted text-sm py-2">No positions added yet. Click "+ Add Position" to record your history.</p>
+            <p className="text-muted text-sm py-2">No positions added yet. Click "+ Add Position" or crawl your LinkedIn/Resume above.</p>
           ) : (
             <div className="space-y-3">
               {p.experience.map((exp, idx) => (
                 <div key={idx} className="p-3 bg-bg2 rounded border border-line text-xs">
                   <div className="flex justify-between items-start font-semibold">
-                    <span className="text-sm font-bold text-ink">{exp.title} — {exp.company}</span>
+                    <span className="text-sm font-bold text-ink">{exp.title || exp.role} — {exp.company}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-muted font-mono">{exp.start_date || ""} – {exp.end_date || "Present"}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExperience(idx)}
-                        className="text-muted hover:text-ink"
-                        title="Delete entry"
-                      >
+                      <span className="text-muted font-mono">{exp.start_date || exp.dates || "Recent"}</span>
+                      <button type="button" onClick={() => handleRemoveExperience(idx)} className="text-muted hover:text-ink" title="Delete entry">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
                   <p className="text-dmuted mt-1 leading-relaxed">{exp.text}</p>
-                  {exp.metrics && (
-                    <div className="text-[11px] font-mono text-ink font-medium mt-1">
-                      Metrics: {exp.metrics}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -380,7 +311,7 @@ export default function ProfilePage() {
 
       {/* Verified Skills */}
       <Reveal i={2}>
-        <section className="card p-6 mb-8">
+        <section className="card p-6 mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold">Technical Skills ({p.skills.length})</h2>
             <form onSubmit={handleAddSkill} className="flex gap-2">
@@ -390,20 +321,14 @@ export default function ProfilePage() {
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
               />
-              <button type="submit" className="btn text-xs py-1">
-                + Add
-              </button>
+              <button type="submit" className="btn text-xs py-1">+ Add</button>
             </form>
           </div>
           <div className="flex flex-wrap gap-2">
             {p.skills.map((s) => (
               <span key={s} className="px-2.5 py-1 bg-bg2 rounded text-xs font-mono border border-line flex items-center gap-1.5">
                 {s}
-                <button
-                  type="button"
-                  className="text-muted hover:text-ink text-[11px]"
-                  onClick={() => setProfile({ skills: p.skills.filter((x) => x !== s) })}
-                >
+                <button type="button" className="text-muted hover:text-ink text-[11px]" onClick={() => setProfile({ skills: p.skills.filter((x) => x !== s) })}>
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -412,23 +337,42 @@ export default function ProfilePage() {
         </section>
       </Reveal>
 
-      {/* Projects */}
+      {/* Featured Projects */}
       <Reveal i={3}>
-        <section className="card p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-3">Featured Projects & Repositories</h2>
+        <section className="card p-6 mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold">Featured Projects & Repositories ({(p.projects || []).length})</h2>
+            <button className="btn text-xs" onClick={() => setShowAddProj(!showAddProj)}>+ Add Project</button>
+          </div>
+          {showAddProj && (
+            <form onSubmit={handleAddProject} className="p-4 bg-bg2 rounded border border-line mb-4 space-y-3">
+              <div className="grid md:grid-cols-2 gap-3">
+                <input className="input text-xs" placeholder="Project / Repository Name" value={projName} onChange={(e) => setProjName(e.target.value)} />
+                <input className="input text-xs" placeholder="Technologies (comma-separated: Python, FastAPI, Docker)" value={projTech} onChange={(e) => setProjTech(e.target.value)} />
+              </div>
+              <textarea rows={2} className="input text-xs" placeholder="Architecture & engineering impact description..." value={projText} onChange={(e) => setProjText(e.target.value)} />
+              <div className="flex justify-end gap-2">
+                <button type="button" className="btn text-xs" onClick={() => setShowAddProj(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary text-xs">Save Project</button>
+              </div>
+            </form>
+          )}
           {p.projects.length === 0 ? (
-            <p className="text-muted text-sm">Connect GitHub in onboarding to auto-import repositories.</p>
+            <p className="text-muted text-sm">Crawl your GitHub or Portfolio above, or click "+ Add Project".</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
-              {p.projects.map((x) => (
-                <div key={x.name} className="card p-3.5 bg-bg2/40">
-                  <div className="font-semibold text-sm">{x.name}</div>
-                  <p className="text-muted text-xs mt-1">{x.text || "Imported repository"}</p>
-                  {x.tech && x.tech.length > 0 && (
-                    <div className="text-[10px] text-dmuted font-mono mt-2">
-                      Stack: {x.tech.join(", ")}
-                    </div>
-                  )}
+              {p.projects.map((x, idx) => (
+                <div key={`${x.name}-${idx}`} className="card p-3.5 bg-bg2/40 flex justify-between items-start gap-2">
+                  <div>
+                    <div className="font-semibold text-sm">{x.name}</div>
+                    <p className="text-muted text-xs mt-1">{x.text}</p>
+                    {x.tech && x.tech.length > 0 && (
+                      <div className="text-[10px] text-dmuted font-mono mt-2">Stack: {x.tech.join(", ")}</div>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => handleRemoveProject(idx)} className="text-muted hover:text-ink" title="Remove project">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -442,9 +386,7 @@ export default function ProfilePage() {
           <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
             <div>
               <h2 className="text-lg font-semibold">Evidence Corpus ({p.evidence.length} Records)</h2>
-              <p className="text-xs text-muted">
-                Every claim proposed by the AI workforce is validated against this evidence list.
-              </p>
+              <p className="text-xs text-muted">Every claim proposed by the AI workforce is validated against this evidence list.</p>
             </div>
             <input
               className="input max-w-xs text-xs py-1"
@@ -453,7 +395,6 @@ export default function ProfilePage() {
               onChange={(e) => setEvidenceFilter(e.target.value)}
             />
           </div>
-
           <div className="max-h-96 overflow-y-auto space-y-2.5 pr-2">
             {filteredEvidence.length === 0 ? (
               <p className="text-muted text-sm py-4 text-center">No evidence matching search.</p>
@@ -467,12 +408,7 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-dmuted font-sans leading-relaxed">{ev.text}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveEvidence(i)}
-                    className="text-muted hover:text-ink text-xs p-1"
-                    title="Remove evidence record"
-                  >
+                  <button type="button" onClick={() => handleRemoveEvidence(i)} className="text-muted hover:text-ink text-xs p-1">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>

@@ -11,6 +11,12 @@ class SearchIn(BaseModel):
     profile: dict = {}
 
 
+@router.get("")
+async def jobs_list(q: str = "Engineer", limit: int = 50):
+    found, _ = await jobs.discover(q.strip()[:80])
+    return found[:limit]
+
+
 @router.post("/search")
 async def jobs_search(b: SearchIn):
     found, errs = await jobs.discover(b.query.strip()[:80])

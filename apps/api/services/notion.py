@@ -97,6 +97,7 @@ async def create_database(token: str, parent_page_id: str) -> dict:
         "Job Description": {"rich_text": {}},
         "Resume Format": {"rich_text": {}},
         "Resume PDF": {"url": {}},
+        "Submission Screenshot": {"url": {}},
         "Applied Date": {"date": {}},
         "URL": {"url": {}},
         "Notes": {"rich_text": {}}
@@ -147,6 +148,9 @@ async def sync_application(token: str, database_id: str, app: dict) -> dict:
         props["Applied Date"] = {"date": {"start": app.get("applied_date") or today_str}}
     if not db_props or "URL" in db_props:
         props["URL"] = {"url": app.get("url") or info["careers"]}
+    if not db_props or "Submission Screenshot" in db_props:
+        scr_val = app.get("screenshot_url") or f"http://localhost:8000/applications/{app.get('id', 'app')}/screenshot"
+        props["Submission Screenshot"] = {"url": scr_val}
 
     # Rich company metadata properties
     if db_props and "Company Background" in db_props:
@@ -256,6 +260,13 @@ def _parse_page_props(page: dict) -> dict:
             url = props[candidate].get("url") or ""
             break
 
+    # 7b. Submission Screenshot
+    screenshot_url = ""
+    for candidate in ["Submission Screenshot", "Screenshot", "Proof"]:
+        if candidate in props and props[candidate].get("type") == "url":
+            screenshot_url = props[candidate].get("url") or ""
+            break
+
     # 8. Notes
     notes = ""
     if "Notes" in props and props["Notes"].get("type") == "rich_text":
@@ -271,6 +282,7 @@ def _parse_page_props(page: dict) -> dict:
         "match": match_score,
         "applied_date": applied_date or datetime.now().strftime("%Y-%m-%d"),
         "url": url,
+        "screenshot_url": screenshot_url,
         "notes": notes
     }
 
@@ -383,12 +395,14 @@ async def push_to_notion(token: str, database_id: str, db) -> dict:
     for app in unsynced:
         try:
             res = await sync_application(token, database_id, {
+                "id": app.id,
                 "company": app.company,
                 "role": app.role,
                 "match": app.match,
                 "status": app.status,
                 "platform": getattr(app, "platform", "Direct"),
                 "url": getattr(app, "url", ""),
+                "screenshot_url": getattr(app, "screenshot_url", None) or f"http://localhost:8000/applications/{app.id}/screenshot",
                 "notes": app.events[0]["text"] if app.events else "Applied through HowToLarped"
             })
             if res and res.get("page_id"):

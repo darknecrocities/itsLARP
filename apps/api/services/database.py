@@ -50,6 +50,7 @@ class ApplicationRecord(Base):
     events = Column(JSON, default=list)
     platform = Column(String(64), default="Direct")
     url = Column(String(1024), default="")
+    screenshot_url = Column(String(1024), default="")
     notion_page_id = Column(String(128), nullable=True, index=True)
     notion_database_id = Column(String(128), nullable=True)
     applied_date = Column(String(64), default="")
