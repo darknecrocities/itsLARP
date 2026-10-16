@@ -64,17 +64,20 @@ class Run:
         target_jobs: int = 100,
         target_roles: Optional[list[str]] = None,
         target_companies: Optional[list[str]] = None,
-        work_types: Optional[list[str]] = None
+        work_types: Optional[list[str]] = None,
+        app_config: Optional[dict] = None,
     ):
         self.id = uuid.uuid4().hex[:10]
         self.profile = profile
         self.queries = queries
-        self.credentials = credentials or {}  # Platform credentials for LinkedIn, JobStreet, etc.
+        self.credentials = credentials or {}
+        self.app_config = app_config or {}
         self.n = max(1, min(workers, 50000))
         self.target_jobs = max(1, min(target_jobs, 50000))
         self.target_roles = target_roles or profile.get("target_roles", ["all"])
         self.target_companies = target_companies or profile.get("target_companies", ["all"])
         self.work_types = work_types or profile.get("work_types", ["fulltime", "remote"])
+        self.applied_count = 0
 
         # Distribute into the requested bot workforce:
         self.n_scrape = int(self.n * 0.3)
@@ -136,11 +139,7 @@ class Run:
                     break
 
     def log(self, bot_id: str, msg: str):
-        entry = {
-            "t": time.strftime("%H:%M:%S"),
-            "id": bot_id,
-            "msg": msg
-        }
+        entry = {"t": time.strftime("%H:%M:%S"), "id": bot_id, "msg": msg}
         self.feed.insert(0, entry)
         del self.feed[80:]
         if bot_id in self.bots:
@@ -154,7 +153,6 @@ class Run:
         for b in self.bots.values():
             if b.pool == pool and b.status in ["idle", "completed"]:
                 return b
-        # Fallback to any bot in pool
         candidates = [b for b in self.bots.values() if b.pool == pool]
         return random.choice(candidates) if candidates else None
 
@@ -171,7 +169,6 @@ class Run:
 
             self.log(bid, f"Browsing {platform} portal for opportunities matching '{payload}'...")
 
-            # Occasional simulated 2FA verification challenge for realism if not already verified
             if random.random() < 0.05 and bot and not bot.verification_challenge:
                 bot.status = "needs_verification"
                 bot.verification_challenge = {
@@ -180,7 +177,6 @@ class Run:
                     "created_at": time.time()
                 }
                 self.log(bid, f"Notice: {platform} requested login verification / OTP token.")
-                # Allow a short async pause then auto-confirm if not interacted
                 await asyncio.sleep(0.5)
                 bot.status = "browsing"
                 bot.verification_challenge = None
@@ -194,7 +190,7 @@ class Run:
                 bot.status = "completed"
                 bot.current_task = f"Discovered {len(found)} listings. Staged for LLM analysis."
 
-            for j in found:
+            for j in found[: self.target_jobs]:
                 if j["id"] not in self.results:
                     self.results[j["id"]] = {"job": j}
                     self.put("analysis", j["id"])
@@ -213,8 +209,22 @@ class Run:
             score = r["match"]["score"]
             self.log(bid, f"Match score: {score}% · {j['company']} ({j['title']})")
 
-            # Duplicate Application Guard: Check if user already applied
-            from .database import SessionLocal, ApplicationRecord
+            # Guardrail: Company Blacklist
+            raw_bl = self.app_config.get("companyBlacklist", "")
+            bl_items = [x.strip().lower() for x in (raw_bl if isinstance(raw_bl, list) else str(raw_bl).split(",")) if x.strip()]
+            if bl_items and any(b_name in j["company"].lower() for b_name in bl_items):
+                r["state"] = "FILTERED_BLACKLIST"
+                self.log(bid, f"Skipped {j['company']}: matched company blacklist filter.")
+                return
+
+            # Guardrail: Remote Workplace Preference
+            wp_pref = self.app_config.get("remoteWorkplacePreference", "remote_preferred")
+            if wp_pref == "remote_only" and not j.get("remote", True):
+                r["state"] = "FILTERED_WORKPLACE"
+                self.log(bid, f"Skipped {j['company']}: role is non-remote and Remote Only is active.")
+                return
+
+            # Duplicate Application Guard
             db_s = SessionLocal()
             existing_app = None
             try:
@@ -236,7 +246,8 @@ class Run:
                     r["can_reapply"] = True
                     self.log(bid, f"Prior status: {existing_app.status} from {j['company']}. Re-application eligible.")
 
-            if score >= 50:  # User liking compatibility filter
+            min_threshold = int(self.app_config.get("minMatchThreshold", 50))
+            if score >= min_threshold:
                 self.put("resumes", payload)
             else:
                 r["state"] = "FILTERED_LOW_MATCH"
@@ -246,85 +257,101 @@ class Run:
             bid = bot.id if bot else f"bot_tailor_{worker_idx:03d}"
             r = self.results[payload]
             j = r["job"]
+            fmt_key = self.app_config.get("resumeFormat", "apa_7th")
 
             if bot:
                 bot.status = "tailoring"
                 bot.target_company = j["company"]
                 bot.target_role = j["title"]
-                bot.current_task = f"Drafting tailored resume for {j['title']} @ {j['company']} via Local LLM"
+                bot.current_task = f"Constructing {fmt_key} resume tailored for {j['title']} @ {j['company']}"
 
-            self.log(bid, f"Tailoring APA resume via Local LLM for {j['title']} @ {j['company']}")
-            r["package"] = await tailoring.prepare(self.profile, j)
-            self.log(bid, f"Resume & cover tailored · 100% verified against Career DNA evidence")
+            self.log(bid, f"Tailoring resume ({fmt_key}) for {j['title']} @ {j['company']}...")
+            r["package"] = await tailoring.prepare(self.profile, j, {**self.app_config, "fastBatchMode": True})
+            fmt_label = r["package"].get("resume_format_label", "APA 7th Edition")
+            self.log(bid, f"Constructed {fmt_label} resume & cover · Verified against Career DNA")
 
             if bot:
                 bot.status = "completed"
-                bot.current_task = f"Tailored package ready for {j['company']}"
+                bot.current_task = f"Tailored {fmt_label} package ready for {j['company']}"
 
             self.put("applications", payload)
-
 
         elif stage == "applications":
             bot = self.get_idle_bot("apply")
             bid = bot.id if bot else f"bot_apply_{worker_idx:05d}"
             r = self.results[payload]
             j = r["job"]
-            platform = bot.platform if bot else "Direct"
+            platform = j.get("source") or (bot.platform if bot else "Direct")
+
+            max_daily = int(self.app_config.get("maxDailyApplications", 50))
+            if self.applied_count >= max_daily:
+                r["state"] = "QUEUED_DAILY_CAP"
+                self.log(bid, f"Daily cap ({max_daily}) reached; queued {j['company']} for next window.")
+                return
 
             if bot:
                 bot.status = "applying"
                 bot.target_company = j["company"]
                 bot.target_role = j["title"]
-                bot.current_task = f"Preparing application package for {j['company']}"
+                bot.current_task = f"Submitting tailored application to {j['company']}"
 
-            # Check for candidate missing data question (simulated on 8% of applications)
-            if random.random() < 0.08 and len(self.pending_questions) < 3:
-                q_id = f"q_{uuid.uuid4().hex[:8]}"
-                sample_qs = [
-                    f"Does the candidate have production experience with {j.get('skills', ['Kubernetes'])[0]} in high-availability clusters?",
-                    f"What is candidate's current work authorization and availability date for {j['company']}?",
-                    f"Does candidate have security clearance or prior enterprise audit experience for {j['company']}?",
-                    f"What is candidate's target compensation range for the {j['title']} position?"
-                ]
-                chosen_q = random.choice(sample_qs)
+            pkg = r.get("package") or {}
+            v = pkg.get("verification", {})
+            score = (r.get("match") or {}).get("score", 75)
+            auto_thresh = int(self.app_config.get("autoApproveThreshold", 70))
+            human_pause = bool(self.app_config.get("humanInTheLoopPause", False))
 
-                db = SessionLocal()
-                try:
-                    q_rec = AgentQuestionRecord(
-                        id=q_id,
-                        run_id=self.id,
-                        bot_id=bid,
+            if not v.get("passed", True):
+                r["state"] = "BLOCKED"
+                db_status = "PREPARING"
+            elif not human_pause and score >= auto_thresh:
+                r["state"] = "APPLIED"
+                db_status = "APPLIED"
+            else:
+                r["state"] = "READY_FOR_REVIEW"
+                db_status = "READY"
+
+            # Persist application record to SQLite so user sees it immediately in /applications
+            app_id = f"a-{j['id']}"
+            now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            today_str = time.strftime("%Y-%m-%d", time.gmtime())
+            db = SessionLocal()
+            try:
+                rec = db.query(ApplicationRecord).filter(
+                    (ApplicationRecord.id == app_id) | (ApplicationRecord.job_id == j["id"])
+                ).first()
+                if not rec:
+                    rec = ApplicationRecord(
+                        id=app_id,
                         job_id=j["id"],
                         company=j["company"],
                         role=j["title"],
-                        question=chosen_q,
-                        context=f"Application autofill question for {j['company']}",
-                        status="pending"
+                        match=score,
+                        status=db_status,
+                        platform=platform,
+                        url=j.get("url", ""),
+                        resume=pkg.get("resume_text", ""),
+                        cover=pkg.get("cover", ""),
+                        answers=pkg.get("answers", {}),
+                        verified=bool(v.get("passed", True)),
+                        applied_date=today_str,
+                        events=[{
+                            "at": now_iso,
+                            "text": f"Parallel bot {bid} constructed {pkg.get('resume_format_label', 'APA')} resume and marked {db_status}"
+                        }],
                     )
-                    db.add(q_rec)
+                    db.add(rec)
                     db.commit()
-                    self.pending_questions.append({
-                        "id": q_id,
-                        "bot_id": bid,
-                        "company": j["company"],
-                        "role": j["title"],
-                        "question": chosen_q
-                    })
-                finally:
-                    db.close()
+                    self.applied_count += 1
+                r["app_id"] = app_id
+            finally:
+                db.close()
 
-                if bot:
-                    bot.status = "waiting_for_input"
-                    bot.current_task = f"Awaiting candidate answer: {chosen_q[:60]}..."
-                self.log(bid, f"Notification: Question logged for user regarding {j['company']} ({chosen_q[:40]}...)")
-
-            v = r["package"].get("verification", {})
-            r["state"] = "READY_FOR_REVIEW" if v.get("passed", False) else "BLOCKED"
             self.log(bid, f"Application {r['state'].lower().replace('_', ' ')} for {j['company']} ({platform})")
 
             if bot and bot.status != "waiting_for_input":
                 bot.status = "completed"
-                bot.current_task = f"Application staged as {r['state']}"
+                bot.current_task = f"Application saved as {r['state']}"
 
     async def worker(self, wid: int):
         while True:
@@ -406,7 +433,8 @@ class Run:
             "dead": len(self.dead),
             "elapsed": round(time.time() - self.started, 1),
             "jobs": len(res),
-            "ready": sum(1 for r in res if r.get("state") == "READY_FOR_REVIEW"),
+            "ready": sum(1 for r in res if r.get("state") in ("READY_FOR_REVIEW", "APPLIED")),
+            "applied": sum(1 for r in res if r.get("state") == "APPLIED"),
             "blocked": sum(1 for r in res if r.get("state") == "BLOCKED"),
             "pools": {
                 "scrapers_count": self.n_scrape,

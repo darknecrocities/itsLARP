@@ -107,7 +107,7 @@ def generate_dna_applications(profile: Optional[dict], target_count: int = 15, d
             "description": f"Seeking an experienced {role} to drive distributed engineering initiatives at {company_name}.",
             "applied_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             "resume_url": "http://localhost:8000/profile/apa-resume/download?format=html",
-            "screenshot_url": info["careers"],
+            "screenshot_url": f"http://localhost:8000/applications/{app_id}/screenshot",
             "notes": notes,
             "verified": True
         }
@@ -128,6 +128,7 @@ def generate_dna_applications(profile: Optional[dict], target_count: int = 15, d
                     status=status,
                     platform=platform,
                     url=info["careers"],
+                    screenshot_url=app_dict["screenshot_url"],
                     applied_date=app_dict["applied_date"],
                     events=[{"at": datetime.now(timezone.utc).isoformat(), "text": f"Application staged via Career DNA Swarm ({platform})"}],
                     verified=True
@@ -201,6 +202,12 @@ async def backfill_notion_pages(token: str, database_id: str) -> dict:
                 curr_pdf = props.get("Resume PDF", {}).get("url")
                 if not curr_pdf:
                     patch_props["Resume PDF"] = {"url": "http://localhost:8000/profile/apa-resume/download?format=html"}
+
+            if "Submission Screenshot" in db_props:
+                curr_ss = props.get("Submission Screenshot", {}).get("url")
+                if not curr_ss:
+                    app_id = f"dna_{company.lower().replace(' ', '')}"
+                    patch_props["Submission Screenshot"] = {"url": f"http://localhost:8000/applications/{app_id}/screenshot"}
 
             if patch_props:
                 res = await c.patch(f"{API}/pages/{p['id']}", headers=_h(token), json={"properties": patch_props})
