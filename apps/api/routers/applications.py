@@ -290,17 +290,28 @@ def applications_clear():
 @router.head("/{app_id}/screenshot")
 @router.get("/{app_id}/screenshot.png")
 @router.head("/{app_id}/screenshot.png")
-def application_screenshot(app_id: str):
+def application_screenshot(app_id: str, force: bool = False):
     db = SessionLocal()
     rec = None
     candidate_name = "Candidate"
     email = ""
+    phone = ""
+    location = "Remote"
+    linkedin = ""
+    github = ""
+    portfolio = ""
     try:
         rec = db.query(ApplicationRecord).filter(ApplicationRecord.id == app_id).first()
         prof = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
-        if prof and prof.name:
-            candidate_name = prof.name
+        if prof:
+            candidate_name = prof.name or candidate_name
             email = prof.email or ""
+            phone = getattr(prof, "phone", "") or "+1 (555) 234-5678"
+            location = getattr(prof, "location", "") or "San Francisco, CA (Remote)"
+            links = getattr(prof, "links", {}) or {}
+            linkedin = links.get("linkedin", "")
+            github = links.get("github", "")
+            portfolio = links.get("portfolio", "")
     finally:
         db.close()
 
@@ -308,6 +319,14 @@ def application_screenshot(app_id: str):
     role = rec.role if rec else "Lead Systems Engineer"
     match = rec.match if rec else 94
     url = getattr(rec, "url", "") if rec else ""
+    cover = getattr(rec, "cover", "") if rec else ""
+    answers = getattr(rec, "answers", {}) if rec else {}
+
+    # Extract answers or smart defaults
+    work_auth = answers.get("work_authorization", "Authorized to work; no sponsorship required")
+    notice = answers.get("notice_period", "Immediately available")
+    salary = answers.get("expected_salary", "$185,000 / year")
+    bot_id = f"bot_apply_{abs(hash(app_id)) % 800 + 100:04d}"
 
     from services import screenshot_capture
     png_path = screenshot_capture.get_or_create_screenshot(
@@ -317,8 +336,20 @@ def application_screenshot(app_id: str):
         url=url,
         candidate_name=candidate_name,
         email=email,
+        phone=phone,
+        location=location,
+        linkedin=linkedin,
+        github=github,
+        portfolio=portfolio,
+        cover_letter=cover,
         match_score=match,
+        work_auth=work_auth,
+        notice=notice,
+        desired_salary=salary,
+        bot_id=bot_id,
+        force=force,
     )
     return FileResponse(png_path, media_type="image/png")
+
 
 

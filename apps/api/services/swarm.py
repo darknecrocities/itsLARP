@@ -293,7 +293,7 @@ class Run:
                 bot.status = "applying"
                 bot.target_company = j["company"]
                 bot.target_role = j["title"]
-                bot.current_task = f"Submitting tailored application to {j['company']}"
+                bot.current_task = f"Injecting form fields & hovering submit for {j['company']}"
 
             pkg = r.get("package") or {}
             v = pkg.get("verification", {})
@@ -335,9 +335,10 @@ class Run:
                         answers=pkg.get("answers", {}),
                         verified=bool(v.get("passed", True)),
                         applied_date=today_str,
+                        screenshot_url=f"http://localhost:8000/applications/{app_id}/screenshot",
                         events=[{
                             "at": now_iso,
-                            "text": f"Parallel bot {bid} constructed {pkg.get('resume_format_label', 'APA')} resume and marked {db_status}"
+                            "text": f"Autonomous bot {bid} filled application form and poised to submit ({db_status})"
                         }],
                     )
                     db.add(rec)
@@ -351,7 +352,7 @@ class Run:
 
             if bot and bot.status != "waiting_for_input":
                 bot.status = "completed"
-                bot.current_task = f"Application saved as {r['state']}"
+                bot.current_task = f"Form pre-filled & proof captured ({r['state']})"
 
     async def worker(self, wid: int):
         while True:

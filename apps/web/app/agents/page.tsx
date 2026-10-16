@@ -7,7 +7,10 @@ import { Badge, PageHeader, Stat, Reveal, ErrorBox } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
-import { Key, Zap, X, SlidersHorizontal } from "lucide-react";
+import { WorkforceFleetCard } from "@/components/agents/WorkforceFleetCard";
+import { PreSubmissionModal } from "@/components/agents/PreSubmissionModal";
+import { Key, Zap, X, SlidersHorizontal, Eye } from "lucide-react";
+
 
 const STAGE_LABELS: Record<Stage, string> = {
   discovery: "300 Discovery Agents (LinkedIn, JobStreet, Indeed, Glassdoor)",
@@ -53,6 +56,7 @@ export default function AgentsPage() {
   // Notion database modal
   const [showNotionModal, setShowNotionModal] = useState(false);
   const [targetJobsGoal, setTargetJobsGoal] = useState<number>(1000);
+  const [previewApp, setPreviewApp] = useState<{ id: string; company: string; role: string; matchScore: number } | null>(null);
 
   const totQ = Object.values(counts).reduce((acc, c) => acc + c.queued, 0);
   const totD = Object.values(counts).reduce((acc, c) => acc + c.done, 0);
@@ -75,32 +79,6 @@ export default function AgentsPage() {
         sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded border border-line bg-bg2/80 p-0.5">
-              {[100, 1000, 5000, 10000, 50000].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`px-2 py-1 text-xs rounded transition-all font-mono ${
-                    selectedWorkers === n ? "bg-black text-white shadow-xs font-semibold" : "text-muted hover:text-ink"
-                  }`}
-                  disabled={running}
-                  onClick={() => setSelectedWorkers(n)}
-                >
-                  {n >= 1000 ? `${n / 1000}k` : n}
-                </button>
-              ))}
-            </div>
-
-            {running ? (
-              <button className="btn btn-primary bg-black text-white hover:bg-neutral-800 text-xs" onClick={stop}>
-                Stop Agents
-              </button>
-            ) : (
-              <button className="btn btn-primary text-xs" onClick={() => handleStart(selectedWorkers)}>
-                Launch {selectedWorkers.toLocaleString()} Agents ({targetJobsGoal.toLocaleString()} Targets)
-              </button>
-            )}
-
             <button
               type="button"
               className={`btn text-xs flex items-center gap-1.5 ${showAppConfig ? "bg-black text-white" : ""}`}
@@ -131,58 +109,35 @@ export default function AgentsPage() {
         </div>
       )}
 
+      {/* Workforce Fleet Scaler */}
+      <div className="mb-4">
+        <WorkforceFleetCard
+          workers={selectedWorkers}
+          onWorkersChange={setSelectedWorkers}
+          targetJobs={targetJobsGoal}
+          onTargetJobsChange={setTargetJobsGoal}
+          running={running}
+          onStart={handleStart}
+          onStop={stop}
+          activeCount={active}
+          discoveredCount={totD}
+        />
+      </div>
+
       {/* Target query & platform liking configure */}
       {!running && (
-        <div className="card p-3.5 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-bg2/40 border border-line">
-          <div>
-            <label className="label-xs" htmlFor="tq">Target Roles & Keywords</label>
-            <input
-              id="tq"
-              className="input mt-1 w-full"
-              value={targetQuery}
-              onChange={(e) => setTargetQuery(e.target.value)}
-              placeholder="Software Engineer, Full Stack Developer, Product Manager"
-            />
-          </div>
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="label-xs" htmlFor="target-jobs-input">
-                Target Jobs (Max 50,000)
-              </label>
-              <span className="text-xs font-mono font-semibold text-ink">
-                {targetJobsGoal.toLocaleString()} jobs
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <input
-                id="target-jobs-input"
-                type="number"
-                min={1}
-                max={50000}
-                className="input text-xs w-28 font-mono"
-                value={targetJobsGoal}
-                onChange={(e) => setTargetJobsGoal(Math.max(1, Math.min(50000, Number(e.target.value) || 1)))}
-              />
-              <div className="flex flex-wrap items-center gap-1">
-                {[100, 1000, 5000, 10000, 25000, 50000].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setTargetJobsGoal(n)}
-                    className={`px-1.5 py-0.5 text-[11px] rounded font-mono border ${
-                      targetJobsGoal === n
-                        ? "bg-black text-white border-black font-semibold"
-                        : "bg-bg text-muted border-line hover:text-ink"
-                    }`}
-                  >
-                    {n >= 1000 ? `${n / 1000}k` : n}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="card p-3.5 mb-4 bg-bg2/40 border border-line">
+          <label className="label-xs" htmlFor="tq">Target Roles & Domain Keywords (Comma-Separated)</label>
+          <input
+            id="tq"
+            className="input mt-1 w-full text-xs font-mono"
+            value={targetQuery}
+            onChange={(e) => setTargetQuery(e.target.value)}
+            placeholder="AI Systems Engineer, Principal Architect, Full Stack Developer"
+          />
         </div>
       )}
+
 
       {/* Platform Login Credentials Modal */}
       {showCreds && (
@@ -434,9 +389,27 @@ export default function AgentsPage() {
                         </div>
                       </td>
                       <td className="text-right">
-                        <Link href={`/apply/${r.job.id}`} className="btn text-xs py-1 px-3">
-                          Review in Studio
-                        </Link>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPreviewApp({
+                                id: r.app_id || `a-${r.job.id}`,
+                                company: r.job.company,
+                                role: r.job.title,
+                                matchScore: r.match?.score || 94,
+                              })
+                            }
+                            className="btn text-xs py-1 px-2.5 flex items-center gap-1 bg-bg2 border border-line hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                            title="View Pre-Submission Filled Form Proof"
+                          >
+                            <Eye className="w-3 h-3 text-muted" />
+                            <span>Form Proof</span>
+                          </button>
+                          <Link href={`/apply/${r.job.id}`} className="btn text-xs py-1 px-3">
+                            Review in Studio
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -446,6 +419,17 @@ export default function AgentsPage() {
           )}
         </section>
       )}
+
+      {previewApp && (
+        <PreSubmissionModal
+          appId={previewApp.id}
+          company={previewApp.company}
+          role={previewApp.role}
+          matchScore={previewApp.matchScore}
+          onClose={() => setPreviewApp(null)}
+        />
+      )}
     </>
   );
 }
+

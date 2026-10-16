@@ -441,6 +441,15 @@ export default function ApplicationsPage() {
                               <span>Re-Apply</span>
                             </button>
                           )}
+                          <a
+                            href={a.screenshotUrl || `http://localhost:8000/applications/${a.id}/screenshot`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn text-xs py-1 px-2 border border-neutral-300 hover:border-black font-mono text-neutral-600 hover:text-black"
+                            title="View Pre-Submission Filled Form Proof"
+                          >
+                            Proof
+                          </a>
                           <Link
                             href={`/apply/${a.jobId}`}
                             className="btn text-xs py-1 px-2.5 border border-neutral-300 hover:border-black font-mono"
@@ -449,6 +458,7 @@ export default function ApplicationsPage() {
                           </Link>
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}

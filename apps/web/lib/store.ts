@@ -73,6 +73,7 @@ export type App = {
   status: string;
   platform?: string;
   url?: string;
+  screenshotUrl?: string;
   notionPageId?: string;
   notionDatabaseId?: string;
   appliedDate?: string;
