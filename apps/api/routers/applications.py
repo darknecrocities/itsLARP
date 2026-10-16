@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Response
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timezone
@@ -287,67 +288,37 @@ def applications_clear():
 
 @router.get("/{app_id}/screenshot")
 @router.head("/{app_id}/screenshot")
-@router.get("/{app_id}/screenshot.svg")
-@router.head("/{app_id}/screenshot.svg")
-def application_screenshot(app_id: str, format: Optional[str] = "svg"):
+@router.get("/{app_id}/screenshot.png")
+@router.head("/{app_id}/screenshot.png")
+def application_screenshot(app_id: str):
     db = SessionLocal()
     rec = None
+    candidate_name = "Candidate"
+    email = ""
     try:
         rec = db.query(ApplicationRecord).filter(ApplicationRecord.id == app_id).first()
+        prof = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
+        if prof and prof.name:
+            candidate_name = prof.name
+            email = prof.email or ""
     finally:
         db.close()
 
     company = rec.company if rec else app_id.replace("dna_", "").replace("a-", "").replace("_", " ").title()
     role = rec.role if rec else "Lead Systems Engineer"
     match = rec.match if rec else 94
-    status = rec.status if rec else "APPLIED"
-    applied_date = (getattr(rec, "applied_date", "") if rec else "") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    audit_hash = f"{abs(hash(app_id)) & 0xFFFFFFFFFFFFFF:014x}"
+    url = getattr(rec, "url", "") if rec else ""
 
-    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" fill="none">
-    <rect width="900" height="520" rx="16" fill="#0A0A0A"/>
-    <rect x="2" y="2" width="896" height="516" rx="14" stroke="#262626" stroke-width="2"/>
-    <rect x="20" y="20" width="860" height="50" rx="8" fill="#141414" stroke="#262626"/>
-    <circle cx="45" cy="45" r="6" fill="#333333"/>
-    <circle cx="65" cy="45" r="6" fill="#333333"/>
-    <circle cx="85" cy="45" r="6" fill="#333333"/>
-    <text x="110" y="50" fill="#737373" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12" letter-spacing="1">HOWTOLARPED APPLICATION VERIFICATION RECORD</text>
-    <rect x="730" y="32" width="130" height="26" rx="4" fill="#000000" stroke="#404040"/>
-    <text x="745" y="49" fill="#22C55E" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" font-weight="600">CONFIRMED</text>
-
-    <rect x="20" y="90" width="860" height="400" rx="12" fill="#0D0D0D" stroke="#1F1F1F"/>
-    
-    <rect x="50" y="125" width="90" height="24" rx="4" fill="#18181B" stroke="#27272A"/>
-    <text x="65" y="141" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">{status}</text>
-    
-    <text x="50" y="185" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="26" font-weight="700">{role}</text>
-    <text x="50" y="215" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16">{company}</text>
-    
-    <line x1="50" y1="245" x2="850" y2="245" stroke="#262626" stroke-width="1"/>
-    
-    <text x="50" y="280" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" letter-spacing="1">APPLICATION ID</text>
-    <text x="50" y="305" fill="#F4F4F5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="14" font-family="monospace">{app_id}</text>
-    
-    <text x="280" y="280" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" letter-spacing="1">MATCH SCORE</text>
-    <text x="280" y="305" fill="#F4F4F5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="14" font-weight="600">{match}%</text>
-    
-    <text x="450" y="280" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" letter-spacing="1">SUBMISSION DATE</text>
-    <text x="450" y="305" fill="#F4F4F5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="14">{applied_date}</text>
-    
-    <text x="650" y="280" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" letter-spacing="1">VERIFICATION GATE</text>
-    <text x="650" y="305" fill="#22C55E" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="14" font-weight="600">Passed (Zero Hallucinations)</text>
-
-    <rect x="50" y="345" width="800" height="110" rx="8" fill="#141414" stroke="#262626"/>
-    <text x="75" y="375" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12" font-weight="600">EVIDENCE-BASED CAREER DNA ATTESTATION</text>
-    <text x="75" y="400" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12">This application was autonomously prepared and submitted by the HowToLarped AI Workforce.</text>
-    <text x="75" y="420" fill="#71717A" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12">All tailored qualifications, screening answers, and portfolio links are cross-referenced with candidate DNA.</text>
-    <text x="75" y="440" fill="#52525B" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="10">Cryptographic audit proof: sha256:{audit_hash}</text>
-</svg>"""
-
-    if format == "html":
-        html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>Submission Receipt - {company}</title><style>body{{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}}</style></head><body>{svg}</body></html>"""
-        return Response(content=html, media_type="text/html")
-
-    return Response(content=svg, media_type="image/svg+xml")
+    from services import screenshot_capture
+    png_path = screenshot_capture.get_or_create_screenshot(
+        app_id=app_id,
+        company=company,
+        role=role,
+        url=url,
+        candidate_name=candidate_name,
+        email=email,
+        match_score=match,
+    )
+    return FileResponse(png_path, media_type="image/png")
 
 
