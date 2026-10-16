@@ -206,14 +206,26 @@ BASELINE_POOL = [
 ]
 
 
+import time as _time
+_DISCOVER_CACHE: dict[str, tuple[float, list[dict], list[str]]] = {}
+
+
 async def discover(query: str, sources: list[str] | None = None) -> tuple[list[dict], list[str]]:
-    """Returns (jobs, errors). Queries live sources and gracefully falls back or supplements."""
+    """Returns (jobs, errors). Queries live sources with 120s in-memory cache and graceful fallback."""
+    cache_key = f"{query.strip().lower()}::{','.join(sorted(sources or ['all']))}"
+    now = _time.time()
+    if cache_key in _DISCOVER_CACHE:
+        ts, cached_jobs, cached_errs = _DISCOVER_CACHE[cache_key]
+        if now - ts < 120.0 and cached_jobs:
+            return cached_jobs, cached_errs
+
     fns = {"remotive": _remotive, "arbeitnow": _arbeitnow}
     chosen = [fns[s] for s in (sources or list(fns)) if s in fns]
     jobs, errs = [], []
 
     try:
-        async with httpx.AsyncClient(timeout=8.0, headers={"User-Agent": "HowToLarped/1.0"}) as c:
+        timeout_cfg = httpx.Timeout(connect=2.5, read=4.0, write=3.0, pool=3.0)
+        async with httpx.AsyncClient(timeout=timeout_cfg, headers={"User-Agent": "HowToLarped/1.0"}) as c:
             res = await asyncio.gather(*(f(c, query) for f in chosen), return_exceptions=True)
         for f, r in zip(chosen, res):
             if isinstance(r, Exception):
@@ -223,13 +235,12 @@ async def discover(query: str, sources: list[str] | None = None) -> tuple[list[d
     except Exception as e:
         errs.append(f"Network error: {str(e)[:40]}")
 
-    # If external feeds return few results or query matches baseline jobs, include matched baseline jobs
     ql = query.lower().strip()
     matched_baselines = [
         b for b in BASELINE_POOL
         if not ql or any(w in (b["title"] + " " + b["description"]).lower() for w in ql.split())
     ]
-    all_raw = jobs + matched_baselines
+    all_raw = jobs + (matched_baselines or BASELINE_POOL)
 
     out = []
     for j in dedupe.dedupe(all_raw):
@@ -238,6 +249,7 @@ async def discover(query: str, sources: list[str] | None = None) -> tuple[list[d
         save_job_to_db(j)
         out.append(j)
 
+    _DISCOVER_CACHE[cache_key] = (now, out, errs)
     return out, errs
 
 
