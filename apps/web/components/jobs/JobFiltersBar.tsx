@@ -65,10 +65,11 @@ export function JobFiltersBar({
       <form onSubmit={handleSubmit} className="flex flex-wrap items-center gap-2.5">
         <div className="flex gap-1.5 flex-1 min-w-[260px] max-w-md">
           <div className="relative flex-1">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none z-10" />
             <input
               id="job-query"
-              className="input pl-8 py-1.5 text-xs w-full"
+              className="input !pl-10 py-1.5 text-xs w-full"
+              style={{ paddingLeft: "2.5rem" }}
               placeholder="Search any role (e.g. Project Manager, Flight Attendant, AI Engineer)"
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}

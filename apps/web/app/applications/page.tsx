@@ -317,10 +317,11 @@ export default function ApplicationsPage() {
         <>
           <div className="flex flex-wrap gap-3 mb-6 font-mono text-xs">
             <div className="relative max-w-xs w-full">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-neutral-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none z-10" />
               <input
                 id="aq"
-                className="input pl-9"
+                className="input !pl-10 text-xs"
+                style={{ paddingLeft: "2.5rem" }}
                 placeholder="Search company or role..."
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
