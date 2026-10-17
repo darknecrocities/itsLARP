@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, apiGet } from "@/lib/api";
 import { Badge, PageHeader, ErrorBox } from "@/components/ui";
+import { OllamaManager } from "@/components/OllamaManager";
 
 type AIStatusResponse = {
   provider: string;
@@ -199,6 +200,11 @@ export default function SettingsPage() {
           </form>
         </section>
       </div>
+
+      {/* Local Ollama Engine & Model Hub */}
+      <section className="mt-10 max-w-4xl">
+        <OllamaManager />
+      </section>
     </>
   );
 }

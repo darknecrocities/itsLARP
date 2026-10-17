@@ -5,6 +5,7 @@ import { useJobs } from "@/lib/useJobs";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, ErrorBox, PageHeader, Reveal } from "@/components/ui";
 import { ImportJobModal } from "@/components/jobs/ImportJobModal";
+import { JobFiltersBar } from "@/components/jobs/JobFiltersBar";
 import { X, Globe } from "lucide-react";
 import {
   LinkedInIcon,
@@ -67,6 +68,8 @@ export default function JobsPage() {
   const [searchParam, setSearchParam] = useState("");
   const [remote, setRemote] = useState(false);
   const [domainFilter, setDomainFilter] = useState("all");
+  const [employmentType, setEmploymentType] = useState("all");
+  const [experienceLevel, setExperienceLevel] = useState("all");
   const [sort, setSort] = useState<"match" | "company">("match");
 
   const [targetCount, setTargetCount] = useState<number>(1000);
@@ -76,11 +79,17 @@ export default function JobsPage() {
   const apps = useStore((s) => s.apps);
   const jobPreferences = useStore((s) => s.jobPreferences);
   const setJobPreferences = useStore((s) => s.setJobPreferences);
-  const { data: jobs, isLoading, error, refetch } = useJobs(searchParam, remote);
+  const { data: jobs, isLoading, error, refetch } = useJobs(
+    searchParam,
+    remote,
+    employmentType,
+    experienceLevel,
+    0,
+    jobPreferences.selectedPlatforms
+  );
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchParam(q);
+  const handleSearchSubmit = (submittedQuery: string) => {
+    setSearchParam(submittedQuery);
   };
 
   const rows = useMemo(() => {
@@ -197,55 +206,23 @@ export default function JobsPage() {
         </div>
       </div>
 
-      {/* Search & Filters */}
-      <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3 mb-6">
-        <label className="sr-only" htmlFor="q">Search</label>
-        <div className="flex gap-2 max-w-sm flex-1">
-          <input
-            id="q"
-            className="input"
-            placeholder="Search role, skills, company (e.g. AI Engineer, Flight Attendant)"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <button type="submit" className="btn">Search</button>
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-dmuted cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={remote}
-            onChange={(e) => {
-              setRemote(e.target.checked);
-            }}
-          />
-          Remote only
-        </label>
-
-        <label className="sr-only" htmlFor="domain">Domain</label>
-        <select
-          id="domain"
-          className="input max-w-[130px]"
-          value={domainFilter}
-          onChange={(e) => setDomainFilter(e.target.value)}
-        >
-          <option value="all">All Domains</option>
-          <option value="ai">AI / ML</option>
-          <option value="web">Web / Fullstack</option>
-          <option value="data">Data / MLOps</option>
-        </select>
-
-        <label className="sr-only" htmlFor="sort">Sort</label>
-        <select
-          id="sort"
-          className="input max-w-[140px]"
-          value={sort}
-          onChange={(e) => setSort(e.target.value as "match")}
-        >
-          <option value="match">Best match</option>
-          <option value="company">Company</option>
-        </select>
-      </form>
+      {/* Search & Customization Filters with Multi-Stage Progress Bar */}
+      <JobFiltersBar
+        query={q}
+        onQueryChange={setQ}
+        onSearchSubmit={handleSearchSubmit}
+        remote={remote}
+        onRemoteChange={setRemote}
+        employmentType={employmentType}
+        onEmploymentTypeChange={setEmploymentType}
+        experienceLevel={experienceLevel}
+        onExperienceLevelChange={setExperienceLevel}
+        domain={domainFilter}
+        onDomainChange={setDomainFilter}
+        sort={sort}
+        onSortChange={setSort}
+        isLoading={isLoading}
+      />
 
       {/* Import Modal */}
       <ImportJobModal
@@ -297,16 +274,28 @@ export default function JobsPage() {
                 return (
                   <tr key={j.id} className="border-b border-line hover:bg-bg2 transition-colors">
                     <td className="py-3 font-medium">
-                      <Link
-                        className="underline-offset-2 hover:underline text-fg font-semibold"
-                        href={`/apply/${j.id}`}
-                      >
-                        {j.title}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Link
+                          className="underline-offset-2 hover:underline text-fg font-semibold"
+                          href={`/apply/${j.id}`}
+                        >
+                          {j.title}
+                        </Link>
+                        {j.employment_type && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-bg2 border border-line rounded text-ink">
+                            {j.employment_type}
+                          </span>
+                        )}
+                        {j.years !== undefined && j.years > 0 && (
+                          <span className="text-[10px] font-mono text-muted">
+                            {j.years}+ yrs
+                          </span>
+                        )}
+                      </div>
                       {existing && (
-                        <span className="ml-2 font-mono text-[10px] text-neutral-500">
+                        <div className="font-mono text-[10px] text-neutral-500 mt-0.5">
                           {isRejected ? "· Previously Rejected (Can Re-Apply)" : `· Ongoing: ${existing.status}`}
-                        </span>
+                        </div>
                       )}
                       {j.skills && j.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">

@@ -29,12 +29,16 @@ def clean(raw: str, cap: int = 6000) -> str:
 
 
 def extract(job: dict) -> dict:
-    text = f"{job['title']} {job['description']}"
+    text = f"{job['title']} {job.get('description', '')}"
     skills = [k for k, p in _pat.items() if p.search(text)]
     yrs = [int(m) for m in re.findall(r"(\d{1,2})\+?\s*(?:years|yrs)", text, re.I) if int(m) < 20]
     t = job["title"].lower()
     domain = "ai" if re.search(r"\b(ai|ml|machine learning|llm|data scien|deep learning)", t) else "data" if "data" in t else "web"
-    return {**job, "skills": skills, "years": min(yrs) if yrs else 1, "domain": domain}
+    emp_type = job.get("employment_type")
+    if not emp_type:
+        emp_type = "Internship" if "intern" in t else "Contract" if "contract" in t else "Part-time" if "part-time" in t else "Full-time"
+    assigned_yrs = job.get("years") if job.get("years") is not None else (min(yrs) if yrs else 1)
+    return {**job, "skills": skills, "years": assigned_yrs, "domain": domain, "employment_type": emp_type}
 
 
 def _id(company: str, title: str, location: str) -> str:
@@ -210,20 +214,20 @@ import time as _time
 _DISCOVER_CACHE: dict[str, tuple[float, list[dict], list[str]]] = {}
 
 
-def _synthesize_query_opportunities(query_text: str) -> list[dict]:
+def _synthesize_query_opportunities(query_text: str, platforms: list[str] | None = None) -> list[dict]:
     qt = query_text.strip().title()
     ql = query_text.strip().lower()
     if any(k in ql for k in ["flight", "airline", "cabin", "aviation", "pilot", "airport"]):
         cos = ["Delta Air Lines", "United Airlines", "American Airlines", "Emirates", "Alaska Airlines", "JetBlue"]
         dom = "aviation"
         locs = ["Atlanta, GA", "Chicago, IL", "Dallas, TX", "New York, NY", "San Francisco, CA", "Denver, CO"]
-        sal = "$55,000 - $88,000"
+        sal = "$60,000 - $95,000"
         desc = f"Ensure passenger safety and world-class service as a {qt}. Pre-flight inspections, emergency readiness, and customer care."
     elif any(k in ql for k in ["nurse", "medical", "doctor", "health", "hospital", "clinical"]):
         cos = ["Mayo Clinic", "Cleveland Clinic", "Kaiser Permanente", "Johns Hopkins", "Mount Sinai", "Pfizer"]
         dom = "healthcare"
         locs = ["New York, NY", "Boston, MA", "Houston, TX", "Rochester, MN", "Los Angeles, CA", "Remote"]
-        sal = "$85,000 - $125,000"
+        sal = "$85,000 - $130,000"
         desc = f"Deliver patient-centered clinical care as a {qt}. Multidisciplinary care coordination and evidence-based standards."
     elif any(k in ql for k in ["account", "finance", "audit", "tax", "banking", "treasury"]):
         cos = ["JPMorgan Chase", "Goldman Sachs", "Morgan Stanley", "BlackRock", "Deloitte", "PwC"]
@@ -238,25 +242,101 @@ def _synthesize_query_opportunities(query_text: str) -> list[dict]:
         sal = "$110,000 - $170,000"
         desc = f"Drive strategic growth and customer acquisition as a {qt}. Multi-channel campaigns and revenue generation."
     else:
-        cos = ["Microsoft", "Google", "Amazon", "Apple", "Meta", "IBM", "Stripe", "Salesforce"]
+        cos = ["Microsoft", "Google", "Amazon", "Apple", "Meta", "IBM", "Stripe", "Salesforce", "Netflix", "Uber"]
         dom = "tech"
         locs = ["Remote", "San Francisco, CA", "Seattle, WA", "New York, NY", "Austin, TX", "Boston, MA"]
-        sal = "$115,000 - $165,000"
-        desc = f"Lead key initiatives and cross-functional execution as a {qt}. High-impact delivery and operational excellence."
+        sal = "$120,000 - $185,000"
+        desc = f"Lead key initiatives, strategy, and cross-functional execution as a {qt}. High-impact delivery and operational excellence."
 
-    titles = [f"{qt}", f"Senior {qt}", f"Lead {qt}", f"{qt} - Operations", f"{qt} (Immediate Opening)", f"Principal {qt}"]
-    srcs = ["LinkedIn", "Indeed", "Glassdoor", "Direct", "ZipRecruiter", "Wellfound"]
-    return [{
-        "title": t, "company": cos[i % len(cos)], "location": locs[i % len(locs)],
-        "remote": "Remote" in locs[i % len(locs)] or i % 2 == 0, "salary": sal,
-        "source": srcs[i % len(srcs)], "url": f"https://www.google.com/search?q={cos[i % len(cos)]}+{t.replace(' ', '+')}",
-        "description": desc, "domain": dom,
-    } for i, t in enumerate(titles)]
+    roles_spec = [
+        (f"{qt}", "Full-time", 3),
+        (f"Senior {qt}", "Full-time", 6),
+        (f"Lead {qt}", "Full-time", 8),
+        (f"{qt} Intern", "Internship", 0),
+        (f"Contract {qt}", "Contract", 4),
+        (f"Part-Time {qt}", "Part-time", 2),
+        (f"Associate {qt}", "Full-time", 1),
+        (f"Principal {qt}", "Full-time", 9),
+    ]
+    all_platforms = ["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Wellfound"]
+    srcs = [p.capitalize() for p in (platforms or all_platforms) if p] or all_platforms
+
+    out = []
+    for i, (t, emp_type, yrs) in enumerate(roles_spec):
+        co = cos[i % len(cos)]
+        loc = locs[i % len(locs)]
+        src = srcs[i % len(srcs)]
+        is_rem = "Remote" in loc or i % 2 == 0
+        search_query = f"{co}+{t.replace(' ', '+')}"
+        if src.lower() == "linkedin":
+            url = f"https://www.linkedin.com/jobs/search/?keywords={search_query}"
+        elif src.lower() == "indeed":
+            url = f"https://www.indeed.com/jobs?q={search_query}"
+        elif src.lower() == "glassdoor":
+            url = f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={search_query}"
+        elif src.lower() == "ziprecruiter":
+            url = f"https://www.ziprecruiter.com/jobs-search?search={search_query}"
+        elif src.lower() == "wellfound":
+            url = f"https://wellfound.com/jobs"
+        else:
+            url = f"https://www.google.com/search?q={search_query}+careers"
+
+        out.append({
+            "title": t,
+            "company": co,
+            "location": loc,
+            "remote": is_rem,
+            "employment_type": emp_type,
+            "salary": sal if emp_type != "Internship" else "$35 - $50 / hr",
+            "source": src,
+            "url": url,
+            "description": desc,
+            "domain": dom,
+            "years": yrs
+        })
+    return out
 
 
-async def discover(query: str, sources: list[str] | None = None) -> tuple[list[dict], list[str]]:
-    """Returns (jobs, errors). Queries live sources with 120s in-memory cache and graceful fallback."""
-    cache_key = f"{query.strip().lower()}::{','.join(sorted(sources or ['all']))}"
+def filter_jobs(
+    jobs_list: list[dict],
+    employment_type: str = "all",
+    experience_level: str = "all",
+    min_years: int = 0,
+    platforms: list[str] | None = None
+) -> list[dict]:
+    out = []
+    for j in jobs_list:
+        if employment_type and employment_type.lower() != "all":
+            jet = (j.get("employment_type") or "Full-time").lower()
+            target_et = employment_type.lower()
+            if target_et not in jet and jet not in target_et:
+                continue
+        j_yrs = j.get("years", 1)
+        jt = j.get("title", "").lower()
+        if experience_level and experience_level.lower() != "all":
+            el = experience_level.lower()
+            if el in ["entry", "intern"] and j_yrs > 1 and "intern" not in jt and "entry" not in jt and "junior" not in jt:
+                continue
+            elif el == "mid" and (j_yrs < 2 or j_yrs > 4):
+                continue
+            elif el == "senior" and (j_yrs < 5 and "senior" not in jt and "sr" not in jt):
+                continue
+            elif el in ["lead", "executive"] and (j_yrs < 8 and "lead" not in jt and "principal" not in jt):
+                continue
+        if min_years > 0 and j_yrs < min_years:
+            continue
+        if platforms:
+            valid_p = [p.lower() for p in platforms if p]
+            js = (j.get("source") or "").lower()
+            if valid_p and not any(p in js for p in valid_p):
+                continue
+        out.append(j)
+    return out
+
+
+async def discover(query: str, sources: list[str] | None = None, platforms: list[str] | None = None) -> tuple[list[dict], list[str]]:
+    """Returns (jobs, errors). Queries live sources with strict role matching and graceful synthesis."""
+    cache_key = f"{query.strip().lower()}::{','.join(sorted(sources or ['all']))}::{','.join(sorted(platforms or ['all']))}"
     now = _time.time()
     if cache_key in _DISCOVER_CACHE:
         ts, cached_jobs, cached_errs = _DISCOVER_CACHE[cache_key]
@@ -281,17 +361,16 @@ async def discover(query: str, sources: list[str] | None = None) -> tuple[list[d
 
     ql = query.lower().strip()
     if ql:
-        matching_live = [j for j in jobs if any(w in (j["title"] + " " + j.get("description", "")).lower() for w in ql.split())]
-        matched_baselines = [
-            b for b in BASELINE_POOL
-            if any(w in (b["title"] + " " + b["description"]).lower() for w in ql.split())
-        ]
-        if matching_live:
-            all_raw = matching_live + matched_baselines
-        elif matched_baselines:
-            all_raw = matched_baselines
-        else:
-            all_raw = _synthesize_query_opportunities(query)
+        q_words = [w for w in ql.split() if len(w) > 2]
+        def is_match(t: str) -> bool:
+            tl = t.lower()
+            if ql in tl:
+                return True
+            return bool(q_words and all(w in tl for w in q_words))
+
+        matching_live = [j for j in jobs if is_match(j["title"])]
+        matched_baselines = [b for b in BASELINE_POOL if is_match(b["title"])]
+        all_raw = matching_live + matched_baselines + _synthesize_query_opportunities(query, platforms)
     else:
         all_raw = jobs + BASELINE_POOL
 
@@ -344,28 +423,7 @@ async def import_custom_job(url: str, title: str = "", company: str = "", raw_te
     return job_dict
 
 
-TECH_COMPANIES = [
-    "Anthropic", "Stripe", "OpenAI", "Google", "Meta", "Microsoft", "Amazon", "Scale AI",
-    "Databricks", "Vercel", "Linear", "Supabase", "Coinbase", "Palantir", "Snowflake",
-    "Figma", "Notion", "GitHub", "Cloudflare", "Modal", "Synthetix Labs", "Vantage AI",
-    "Cognitive Cloud", "Aura Health", "Axiom Vector", "Hyperion Labs", "Perplexity", "Mistral AI"
-]
-
-ROLE_TEMPLATES = [
-    ("AI Systems Engineer", "ai", ["python", "fastapi", "rag", "docker", "redis", "pytorch", "llm"], 2),
-    ("Senior Machine Learning Engineer", "ai", ["python", "pytorch", "tensorflow", "ollama", "docker", "cuda"], 4),
-    ("Full Stack AI Platform Engineer", "web", ["typescript", "react", "next.js", "node", "fastapi", "postgresql", "tailwind"], 3),
-    ("Staff Backend Systems Engineer", "web", ["python", "go", "postgresql", "redis", "kubernetes", "docker", "aws"], 5),
-    ("Data & MLOps Infrastructure Engineer", "data", ["python", "airflow", "spark", "sql", "docker", "kubernetes", "gcp"], 3),
-    ("Software Engineer - Autonomous Agents", "ai", ["python", "fastapi", "rag", "qwen", "postgresql", "docker"], 2),
-    ("Backend Engineer (Distributed Systems)", "web", ["go", "python", "postgresql", "redis", "docker", "kafka"], 3),
-    ("Frontend Platform Engineer", "web", ["typescript", "react", "next.js", "tailwind", "graphql"], 2),
-    ("AI Research & Evaluation Engineer", "ai", ["python", "pytorch", "nlp", "pandas", "numpy", "ollama"], 3),
-    ("Cloud Infrastructure & DevOps Engineer", "web", ["docker", "kubernetes", "terraform", "aws", "gcp", "linux", "ci/cd"], 3),
-    ("Software Engineer Intern", "web", ["python", "typescript", "react", "git", "sql"], 0),
-    ("Part-Time AI Systems Specialist", "ai", ["python", "fastapi", "llm", "rag", "docker"], 2),
-    ("Contract Full Stack Architect", "web", ["typescript", "next.js", "postgresql", "redis", "docker"], 5),
-]
+from .job_streamer import stream_target_jobs as _stream_target_jobs, TECH_COMPANIES, ROLE_TEMPLATES
 
 
 def stream_target_jobs(
@@ -375,77 +433,12 @@ def stream_target_jobs(
     work_types: list[str] | None = None,
     min_years: int = 0
 ) -> list[dict]:
-    """Generates and streams diverse target opportunities scaling up to 50,000 jobs.
-    Grounds listings in target company whitelists, role templates, and employment types.
-    """
-    import itertools
-    count = max(1, min(target_count, 50000))
-    cos = [c.strip() for c in (target_companies or ["all"]) if c.strip()]
-    if not cos or "all" in [c.lower() for c in cos]:
-        cos = TECH_COMPANIES
+    return _stream_target_jobs(
+        target_count=target_count,
+        queries=queries,
+        target_companies=target_companies,
+        work_types=work_types,
+        min_years=min_years,
+        batch_saver=save_jobs_batch
+    )
 
-    wtypes = [w.strip() for w in (work_types or ["fulltime", "remote"]) if w.strip()]
-    types_pool = []
-    if any("intern" in w.lower() for w in wtypes):
-        types_pool.append("Internship")
-    if any("part" in w.lower() for w in wtypes):
-        types_pool.append("Part-time")
-    if any("contract" in w.lower() for w in wtypes):
-        types_pool.append("Contract")
-    if not types_pool or any("full" in w.lower() for w in wtypes):
-        types_pool.append("Full-time")
-
-    generated = []
-    batch = []
-    co_cycle = itertools.cycle(cos)
-    tmpl_cycle = itertools.cycle(ROLE_TEMPLATES)
-    type_cycle = itertools.cycle(types_pool)
-
-    for i in range(count):
-        title, domain, skills, yrs = next(tmpl_cycle)
-        company = next(co_cycle)
-        emp_type = next(type_cycle)
-
-        # Override title for intern or contract if matched
-        if emp_type == "Internship" and "intern" not in title.lower():
-            title = f"{title.split(' ')[0]} Engineering Intern"
-            yrs = 0
-        elif emp_type == "Contract" and "contract" not in title.lower():
-            title = f"Contract {title}"
-
-        location = "Remote" if (not work_types or any("remote" in w.lower() for w in wtypes)) else "San Francisco, CA / Remote"
-        sal_base = 90 + (yrs * 18)
-        salary = f"${sal_base},000 - ${sal_base + 35},000" if emp_type != "Internship" else "$55 - $75 / hr"
-        desc = (
-            f"Opportunity at {company} for a {title} ({emp_type}). Join our distributed engineering team building scalable systems. "
-            f"Key technical requirements include hands-on experience with {', '.join(skills[:5])}. "
-            f"We emphasize evidence-grounded engineering rigor and autonomous execution."
-        )
-
-        job_id = _id(f"{company}_{i % 250}", title, location)
-        j = {
-            "id": job_id,
-            "title": title,
-            "company": company,
-            "location": location,
-            "remote": True,
-            "employment_type": emp_type,
-            "salary": salary,
-            "source": "Platform Streamer",
-            "url": f"https://jobs.{company.lower().replace(' ', '')}.com/positions/{job_id}",
-            "domain": domain,
-            "skills": skills,
-            "years": max(min_years, yrs),
-            "description": desc
-        }
-        generated.append(j)
-        batch.append(j)
-
-        if len(batch) >= 200:
-            save_jobs_batch(batch)
-            batch = []
-
-    if batch:
-        save_jobs_batch(batch)
-
-    return generated

@@ -8,6 +8,10 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 class SearchIn(BaseModel):
     query: str = ""
     remote: bool = False
+    employment_type: str = "all"
+    experience_level: str = "all"
+    min_years: int = 0
+    platforms: list[str] | None = None
     profile: dict = {}
 
 
@@ -19,9 +23,16 @@ async def jobs_list(q: str = "Engineer", limit: int = 50):
 
 @router.post("/search")
 async def jobs_search(b: SearchIn):
-    found, errs = await jobs.discover(b.query.strip()[:80])
+    found, errs = await jobs.discover(b.query.strip()[:80], platforms=b.platforms)
     if b.remote:
         found = [j for j in found if j.get("remote", True)]
+    found = jobs.filter_jobs(
+        found,
+        employment_type=b.employment_type,
+        experience_level=b.experience_level,
+        min_years=b.min_years,
+        platforms=b.platforms
+    )
     if b.profile.get("skills"):
         for j in found:
             j["match"] = tailoring.match(b.profile, j)

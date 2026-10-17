@@ -33,3 +33,26 @@ def test_dedupe_merges():
             {"company": "x ", "title": "AI  Engineer", "location": "remote", "source": "b"}]
     out = dedupe.dedupe(jobs)
     assert len(out) == 1 and out[0]["sources"] == ["a", "b"]
+
+
+def test_job_discovery_and_filtering():
+    import asyncio
+    from services import jobs
+    found, _ = asyncio.run(jobs.discover("Project Manager"))
+    assert len(found) > 0
+    # Every synthesized job must be relevant to Project Manager
+    for j in found:
+        assert "project" in j["title"].lower() or "manager" in j["title"].lower()
+
+    # Test filtering by employment type
+    contract_only = jobs.filter_jobs(found, employment_type="Contract")
+    assert all("contract" in (j.get("employment_type") or "").lower() for j in contract_only)
+
+    # Test filtering by experience level
+    senior_only = jobs.filter_jobs(found, experience_level="senior")
+    assert all(j.get("years", 1) >= 5 or "senior" in j["title"].lower() for j in senior_only)
+
+    # Test filtering by platforms
+    linkedin_only = jobs.filter_jobs(found, platforms=["LinkedIn"])
+    assert all("linkedin" in (j.get("source") or "").lower() for j in linkedin_only)
+

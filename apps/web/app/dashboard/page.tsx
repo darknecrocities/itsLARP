@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { useSwarm } from "@/lib/swarm";
 import { apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Reveal, Stat } from "@/components/ui";
-import { OllamaManager } from "@/components/OllamaManager";
+import { BentoAnalyticsGrid } from "@/components/dashboard/BentoAnalyticsGrid";
 import { LLMRecommendationsCard } from "@/components/LLMRecommendationsCard";
 import { AgentQuestionsDrawer } from "@/components/AgentQuestionsDrawer";
 import {
@@ -49,7 +49,7 @@ export default function Dashboard() {
     <>
       <PageHeader
         title="Command Workspace"
-        sub="Monitor your autonomous workforce, inspect local Ollama models, review complete resumes, and auto-apply strategic recommendations."
+        sub="Monitor your autonomous workforce, review live application conversion analytics, inspect complete resumes, and auto-apply strategic recommendations."
         action={
           <div className="flex gap-2">
             <Link href="/agents" className="btn btn-primary flex items-center gap-1.5">
@@ -68,17 +68,9 @@ export default function Dashboard() {
         <AgentQuestionsDrawer />
       </section>
 
-      {/* Strategic Metrics Overview */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <Stat label="Applications Tracked" value={apps.length} />
-        <Stat label="Interviews Scheduled" value={count("INTERVIEW")} i={1} />
-        <Stat label="Offers Received" value={count("OFFER")} i={2} />
-        <Stat label="Opportunities Scored" value={jobs?.length ?? 0} i={3} />
-      </section>
-
-      {/* Ollama Local Engine & Recommended Models Hub */}
+      {/* Synchronized Bento Analytics Grid */}
       <section className="mb-8">
-        <OllamaManager />
+        <BentoAnalyticsGrid />
       </section>
 
       {/* LLM Strategic Recommendations Engine with 1-Click Auto-Apply */}
