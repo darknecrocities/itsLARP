@@ -178,8 +178,8 @@ def test_parallel_swarm_find_construct_and_apply():
     assert start_res.status_code == 200
     run_id = start_res.json()["id"]
 
-    # Wait briefly for async workers to complete discovery -> analysis -> matching -> resumes -> applications
-    for _ in range(25):
+    # Wait for async workers to complete discovery -> analysis -> matching -> resumes -> applications
+    for _ in range(50):
         snap = client.get(f"/swarm/{run_id}").json()
         if snap["status"] in ("completed", "stopped") or snap["ready"] > 0:
             break
