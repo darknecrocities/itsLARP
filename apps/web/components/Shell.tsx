@@ -31,6 +31,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/dashboard", target: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/profile", target: "/profile", label: "Career Profile", icon: User },
+  { href: "/resume", target: "/resume", label: "APA Resume & 20 Configs", icon: FileText },
   { href: "/jobs", target: "/jobs", label: "Jobs", icon: Briefcase },
   { href: "/apply", target: "/applications", label: "Applications", icon: FileCheck },
   { href: "/agents", target: "/agents", label: "Auto-Apply Agents", icon: Bot },
@@ -244,39 +245,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 );
               })}
             </ul>
-
-            {/* Resume Studio & Updates Links */}
-            <div className="mt-4 pt-3 border-t border-line/60 space-y-1">
-              <Link
-                href="/resume"
-                title={collapsed ? "APA Resume" : undefined}
-                className={`flex items-center ${
-                  collapsed ? "justify-center p-2" : "justify-between px-2 py-1.5"
-                } text-xs rounded transition-colors font-mono ${
-                  path === "/resume"
-                    ? "bg-black text-white font-semibold"
-                    : "text-dmuted hover:text-ink hover:bg-bg"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 shrink-0" />
-                  {!collapsed && <span>APA Resume</span>}
-                </div>
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowUpdateModal(true)}
-                title={collapsed ? "Updates & Adds" : undefined}
-                className={`flex items-center ${
-                  collapsed ? "justify-center p-2" : "justify-between px-2 py-1.5"
-                } text-xs rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono w-full text-left`}
-              >
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-ink shrink-0" />
-                  {!collapsed && <span>Updates & Adds</span>}
-                </div>
-              </button>
-            </div>
           </div>
 
           {/* User Profile Footer */}
@@ -298,6 +266,22 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </div>
               {collapsed && <User className="w-4 h-4 text-ink" />}
             </Link>
+
+            {!collapsed && (
+              <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-line/40 text-[10px] text-muted font-mono px-1">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block animate-pulse" />
+                  <span>Auto-Sync Ready</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateModal(true)}
+                  className="hover:text-ink underline transition-colors text-[10px]"
+                >
+                  v1.0.0
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Draggable Resizer Handle on Right Border */}

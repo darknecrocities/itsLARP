@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { X, RefreshCw, Download, GitBranch, GitMerge, Check, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, RefreshCw, Download, GitBranch, GitMerge, Check, AlertCircle, Laptop } from "lucide-react";
 import { Badge } from "./ui";
 import { LATEST_UPDATE_DATA, CURRENT_RELEASE_VERSION, CURRENT_COMMIT_SHA, MAIN_BRANCH, type UpdateRelease } from "@/lib/updates";
 
@@ -20,6 +20,31 @@ export function UpdateNotificationModal({
   const [activeTab, setActiveTab] = useState<"merged" | "adds" | "fixes" | "verification">("merged");
   const data: UpdateRelease = LATEST_UPDATE_DATA;
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsDesktop(
+        Boolean(
+          (window as any).electronAPI?.isDesktop ||
+          (window as any).isDesktop ||
+          navigator.userAgent.toLowerCase().includes("electron")
+        )
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -27,9 +52,13 @@ export function UpdateNotificationModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="update-modal-title"
+      onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
     >
-      <div className="bg-white text-black border border-neutral-300 rounded-lg shadow-2xl max-w-2xl w-full max-h-[88vh] flex flex-col font-sans overflow-hidden">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white text-black border border-neutral-300 rounded-lg shadow-2xl max-w-2xl w-full max-h-[88vh] flex flex-col font-sans overflow-hidden"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 bg-neutral-50/80">
           <div>
@@ -74,13 +103,20 @@ export function UpdateNotificationModal({
                 <span>Check Updates</span>
               </button>
             )}
-            <a
-              href="/download"
-              className="btn btn-primary text-xs py-1 px-2.5 flex items-center gap-1.5 font-medium"
-            >
-              <Download className="w-3 h-3" />
-              <span>Get Desktop App</span>
-            </a>
+            {!isDesktop ? (
+              <a
+                href="/download"
+                className="btn btn-primary text-xs py-1 px-2.5 flex items-center gap-1.5 font-medium"
+              >
+                <Download className="w-3 h-3" />
+                <span>Get Desktop App</span>
+              </a>
+            ) : (
+              <span className="font-mono text-[11px] px-2.5 py-1 bg-black text-white rounded font-medium flex items-center gap-1.5">
+                <Laptop className="w-3.5 h-3.5" />
+                <span>Desktop App Native</span>
+              </span>
+            )}
           </div>
         </div>
 
@@ -245,9 +281,9 @@ export function UpdateNotificationModal({
           </div>
           <button
             onClick={onClose}
-            className="btn py-1 px-4 text-xs font-semibold bg-black text-white hover:bg-neutral-800"
+            className="btn py-1.5 px-5 text-xs font-semibold bg-black text-white hover:bg-neutral-800 transition-colors"
           >
-            Close
+            Close & Return to App
           </button>
         </div>
       </div>

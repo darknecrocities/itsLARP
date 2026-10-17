@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, apiGet } from "@/lib/api";
 import { Badge, PageHeader, ErrorBox } from "@/components/ui";
 import { OllamaManager } from "@/components/OllamaManager";
+import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
 
 type AIStatusResponse = {
   provider: string;
@@ -31,6 +32,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [saveErr, setSaveErr] = useState("");
+  const [showUpdatesModal, setShowUpdatesModal] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,6 +207,38 @@ export default function SettingsPage() {
       <section className="mt-10 max-w-4xl">
         <OllamaManager />
       </section>
+
+      {/* Software Updates & Production Changelog */}
+      <section className="mt-8 max-w-4xl card p-6 border border-line bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs px-2 py-0.5 bg-black text-white rounded font-bold">
+                VERSION 1.0.0
+              </span>
+              <span className="font-mono text-xs px-2 py-0.5 bg-ok/10 text-ok border border-ok/30 rounded font-semibold">
+                [STATUS: UP TO DATE]
+              </span>
+            </div>
+            <h3 className="text-base font-semibold mt-2">Software Updates & Production Changelog</h3>
+            <p className="text-xs text-muted mt-0.5">
+              Review merged pull requests, architectural feature additions, stability fixes, and automated test verifications.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowUpdatesModal(true)}
+            className="btn btn-primary text-xs flex items-center gap-1.5"
+          >
+            <span>View Release Changelog</span>
+          </button>
+        </div>
+      </section>
+
+      <UpdateNotificationModal
+        isOpen={showUpdatesModal}
+        onClose={() => setShowUpdatesModal(false)}
+      />
     </>
   );
 }

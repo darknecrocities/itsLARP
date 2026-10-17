@@ -1,11 +1,79 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Download, Printer, ArrowRight, Check, SlidersHorizontal, FileText } from "lucide-react";
-import { useStore, type ResumeFormatKey } from "@/lib/store";
+import { Download, Printer, ArrowRight, Check, SlidersHorizontal, FileText, Sparkles, UserCheck } from "lucide-react";
+import { useStore, type ResumeFormatKey, type Profile } from "@/lib/store";
 import { Badge, Empty, PageHeader, Reveal } from "@/components/ui";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 import { api, apiGet } from "@/lib/api";
+
+const BASELINE_TEMPLATE_PROFILE: Profile = {
+  name: "Alex Rivera",
+  headline: "Lead AI Engineer & Distributed Systems Architect",
+  email: "alex.rivera.systems@example.org",
+  phone: "+1 (555) 019-2834",
+  location: "San Francisco, CA (Open to Remote)",
+  years: 6,
+  education: "B.S. in Computer Science, UC Berkeley",
+  summary:
+    "Lead AI Systems Engineer with 6+ years of experience architecting high-throughput inference engines, distributed model serving pipelines, and resilient multi-agent swarms using PyTorch, FastAPI, and Kubernetes.",
+  skills: [
+    "Python",
+    "PyTorch",
+    "FastAPI",
+    "Next.js",
+    "TypeScript",
+    "Docker",
+    "Kubernetes",
+    "PostgreSQL",
+    "Distributed Systems",
+    "Vector Databases",
+  ],
+  experience: [
+    {
+      company: "NeuralScale AI",
+      role: "Lead Systems Architect",
+      dates: "2023 - Present",
+      metrics: "Reduced LLM inference p99 latency by 42% across 10M daily requests",
+      bullets: [
+        "Architected scalable LLM inference clusters using Triton and vLLM serving 10M+ queries daily.",
+        "Engineered autonomous multi-agent verification pipelines with strict SLA monitoring and zero downtime.",
+      ],
+    },
+    {
+      company: "Vanguard Cloud Technologies",
+      role: "Senior Distributed Systems Engineer",
+      dates: "2020 - 2023",
+      metrics: "Maintained 99.99% availability for enterprise microservice infrastructure",
+      bullets: [
+        "Implemented real-time data streaming pipelines processing 50k+ events/sec with Apache Kafka and PostgreSQL.",
+        "Standardized containerized orchestration patterns across 40+ engineering microservices.",
+      ],
+    },
+  ],
+  projects: [
+    {
+      name: "Autonomous Agent Fleet Orchestrator",
+      tech: ["Python", "FastAPI", "PostgreSQL", "Next.js"],
+      text: "Open-source distributed scheduler for parallelized multi-agent workloads with adaptive rate-limiting.",
+      url: "https://github.com/example/agent-fleet",
+    },
+  ],
+  links: {
+    github: "https://github.com/example",
+    linkedin: "https://linkedin.com/in/example",
+  },
+  evidence: [
+    {
+      source: "GitHub Verification",
+      text: "Verified 1,400+ production commits across distributed systems and machine learning repositories.",
+    },
+    {
+      source: "Technical Assessment",
+      text: "Ranked top 1% in algorithmic systems design and distributed concurrency.",
+    },
+  ],
+};
 
 const RESUME_FORMATS: { key: ResumeFormatKey; label: string; desc: string }[] = [
   { key: "apa_7th", label: "APA 7th Edition CV", desc: "Academic & Research Standard" },
@@ -27,7 +95,8 @@ export default function ResumeStudio() {
   const [copied, setCopied] = useState(false);
   const [appliedToast, setAppliedToast] = useState(false);
 
-  const hasProfile = Boolean(p.name || p.skills.length > 0);
+  const hasProfile = Boolean(p.name && (p.skills?.length > 0 || p.experience?.length > 0));
+  const activeProfile = hasProfile ? p : BASELINE_TEMPLATE_PROFILE;
 
   useEffect(() => {
     apiGet<any[]>("/jobs?q=Engineer")
@@ -38,7 +107,6 @@ export default function ResumeStudio() {
   }, []);
 
   useEffect(() => {
-    if (!hasProfile) return;
     const targetJob =
       selectedJobId === "master"
         ? null
@@ -50,7 +118,7 @@ export default function ResumeStudio() {
       html: string;
       format_label: string;
     }>("/profile/render-resume", {
-      profile: p,
+      profile: activeProfile,
       format: appConfig.resumeFormat,
       job: targetJob,
       config: appConfig,
@@ -64,7 +132,7 @@ export default function ResumeStudio() {
       })
       .catch(() => {})
       .finally(() => setLoadingRender(false));
-  }, [p, appConfig, selectedJobId, availableJobs, hasProfile]);
+  }, [activeProfile, appConfig, selectedJobId, availableJobs]);
 
   const handleApplyToAgents = () => {
     setAppliedToast(true);
@@ -101,41 +169,39 @@ export default function ResumeStudio() {
         title="APA Resume & 20 Apply Configurations"
         sub="Configure 20 autonomous application parameters, select resume design architecture, and inspect real-time dynamic bot tailoring for target job descriptions."
         action={
-          hasProfile ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleApplyToAgents}
-                className="btn btn-primary text-xs flex items-center gap-1.5"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>Apply to Auto-Apply Agents</span>
-              </button>
-              <button
-                className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5 hover:border-black"
-                onClick={() =>
-                  downloadTextFile(
-                    renderedText,
-                    `${(p.name || "Candidate").replace(/\s+/g, "_")}_${appConfig.resumeFormat}.txt`
-                  )
-                }
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download (.txt)</span>
-              </button>
-              <button
-                className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5 hover:border-black"
-                onClick={openPrintWindow}
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print / Save PDF</span>
-              </button>
-              <Link href="/profile" className="btn text-xs border border-line flex items-center gap-1.5 hover:border-black">
-                <span>Edit Career DNA</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          ) : null
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleApplyToAgents}
+              className="btn btn-primary text-xs flex items-center gap-1.5"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Apply to Auto-Apply Agents</span>
+            </button>
+            <button
+              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5 hover:border-black"
+              onClick={() =>
+                downloadTextFile(
+                  renderedText,
+                  `${(activeProfile.name || "Candidate").replace(/\s+/g, "_")}_${appConfig.resumeFormat}.txt`
+                )
+              }
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download (.txt)</span>
+            </button>
+            <button
+              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5 hover:border-black"
+              onClick={openPrintWindow}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print / Save PDF</span>
+            </button>
+            <Link href="/profile" className="btn text-xs border border-line flex items-center gap-1.5 hover:border-black">
+              <span>{hasProfile ? "Edit Career DNA" : "Construct Career DNA"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         }
       />
 
@@ -151,24 +217,8 @@ export default function ResumeStudio() {
         </div>
       )}
 
-      {!hasProfile ? (
-        <Empty
-          title="No Career DNA Profile Found"
-          hint="Construct your Career DNA from GitHub, LinkedIn, Portfolio links, or upload a resume first to generate real candidate resumes."
-        >
-          <div className="flex flex-wrap justify-center gap-2">
-            <Link href="/profile" className="btn btn-primary text-xs">
-              Construct Career DNA with LLM
-            </Link>
-            <Link href="/onboarding" className="btn text-xs">
-              Upload Resume PDF / TXT
-            </Link>
-          </div>
-        </Empty>
-      ) : (
-        <>
-          {/* Section 1: 20 Apply Configurations */}
-          <section className="space-y-2">
+      {/* Section 1: 20 Apply Configurations */}
+      <section className="space-y-2">
             <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted">
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Section 1: 20 Apply Configurations for Autonomous Swarm</span>
@@ -176,21 +226,40 @@ export default function ResumeStudio() {
             <ApplicationConfigPanel onApplyToAgents={handleApplyToAgents} />
           </section>
 
-          {/* Section 2: Resume Design Format & Live Preview */}
-          <section className="card p-5 bg-white border border-neutral-300 rounded-lg space-y-4 text-black">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-3">
-              <div>
-                <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500">
-                  SECTION 2: RESUME DESIGN ARCHITECTURE & LIVE PREVIEW
-                </div>
-                <h3 className="text-sm font-semibold text-black mt-0.5">
-                  Live Design Preview (Updates instantly when you customize any configuration)
-                </h3>
-              </div>
-              <div className="text-xs font-mono text-neutral-600">
-                {p.evidence.length} Evidence Records
-              </div>
+      {/* Section 2: Resume Design Format & Live Preview */}
+      <section className="card p-5 bg-white border border-neutral-300 rounded-lg space-y-4 text-black">
+        {!hasProfile && (
+          <div className="p-3 bg-neutral-100 border border-neutral-300 rounded flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
+              <span className="text-neutral-800">
+                Previewing resume with Verified Baseline Profile ({BASELINE_TEMPLATE_PROFILE.name}).
+              </span>
             </div>
+            <div className="flex items-center gap-2">
+              <Link href="/profile" className="btn btn-primary text-xs py-0.5 px-2.5">
+                Construct Your Career DNA →
+              </Link>
+              <Link href="/onboarding" className="btn text-xs py-0.5 px-2 bg-white border border-neutral-300 hover:border-black">
+                Upload Resume
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-3">
+          <div>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500">
+              SECTION 2: RESUME DESIGN ARCHITECTURE & LIVE PREVIEW
+            </div>
+            <h3 className="text-sm font-semibold text-black mt-0.5">
+              Live Design Preview (Updates instantly when you customize any configuration)
+            </h3>
+          </div>
+          <div className="text-xs font-mono text-neutral-600">
+            {activeProfile.evidence.length} Evidence Records
+          </div>
+        </div>
 
             {/* 5 Architecture Selector */}
             <div>
@@ -359,8 +428,6 @@ export default function ResumeStudio() {
               )}
             </section>
           </Reveal>
-        </>
-      )}
-    </div>
-  );
-}
+        </div>
+      );
+    }
