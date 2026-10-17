@@ -31,72 +31,94 @@ export interface UpdateRelease {
 }
 
 export const CURRENT_RELEASE_VERSION = "1.0.0";
-export const CURRENT_COMMIT_SHA = "ea4008c";
+export const CURRENT_COMMIT_SHA = "2d0a9c6";
 export const MAIN_BRANCH = "main";
 
 export const LATEST_UPDATE_DATA: UpdateRelease = {
   version: CURRENT_RELEASE_VERSION,
   releaseTag: "v1.0.0-desktop",
-  releaseDate: "2026-10-15",
+  releaseDate: "2026-10-17",
   commitSha: CURRENT_COMMIT_SHA,
   branch: MAIN_BRANCH,
   status: "up_to_date",
   summary:
-    "Official synchronization with origin/main. Includes dynamic desktop workspace routing, OS-aware automated Ollama engine orchestration, animated BST agent visualizer, APA 7th Resume Studio, and duplicate application prevention.",
+    "Official synchronization with origin/main. Includes authentic brand icons, 20 apply configurations, 5 academic/industry resume formats, recruiter email monitoring, real Chrome screenshots, and bento dashboard analytics.",
   mergedPullRequests: [
+    {
+      id: 21,
+      title: "fix(branding): replace mock SVG icons with authentic brand logos for job platforms and integrations",
+      mergedAt: "2026-10-17T05:26:00Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Replaced mock SVGs (notably Glassdoor green letter 'C') with official brandmarks.",
+        "Integrated authentic vector logos for Glassdoor, ZipRecruiter, Indeed, LinkedIn, Wellfound, Gmail, Outlook, and Notion.",
+        "Verified pixel-perfect scaling across light/dark contrast containers.",
+      ],
+    },
+    {
+      id: 20,
+      title: "feat(analytics): bento dashboard analytics grid and responsive real job discovery",
+      mergedAt: "2026-10-17T04:40:00Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Modern bento style grid on dashboard with live conversion metrics and sparkbars.",
+        "Responsive job discovery engine with real multi-source ingestion and experience/type filters.",
+        "Relocated Ollama engine telemetry to dedicated Settings section.",
+      ],
+    },
+    {
+      id: 19,
+      title: "fix(api): capture and serve authentic headless Chrome PNG screenshots for job application submissions",
+      mergedAt: "2026-10-16T22:15:00Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Real headless Chrome browser automation capturing actual submission receipts.",
+        "Pre-submission filled form review modal showing staged inputs prior to final submission.",
+        "Two-way Notion synchronization with embedded submission receipt attachments.",
+      ],
+    },
+    {
+      id: 18,
+      title: "feat(web,api): integrate career dna builder, 5 resume formats, and 20 application configs",
+      mergedAt: "2026-10-16T18:30:00Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Autonomous Career DNA construction from GitHub, LinkedIn, portfolio, and notes.",
+        "5 interchangeable academic & industry formats (APA 7th, Harvard Executive, Silicon Valley Modern, IEEE Engineering, ATS Strict).",
+        "20 precision application parameters covering tone, compensation floor, work auth, and batch modes.",
+      ],
+    },
+    {
+      id: 14,
+      title: "feat(agents): working agent stream visualization, zoom controls, and responsive Windows layout",
+      mergedAt: "2026-10-16T00:26:15Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Activated live agent stream animation showing real in-flight data packets and working status pulses.",
+        "Added responsive Zoom In, Zoom Out, and Fit to Window controls directly on agent topology bar.",
+        "Factored out GraphTelemetryBar and NodeDetailsCard to keep components modular and under 500 lines.",
+      ],
+    },
+    {
+      id: 13,
+      title: "feat(integrations): email monitoring, notion sync, brand icons, and collapsible sidebar",
+      mergedAt: "2026-10-15T23:23:57Z",
+      branch: "desktop_app_ollama_setup -> main",
+      highlights: [
+        "Added recruiter email response monitor for Gmail and Outlook with automatic application status tracking.",
+        "Integrated authentic brand vector icons and target job platform selection.",
+        "Built collapsible and draggable resizable sidebar navigation dock with width persistence.",
+      ],
+    },
     {
       id: 9,
       title: "feat(desktop): dynamic workspace routing and OS-aware automated Ollama engine",
       mergedAt: "2026-10-15T13:03:01Z",
       branch: "desktop_app_ollama_setup -> main",
       highlights: [
-        "Dynamic workspace resolution: Checks local port 3000 (500ms timeout) and automatically connects to live cloud workspace (getitslarp.vercel.app/dashboard) when offline.",
-        "Eliminated the infinite 'Local web service not ready yet. Retrying...' deadlock.",
-        "Automated background Ollama daemon spawning on app launch (macOS open -a Ollama and Windows detached serve).",
-        "OS-aware automated installation triggers for macOS (.zip) and Windows (.exe).",
-        "IPC streaming model pull progress bar.",
-      ],
-    },
-    {
-      id: 8,
-      title: "fix(ui): eliminate SVG transform origin popping circles and label collisions in BST agent tree",
-      mergedAt: "2026-10-15T12:05:28Z",
-      branch: "desktop_app_ollama_setup -> main",
-      highlights: [
-        "Eliminated CSS keyframe transform origin bug that displaced 7 ghost circles at canvas bottom.",
-        "Repositioned node labels with high-contrast badge pills to prevent branch cable overlaps.",
-        "Streamlined data packets to 8 dedicated, non-overlapping paths.",
-      ],
-    },
-    {
-      id: 7,
-      title: "feat(ui): animated Binary Search Tree agent network with spawning nodes",
-      mergedAt: "2026-10-15T11:34:42Z",
-      branch: "desktop_app_ollama_setup -> main",
-      highlights: [
-        "Balanced 4-level BST hierarchy (L0 Root, L1 Partitions, L2 Hubs, L3 Pods).",
-        "Real-time animated Bezier curve data packets (Profile DNA, Match Vectors, APA CV Spec, Notion Sync).",
-        "Interactive + Spawn Agent Node control with dynamic spring entry.",
-      ],
-    },
-    {
-      id: 6,
-      title: "feat(desktop): desktop app packaging and release verification",
-      mergedAt: "2026-10-15T09:12:00Z",
-      branch: "desktop_app_ollama_setup -> main",
-      highlights: [
-        "Native packaging for macOS (Apple Silicon arm64, Intel x64) and Windows (x64 setup, portable zip).",
-        "Automated cryptographic SHA256 checksums generation and release distribution.",
-      ],
-    },
-    {
-      id: 5,
-      title: "feat: optimize job bot performance and duplicate prevention",
-      mergedAt: "2026-10-14T22:30:00Z",
-      branch: "optimize_job_bot_perf -> main",
-      highlights: [
-        "Duplicate application prevention guard preventing accidental re-submissions.",
-        "Explicit re-apply workflows for rejected or withdrawn opportunities.",
+        "Dynamic workspace resolution checking local port 3000 and falling back to cloud workspace.",
+        "Eliminated infinite 'Local web service not ready yet' deadlock.",
+        "Automated background Ollama daemon spawning on app launch for macOS and Windows.",
       ],
     },
   ],

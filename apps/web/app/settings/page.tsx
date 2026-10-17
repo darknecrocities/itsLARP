@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, apiGet } from "@/lib/api";
 import { Badge, PageHeader, ErrorBox } from "@/components/ui";
@@ -33,6 +33,20 @@ export default function SettingsPage() {
   const [saveMsg, setSaveMsg] = useState("");
   const [saveErr, setSaveErr] = useState("");
   const [showUpdatesModal, setShowUpdatesModal] = useState(false);
+  const [updatesTab, setUpdatesTab] = useState<"merged" | "adds" | "fixes" | "verification" | "updater">("merged");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("updates") === "true") {
+        setShowUpdatesModal(true);
+        const t = params.get("tab");
+        if (t === "merged" || t === "adds" || t === "fixes" || t === "verification" || t === "updater") {
+          setUpdatesTab(t);
+        }
+      }
+    }
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,6 +252,7 @@ export default function SettingsPage() {
       <UpdateNotificationModal
         isOpen={showUpdatesModal}
         onClose={() => setShowUpdatesModal(false)}
+        initialTab={updatesTab}
       />
     </>
   );
