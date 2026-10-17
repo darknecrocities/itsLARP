@@ -10,7 +10,12 @@ const FORMAT_OPTIONS: { key: ResumeFormatKey; label: string; desc: string }[] = 
   { key: "ats_strict", label: "ATS Strict Parser-Safe", desc: "Standard ASCII headings optimized for Workday, Greenhouse & Lever" },
 ];
 
-export function ApplicationConfigPanel({ compact = false }: { compact?: boolean }) {
+interface ApplicationConfigPanelProps {
+  compact?: boolean;
+  onApplyToAgents?: () => void;
+}
+
+export function ApplicationConfigPanel({ compact = false, onApplyToAgents }: ApplicationConfigPanelProps) {
   const { appConfig, setAppConfig } = useStore();
   const [tab, setTab] = useState<"resume" | "screening" | "guardrails" | "autonomy">("resume");
 
@@ -398,6 +403,22 @@ export function ApplicationConfigPanel({ compact = false }: { compact?: boolean 
           </div>
         </div>
       )}
+
+      {/* Action Footer */}
+      <div className="pt-3 border-t border-neutral-200 flex flex-wrap items-center justify-between gap-3">
+        <div className="text-[11px] text-neutral-500 font-mono">
+          All 20 parameters are injected into discovery, tailoring, and application bots.
+        </div>
+        {onApplyToAgents && (
+          <button
+            type="button"
+            onClick={onApplyToAgents}
+            className="px-4 py-2 bg-black text-white hover:bg-neutral-800 text-xs font-semibold rounded transition"
+          >
+            Apply to Auto-Apply Agents
+          </button>
+        )}
+      </div>
     </div>
   );
 }

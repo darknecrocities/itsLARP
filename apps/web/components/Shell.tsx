@@ -39,7 +39,7 @@ const NAV: NavItem[] = [
   { href: "/settings", target: "/settings", label: "Settings", icon: Settings },
 ];
 
-const BARE = ["/", "/login", "/onboarding", "/download", "/resume"];
+const BARE = ["/", "/login", "/onboarding", "/download"];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
@@ -249,20 +249,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <div className="mt-4 pt-3 border-t border-line/60 space-y-1">
               <Link
                 href="/resume"
-                title={collapsed ? "APA Resume Studio" : undefined}
+                title={collapsed ? "APA Resume" : undefined}
                 className={`flex items-center ${
                   collapsed ? "justify-center p-2" : "justify-between px-2 py-1.5"
-                } text-xs rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono`}
+                } text-xs rounded transition-colors font-mono ${
+                  path === "/resume"
+                    ? "bg-black text-white font-semibold"
+                    : "text-dmuted hover:text-ink hover:bg-bg"
+                }`}
               >
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 shrink-0" />
                   {!collapsed && <span>APA Resume</span>}
                 </div>
-                {!collapsed && (
-                  <span className="text-[10px] bg-bg2 border border-line px-1 rounded">
-                    CV ↗
-                  </span>
-                )}
               </Link>
               <button
                 type="button"
@@ -273,7 +272,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 } text-xs rounded hover:bg-bg transition-colors text-dmuted hover:text-ink font-mono w-full text-left`}
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-ok shrink-0" />
+                  <Sparkles className="w-4 h-4 text-ink shrink-0" />
                   {!collapsed && <span>Updates & Adds</span>}
                 </div>
               </button>
@@ -297,22 +296,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   {profile.headline || "Verified DNA"}
                 </div>
               </div>
-              {!collapsed && (
-                <span className="text-[10px] font-mono text-muted shrink-0 ml-1">
-                  Active
-                </span>
-              )}
               {collapsed && <User className="w-4 h-4 text-ink" />}
             </Link>
-
-            {!collapsed && (
-              <div className="flex items-center justify-between mt-2 text-[10px] text-muted font-mono px-2">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-ok inline-block animate-pulse" />
-                  <span>Auto-Sync Ready</span>
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Draggable Resizer Handle on Right Border */}

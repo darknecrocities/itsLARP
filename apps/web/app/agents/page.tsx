@@ -6,7 +6,6 @@ import { useStore } from "@/lib/store";
 import { Badge, PageHeader, Stat, Reveal, ErrorBox } from "@/components/ui";
 import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
-import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 import { WorkforceFleetCard } from "@/components/agents/WorkforceFleetCard";
 import { PreSubmissionModal } from "@/components/agents/PreSubmissionModal";
 import { Key, Zap, X, SlidersHorizontal, Eye } from "lucide-react";
@@ -45,7 +44,6 @@ export default function AgentsPage() {
   const [selectedWorkers, setSelectedWorkers] = useState(1000);
   const [targetQuery, setTargetQuery] = useState(profile.headline || "AI Engineer, Full Stack, Machine Learning");
   const [activeTab, setActiveTab] = useState<"diagram" | "stages" | "results">("diagram");
-  const [showAppConfig, setShowAppConfig] = useState(false);
 
   // Platform Login Credentials Modal
   const [showCreds, setShowCreds] = useState(false);
@@ -79,14 +77,13 @@ export default function AgentsPage() {
         sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              className={`btn text-xs flex items-center gap-1.5 ${showAppConfig ? "bg-black text-white" : ""}`}
-              onClick={() => setShowAppConfig(!showAppConfig)}
+            <Link
+              href="/resume"
+              className="btn text-xs flex items-center gap-1.5 hover:border-black"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>20 Apply Configs ({appConfig.resumeFormat})</span>
-            </button>
+              <span>Resume & Apply Configs</span>
+            </Link>
 
             <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
               <Key className="w-3.5 h-3.5" />
@@ -102,12 +99,6 @@ export default function AgentsPage() {
           </div>
         }
       />
-
-      {showAppConfig && (
-        <div className="mb-4">
-          <ApplicationConfigPanel />
-        </div>
-      )}
 
       {/* Workforce Fleet Scaler */}
       <div className="mb-4">

@@ -3,9 +3,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useJobs } from "@/lib/useJobs";
 import { useStore } from "@/lib/store";
-import { api } from "@/lib/api";
-import type { Job } from "@/lib/data";
 import { Badge, Empty, ErrorBox, PageHeader, Reveal } from "@/components/ui";
+import { ImportJobModal } from "@/components/jobs/ImportJobModal";
 import { X, Globe } from "lucide-react";
 import {
   LinkedInIcon,
@@ -70,14 +69,8 @@ export default function JobsPage() {
   const [domainFilter, setDomainFilter] = useState("all");
   const [sort, setSort] = useState<"match" | "company">("match");
 
-  // Custom Job Import Modal state
+  const [targetCount, setTargetCount] = useState<number>(1000);
   const [showImport, setShowImport] = useState(false);
-  const [importUrl, setImportUrl] = useState("");
-  const [importTitle, setImportTitle] = useState("");
-  const [importCompany, setImportCompany] = useState("");
-  const [importDesc, setImportDesc] = useState("");
-  const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState("");
 
   const profile = useStore((s) => s.profile);
   const apps = useStore((s) => s.apps);
@@ -88,31 +81,6 @@ export default function JobsPage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchParam(q);
-  };
-
-  const handleImportJob = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setImporting(true);
-    setImportError("");
-    try {
-      const newJob = await api<Job>("/jobs/import-url", {
-        url: importUrl,
-        title: importTitle,
-        company: importCompany,
-        description: importDesc,
-        profile,
-      });
-      setShowImport(false);
-      setImportUrl("");
-      setImportTitle("");
-      setImportCompany("");
-      setImportDesc("");
-      refetch();
-    } catch (err: any) {
-      setImportError(err.message || "Failed to import job");
-    } finally {
-      setImporting(false);
-    }
   };
 
   const rows = useMemo(() => {
@@ -193,6 +161,42 @@ export default function JobsPage() {
         </div>
       </div>
 
+      {/* Target Jobs Goal Selector */}
+      <div className="card p-3.5 mb-6 bg-white dark:bg-neutral-900 border border-line flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-xs font-semibold text-ink uppercase tracking-wider font-mono">
+            Target Jobs Goal:
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[100, 1000, 5000, 10000, 50000].map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTargetCount(t)}
+                className={`px-2.5 py-1 text-xs rounded font-mono border transition ${
+                  targetCount === t
+                    ? "bg-black text-white border-black font-bold"
+                    : "bg-bg text-muted border-line hover:text-ink"
+                }`}
+              >
+                {t >= 1000 ? `${t / 1000}k` : t} Jobs
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted font-mono">
+            {rows.length} Opportunities Displayed
+          </span>
+          <Link
+            href={`/agents?target=${targetCount}&q=${encodeURIComponent(searchParam || q || profile.headline || "Engineer")}`}
+            className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+          >
+            <span>Apply to {targetCount.toLocaleString()} Target Jobs with Agents</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Search & Filters */}
       <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3 mb-6">
         <label className="sr-only" htmlFor="q">Search</label>
@@ -200,7 +204,7 @@ export default function JobsPage() {
           <input
             id="q"
             className="input"
-            placeholder="Search role, skills, company (e.g. AI Engineer)"
+            placeholder="Search role, skills, company (e.g. AI Engineer, Flight Attendant)"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -244,100 +248,29 @@ export default function JobsPage() {
       </form>
 
       {/* Import Modal */}
-      {showImport && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="card max-w-lg w-full p-6 bg-bg border border-line shadow-2xl rise">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Import Opportunity</h3>
-              <button
-                type="button"
-                className="text-muted hover:text-fg text-sm p-1 rounded"
-                onClick={() => setShowImport(false)}
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-muted mb-4">
-              Paste a URL from any careers page (Greenhouse, Lever, LinkedIn, company site) or enter details directly.
-            </p>
-            <form onSubmit={handleImportJob} className="space-y-3">
-              <div>
-                <label className="label-xs" htmlFor="iurl">Job URL</label>
-                <input
-                  id="iurl"
-                  className="input mt-1"
-                  placeholder="https://company.com/jobs/ai-lead"
-                  value={importUrl}
-                  onChange={(e) => setImportUrl(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label-xs" htmlFor="ititle">Job Title</label>
-                  <input
-                    id="ititle"
-                    className="input mt-1"
-                    placeholder="AI Engineer"
-                    value={importTitle}
-                    onChange={(e) => setImportTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-xs" htmlFor="icompany">Company</label>
-                  <input
-                    id="icompany"
-                    className="input mt-1"
-                    placeholder="Acme Corp"
-                    value={importCompany}
-                    onChange={(e) => setImportCompany(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="label-xs" htmlFor="idesc">Job Description / Requirements</label>
-                <textarea
-                  id="idesc"
-                  rows={4}
-                  className="input mt-1"
-                  placeholder="Paste description or requirements here..."
-                  value={importDesc}
-                  onChange={(e) => setImportDesc(e.target.value)}
-                />
-              </div>
-
-              {importError && <p className="text-xs text-err">{importError}</p>}
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => setShowImport(false)}
-                  disabled={importing}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={importing}>
-                  {importing ? "Analyzing & Adding..." : "Import & Score Job"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ImportJobModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        onImportSuccess={() => refetch()}
+        profile={profile}
+      />
 
       {error && <ErrorBox msg={(error as Error).message} retry={() => refetch()} />}
 
-      {!profile.skills.length ? (
-        <Empty title="Scores need your Career DNA" hint="Upload your resume or connect GitHub to score opportunities.">
-          <Link href="/onboarding" className="btn btn-primary">
-            Build Career DNA
+      {!profile.skills.length && (
+        <div className="card p-3 mb-4 bg-bg2/40 border border-line flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-muted">
+            Tip: Add skills in your Career Profile to calculate personalized compatibility scores. All openings below remain fully browsable.
+          </span>
+          <Link href="/profile" className="underline font-medium text-ink">
+            Add Skills to Career DNA →
           </Link>
-        </Empty>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="label-xs border-b border-line">
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="label-xs border-b border-line">
               <tr>
                 <th scope="col" className="py-2.5">Role</th>
                 <th scope="col">Company</th>
@@ -446,7 +379,6 @@ export default function JobsPage() {
             </p>
           )}
         </div>
-      )}
     </>
   );
 }
