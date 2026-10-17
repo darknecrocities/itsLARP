@@ -134,7 +134,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const isBare = BARE.includes(path) || path.startsWith("/resume");
+  const isBare = BARE.includes(path);
   if (isBare && !(isDesktop && (path === "/" || path === "/login"))) {
     return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
   }
