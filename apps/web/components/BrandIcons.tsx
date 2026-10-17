@@ -12,10 +12,16 @@ interface BrandIconProps {
 export function GmailIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" fill="#EA4335" fillOpacity="0.1" />
-      <path d="M20 4H4C2.9 4 2 4.9 2 6L12 13L22 6C22 4.9 21.1 4 20 4Z" fill="#EA4335" />
-      <path d="M2 18V6L12 13L22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18Z" stroke="#EA4335" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M4 20L10 13.5M20 20L14 13.5" stroke="#EA4335" strokeWidth="1.5" strokeLinecap="round" />
+      <rect width="24" height="24" rx="5" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+      <g transform="translate(3, 4.5) scale(0.20)">
+        <svg viewBox="52 42 88 66" width="88" height="66">
+          <path fill="#4285F4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" />
+          <path fill="#34A853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
+          <path fill="#FBBC04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
+          <path fill="#EA4335" d="M72 74V48l24 18 24-18v26L96 92" />
+          <path fill="#C5221F" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
+        </svg>
+      </g>
     </svg>
   );
 }
@@ -23,9 +29,13 @@ export function GmailIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) 
 export function OutlookIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="4" width="20" height="16" rx="3" fill="#0078D4" fillOpacity="0.15" />
-      <rect x="2" y="4" width="20" height="16" rx="3" stroke="#0078D4" strokeWidth="1.5" />
-      <path d="M12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8Z" stroke="#0078D4" strokeWidth="2" />
+      <rect width="24" height="24" rx="5" fill="#0078D4" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M7.88 12.04q0 .45-.11.87-.1.41-.33.74-.22.33-.58.52-.37.2-.87.2t-.85-.2q-.35-.21-.57-.55-.22-.33-.33-.75-.1-.42-.1-.86t.1-.87q.1-.43.34-.76.22-.34.59-.54.36-.2.87-.2t.86.2q.35.21.57.55.22.34.31.77.1.43.1.88zM24 12v9.38q0 .46-.33.8-.33.32-.8.32H7.13q-.46 0-.8-.33-.32-.33-.32-.8V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h6.5V2.55q0-.44.3-.75.3-.3.75-.3h12.9q.44 0 .75.3.3.3.3.75V10.85l1.24.72h.01q.1.07.18.18.07.12.07.25zm-6-8.25v3h3v-3zm0 4.5v3h3v-3zm0 4.5v1.83l3.05-1.83zm-5.25-9v3h3.75v-3zm0 4.5v3h3.75v-3zm0 4.5v2.03l2.41 1.5 1.34-.8v-2.73zM9 3.75V6h2l.13.01.12.04v-2.3zM5.98 15.98q.9 0 1.6-.3.7-.32 1.19-.86.48-.55.73-1.28.25-.74.25-1.61 0-.83-.25-1.55-.24-.71-.71-1.24t-1.15-.83q-.68-.3-1.55-.3-.92 0-1.64.3-.71.3-1.2.85-.5.54-.75 1.3-.25.74-.25 1.63 0 .85.26 1.56.26.72.74 1.23.48.52 1.17.81.69.3 1.56.3zM7.5 21h12.39L12 16.08V17q0 .41-.3.7-.29.3-.7.3H7.5zm15-.13v-7.24l-5.9 3.54Z"
+        />
+      </g>
     </svg>
   );
 }
@@ -33,8 +43,13 @@ export function OutlookIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps
 export function NotionIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#000000" />
-      <path d="M6 6.5V17.5M6 6.5L13.5 17.5M13.5 17.5V6.5M13.5 17.5H18" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="24" height="24" rx="5" fill="#000000" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"
+        />
+      </g>
     </svg>
   );
 }
@@ -42,8 +57,13 @@ export function NotionIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps)
 export function LinkedInIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#0A66C2" />
-      <path d="M6.5 9.5V17.5M6.5 6.5V6.6M11.5 17.5V13.2C11.5 11.5 12.5 10.5 14 10.5C15.5 10.5 16.5 11.5 16.5 13.2V17.5M11.5 17.5H11.5" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="24" height="24" rx="5" fill="#0A66C2" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452z"
+        />
+      </g>
     </svg>
   );
 }
@@ -51,8 +71,13 @@ export function LinkedInIcon({ className = "w-5 h-5", size = 20 }: BrandIconProp
 export function IndeedIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#2164F3" />
-      <path d="M11 7C11 5.9 11.9 5 13 5C14.1 5 15 5.9 15 7C15 8.1 14.1 9 13 9C11.9 9 11 8.1 11 7ZM11 11H15V19H11V11Z" fill="#FFFFFF" />
+      <rect width="24" height="24" rx="5" fill="#003A9B" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M11.566 21.5633v-8.762c.2553.0231.5009.0346.758.0346 1.2225 0 2.3739-.3206 3.3506-.8928v9.6182c0 .8219-.1957 1.4287-.5757 1.8338-.378.4033-.8808.6049-1.491.6049-.6007 0-1.0766-.2016-1.468-.6183-.3781-.4032-.5739-1.01-.5739-1.8184zM11.589.5659c2.5447-.8929 5.4424-.8449 7.6186.987.405.3687.8673.8334 1.0515 1.3806.2207.6913-.7695-.073-.9057-.167-.71-.4532-1.4182-.8334-2.2127-1.0946C12.8614.3873 8.8122 2.709 6.2945 6.315c-1.0516 1.5939-1.7367 3.2721-2.299 5.1174-.0614.2017-.1094.4647-.2207.6413-.1113.2036-.048-.5453-.048-.5702.0845-.7623.2438-1.4997.4414-2.237C5.3292 5.3375 7.897 2.0655 11.5891.5658zm4.9281 7.0587c0 1.6686-1.353 3.0224-3.0205 3.0224-1.6677 0-3.0186-1.3538-3.0186-3.0224 0-1.6687 1.351-3.0224 3.0186-3.0224 1.6676 0 3.0205 1.3518 3.0205 3.0224Z"
+        />
+      </g>
     </svg>
   );
 }
@@ -60,8 +85,13 @@ export function IndeedIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps)
 export function GlassdoorIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#0CAA41" />
-      <path d="M8 8V16H16M8 8H16" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="24" height="24" rx="5" fill="#0CAA41" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M14.1093.0006c-.0749-.0074-.1348.0522-.1348.127v3.451c0 .0673.0537.1194.121.127 2.619.172 4.6092.9501 4.6092 3.6814H13.086a.1343.1343 0 0 0-.1348.1347v8.9644c0 .0748.06.1347.1348.1347h10.0034c.0748 0 .1347-.0599.1347-.1347V7.342c0-2.2374-.7996-4.0558-2.4159-5.3279C19.3191.8469 17.0874.1428 14.1093.0006ZM.9107 7.387a.1342.1342 0 0 0-.1347.1347v8.9566c0 .0748.06.1347.1347.1347h5.6189c0 2.7313-1.9902 3.5094-4.6091 3.6815-.0674.0075-.1192.0596-.1192.127v3.451c0 .0747.06.1343.1348.1269 2.9781-.1422 5.2078-.8463 6.6969-2.0136 1.6163-1.272 2.4159-3.0905 2.4159-5.3278V7.5217a.1343.1343 0 0 0-.1348-.1347z"
+        />
+      </g>
     </svg>
   );
 }
@@ -69,8 +99,15 @@ export function GlassdoorIcon({ className = "w-5 h-5", size = 20 }: BrandIconPro
 export function ZipRecruiterIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#2B6B48" />
-      <path d="M12 5L7 11H10V18H14V11H17L12 5Z" fill="#FFFFFF" />
+      <rect width="24" height="24" rx="5" fill="#00843D" />
+      <g transform="translate(4.5, 3.5) scale(0.26, 0.18)">
+        <path
+          fill="#FFFFFF"
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M52.9 26.5c-.6-.2-1.3-.1-2 .1l-2.7.9V2.4c0-1.3-1.1-2.4-2.4-2.4H10.3C9 0 7.9 1.1 7.9 2.4v25.2l-2.7-.9c-.7-.2-1.4-.3-2-.1-1 .2-3.2 1.2-3.2 5.1v21c.3 1.8 1.5 3.9 4.2 3.9h9c.9 1.1 3.1 2.9 7.3 3.2.1 3.1 1.9 5.7 4.6 6.8v5.9c0 .1-.1.2-.2.2-12.6.4-20.6 4.4-22.9 5.7C.6 79.2.3 80.9.3 82v4.6c.1 1.6 1.4 2.9 3.1 2.9 1.5 0 2.8-1.3 2.9-2.8.1-1.5-.9-2.7-2.3-3.1-.1 0-.2-.1-.2-.2v-1.7c0-.4.2-.8.6-1 3.4-1.9 12.1-2.8 18.7-3.2H25c.1 0 .2.1.2.2.3 5.3.9 9.8 1.1 12.6h-.2c-1.1 0-2.1 1.3-2.1 3s1 3 2.1 3h4c1.1 0 2.1-1.3 2.1-3s-1-3-2.1-3h-.2s.7-7.3 1.1-12.6c0-.1.1-.2.2-.2h1.9c6.6.3 15.3 1.3 18.7 3.2.4.2.6.6.6 1v1.7c0 .1-.1.2-.2.2-1.4.3-2.4 1.6-2.3 3.1.1 1.5 1.4 2.8 2.9 2.8 1.6 0 3-1.2 3.1-2.9V82c0-1.1-.3-2.7-1.7-3.6-2.3-1.3-10.4-5.3-22.9-5.8-.1 0-.2-.1-.2-.2v-5.9c2.7-1.1 4.5-3.7 4.6-6.8 4.1-.3 6.3-2.2 7.3-3.2h9c2.7 0 3.9-2.1 4.2-3.9v-21c-.1-3.9-2.3-4.8-3.3-5.1zm-45 21.8l-4.1 3.1c-.1.1-.2 0-.2-.1V31.6c0-.8.1-1.8.5-1.7l3.6 1.2c.1 0 .2.2.2.3v16.9zm44.5 3.1l-4.1-3.1V31.5c0-.1.1-.2.2-.3l3.6-1.2c.5-.1.5.9.5 1.7v19.7s-.1.1-.2 0z"
+        />
+      </g>
     </svg>
   );
 }
@@ -78,8 +115,13 @@ export function ZipRecruiterIcon({ className = "w-5 h-5", size = 20 }: BrandIcon
 export function WellfoundIcon({ className = "w-5 h-5", size = 20 }: BrandIconProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="4" fill="#FF5A5F" />
-      <path d="M6 7L9 17L12 10L15 17L18 7" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="24" height="24" rx="5" fill="#FF5A5F" />
+      <g transform="translate(3.84, 3.84) scale(0.68)">
+        <path
+          fill="#FFFFFF"
+          d="M23.998 8.128c.063-1.379-1.612-2.376-2.795-1.664-1.23.598-1.322 2.52-.156 3.234 1.2.862 2.995-.09 2.951-1.57zm0 7.748c.063-1.38-1.612-2.377-2.795-1.665-1.23.598-1.322 2.52-.156 3.234 1.2.863 2.995-.09 2.951-1.57zm-20.5 1.762L0 6.364h3.257l2.066 8.106 2.245-8.106h3.267l2.244 8.106 2.065-8.106h3.257l-3.54 11.274H11.39c-.73-2.713-1.46-5.426-2.188-8.14l-2.233 8.14H3.5z"
+        />
+      </g>
     </svg>
   );
 }
