@@ -8,11 +8,12 @@ const uvicornBin = isWin
   ? path.join(API_DIR, ".venv", "Scripts", "uvicorn.exe")
   : path.join(API_DIR, ".venv", "bin", "uvicorn");
 
-const executable = fs.existsSync(uvicornBin) ? uvicornBin : "uvicorn";
+const hasVenv = fs.existsSync(uvicornBin);
+const executable = hasVenv ? uvicornBin : "uvicorn";
 const proc = spawn(executable, ["main:app", "--port", "8000", "--reload"], {
   cwd: API_DIR,
   stdio: "inherit",
-  shell: isWin,
+  shell: !hasVenv && isWin,
 });
 
 proc.on("exit", (code) => process.exit(code || 0));

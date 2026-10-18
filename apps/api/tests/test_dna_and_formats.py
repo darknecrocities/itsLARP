@@ -159,38 +159,39 @@ def test_20_configs_in_prepare_application():
 
 
 def test_parallel_swarm_find_construct_and_apply():
-    # Clear applications before swarm test
-    client.post("/applications/clear")
+    with TestClient(app) as test_client:
+        # Clear applications before swarm test
+        test_client.post("/applications/clear")
 
-    start_res = client.post("/swarm/start", json={
-        "profile": SYNTHETIC_CANDIDATE,
-        "queries": ["Engineer"],
-        "workers": 100,
-        "target_jobs": 5,
-        "app_config": {
-            "resumeFormat": "silicon_valley_modern",
-            "minMatchThreshold": 40,
-            "autoApproveThreshold": 50,
-            "humanInTheLoopPause": False,
-            "maxDailyApplications": 10,
-        }
-    })
-    assert start_res.status_code == 200
-    run_id = start_res.json()["id"]
+        start_res = test_client.post("/swarm/start", json={
+            "profile": SYNTHETIC_CANDIDATE,
+            "queries": ["Engineer"],
+            "workers": 100,
+            "target_jobs": 5,
+            "app_config": {
+                "resumeFormat": "silicon_valley_modern",
+                "minMatchThreshold": 40,
+                "autoApproveThreshold": 50,
+                "humanInTheLoopPause": False,
+                "maxDailyApplications": 10,
+            }
+        })
+        assert start_res.status_code == 200
+        run_id = start_res.json()["id"]
 
-    # Wait for async workers to complete discovery -> analysis -> matching -> resumes -> applications
-    for _ in range(50):
-        snap = client.get(f"/swarm/{run_id}").json()
-        if snap["status"] in ("completed", "stopped") or snap["ready"] > 0:
-            break
-        time.sleep(0.2)
+        # Wait for async workers to complete discovery -> analysis -> matching -> resumes -> applications
+        for _ in range(50):
+            snap = test_client.get(f"/swarm/{run_id}").json()
+            if (snap["status"] == "completed" and snap["total_done"] > 0) or snap["ready"] > 0:
+                break
+            time.sleep(0.2)
 
-    results = client.get(f"/swarm/{run_id}/results").json()
-    assert len(results) > 0
+        results = test_client.get(f"/swarm/{run_id}/results").json()
+        assert len(results) > 0
 
-    apps = client.get("/applications").json()
-    assert len(apps) > 0
-    # Verify tailored resume was constructed and saved by parallel bot
-    first_app = apps[0]
-    assert first_app["status"] in ("APPLIED", "READY")
-    assert len(first_app.get("resume", "")) > 50
+        apps = test_client.get("/applications").json()
+        assert len(apps) > 0
+        # Verify tailored resume was constructed and saved by parallel bot
+        first_app = apps[0]
+        assert first_app["status"] in ("APPLIED", "READY")
+        assert len(first_app.get("resume", "")) > 50

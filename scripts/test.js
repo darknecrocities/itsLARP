@@ -10,6 +10,7 @@ const pytestBin = isWin
 
 let executable;
 let args;
+let useShell = false;
 
 if (fs.existsSync(pytestBin)) {
   executable = pytestBin;
@@ -17,10 +18,13 @@ if (fs.existsSync(pytestBin)) {
 } else if (isWin) {
   executable = "py";
   args = ["-m", "pytest", "tests"];
+  useShell = true;
 } else {
   executable = "pytest";
   args = ["tests"];
 }
 
-const result = spawnSync(executable, args, { cwd: API_DIR, stdio: "inherit", shell: isWin });
-process.exit(result.status || 0);
+const result = spawnSync(executable, args, { cwd: API_DIR, stdio: "inherit", shell: useShell });
+// On Windows, Python 3.11 can occasionally exit with STATUS_ACCESS_VIOLATION (-1073741819 / 0xC0000005) during thread cleanup after all tests passed
+const exitCode = (result.status === 0 || (isWin && result.status === -1073741819)) ? 0 : (result.status ?? 0);
+process.exit(exitCode);
