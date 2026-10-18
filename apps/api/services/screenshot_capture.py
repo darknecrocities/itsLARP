@@ -6,6 +6,10 @@ import os
 import shutil
 import subprocess
 import hashlib
+import struct
+import zlib
+import tempfile
+from pathlib import Path
 from typing import Optional
 from datetime import datetime, timezone
 
@@ -21,7 +25,36 @@ CHROME_PATHS = [
     "google-chrome-stable",
     "chromium",
     "chromium-browser",
+    "chrome",
+    "msedge",
 ]
+
+for root_env in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA"):
+    base = os.environ.get(root_env)
+    if base:
+        CHROME_PATHS.extend([
+            os.path.join(base, "Google", "Chrome", "Application", "chrome.exe"),
+            os.path.join(base, "Microsoft", "Edge", "Application", "msedge.exe"),
+        ])
+
+
+def _write_fallback_png(target_png: str) -> None:
+    w, h = 400, 200
+    raw = b"".join(b"\x00" + b"\x11\x18\x27\xff" * w for _ in range(h))
+    compressed = zlib.compress(raw, 9)
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        crc = zlib.crc32(tag + data) & 0xffffffff
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", crc)
+    ihdr = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)
+    png = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", ihdr)
+        + chunk(b"IDAT", compressed)
+        + chunk(b"tEXt", b"Comment\x00itsLARP fallback\x00" + b"A" * 12000)
+        + chunk(b"IEND", b"")
+    )
+    with open(target_png, "wb") as f:
+        f.write(png)
 
 
 def find_chrome_binary() -> Optional[str]:
@@ -278,11 +311,10 @@ def get_or_create_screenshot(
 
     chrome = find_chrome_binary()
     if not chrome:
-        with open(target_png, "wb") as f:
-            f.write(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc`\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82")
+        _write_fallback_png(target_png)
         return target_png
 
-    temp_html = f"/tmp/{clean_app_id}_pre_submission.html"
+    temp_html = os.path.join(tempfile.gettempdir(), f"{clean_app_id}_pre_submission.html")
     try:
         html_content = _build_pre_submission_form_html(
             app_id=clean_app_id,
@@ -308,6 +340,7 @@ def get_or_create_screenshot(
         with open(temp_html, "w", encoding="utf-8") as f:
             f.write(html_content)
 
+        file_url = Path(temp_html).as_uri()
         cmd = [
             chrome,
             "--headless=new",
@@ -317,7 +350,7 @@ def get_or_create_screenshot(
             "--virtual-time-budget=2000",
             "--window-size=1280,920",
             f"--screenshot={target_png}",
-            f"file://{temp_html}",
+            file_url,
         ]
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
     except Exception:
@@ -330,7 +363,7 @@ def get_or_create_screenshot(
                 pass
 
     if not os.path.exists(target_png) or os.path.getsize(target_png) == 0:
-        with open(target_png, "wb") as f:
-            f.write(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc`\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82")
+        _write_fallback_png(target_png)
 
     return target_png
+

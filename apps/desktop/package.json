@@ -10,6 +10,7 @@
     "dev": "cross-env DESKTOP_DEV=1 electron src/main.js",
     "pack": "electron-builder --dir",
     "dist:mac": "electron-builder --mac dmg zip --arm64",
+    "dist:win": "electron-builder --win nsis zip --x64",
     "dist:all": "electron-builder -m --arm64 --x64",
     "verify": "node scripts/verify-builds.js",
     "icons": "python3 scripts/generate-icons.py"
@@ -42,6 +43,12 @@
         "nsis",
         "zip"
       ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "artifactName": "${productName}-win-${arch}-setup.${ext}"
     },
     "dmg": {
       "title": "itsLARP Desktop",

@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "dev:web": "cd apps/web && npm run dev",
-    "dev:api": "cd apps/api && .venv/bin/uvicorn main:app --port 8000 --reload",
+    "dev:api": "node scripts/dev-api.js",
     "build": "cd apps/web && npm run build",
-    "test": "cd apps/api && .venv/bin/pytest tests",
+    "test": "node scripts/test.js",
     "desktop:verify": "node apps/desktop/scripts/verify-builds.js",
     "desktop:start": "cd apps/desktop && npm start"
   }

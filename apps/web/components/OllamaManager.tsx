@@ -113,7 +113,11 @@ export function OllamaManager() {
     }
 
     try {
-      const res = await api<{ ok: boolean; installer_url: string; instructions: string }>("/ai/ollama/install", {});
+      const isWin = typeof window !== "undefined" && navigator.userAgent.toLowerCase().includes("win");
+      const osTarget = isWin ? "windows" : "darwin";
+      const res = await api<{ ok: boolean; installer_url: string; instructions: string }>("/ai/ollama/install", {
+        os_target: osTarget,
+      });
       setInstallMsg(`Installer ready: ${res.instructions}`);
       if (typeof window !== "undefined" && res.installer_url) {
         window.open(res.installer_url, "_blank");

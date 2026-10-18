@@ -155,13 +155,24 @@ export default function DownloadPage() {
                 <Download className="w-4 h-4" />
                 <span>Download Setup .EXE (Windows)</span>
               </a>
-              <a
-                href="/releases/itsLARP-win-x64-portable.zip"
-                download
-                className="btn w-full py-1.5 text-xs text-center font-mono"
-              >
-                Download Portable .ZIP
-              </a>
+              <div className="flex gap-2">
+                <a
+                  href="/releases/itsLARP-win-x64-portable.zip"
+                  download
+                  className="btn w-1/2 py-1.5 text-xs text-center font-mono"
+                >
+                  Portable .ZIP
+                </a>
+                <a
+                  href="https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop/itsLARP-win-x64-setup.exe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn w-1/2 py-1.5 text-xs text-center font-mono text-neutral-600 hover:text-black"
+                  title="Direct GitHub CDN download if browser blocks redirects"
+                >
+                  Direct CDN
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -395,10 +406,20 @@ export default function DownloadPage() {
             <span>Experiencing Slow Browser Downloads? (GitHub CDN Single-Stream Throttling)</span>
           </div>
           <p className="text-xs text-neutral-600 mb-3 leading-relaxed font-sans">
-            GitHub Release assets can throttle single-connection browser downloads to ~350 KB/s in certain geographic regions regardless of your fiber internet speed. You can bypass this rate limit using a multi-connection download manager or running this parallel command in Terminal:
+            GitHub Release assets can throttle single-connection browser downloads to ~350 KB/s in certain geographic regions regardless of your fiber internet speed. You can bypass this rate limit using a multi-connection download manager or running this parallel command in your terminal:
           </p>
           <div className="bg-neutral-900 text-neutral-100 p-3 rounded text-xs font-mono overflow-x-auto">
-            <code>curl -L -C - --parallel --parallel-max 8 -o itsLARP-mac-arm64.dmg https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop/itsLARP-mac-arm64.dmg</code>
+            {detectedOS === "windows" ? (
+              <div>
+                <div className="text-[10px] text-neutral-400 mb-1 font-sans">Windows PowerShell / Command Prompt:</div>
+                <code>curl.exe -L -C - --parallel --parallel-max 8 -o itsLARP-win-x64-setup.exe https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop/itsLARP-win-x64-setup.exe</code>
+              </div>
+            ) : (
+              <div>
+                <div className="text-[10px] text-neutral-400 mb-1 font-sans">macOS Terminal:</div>
+                <code>curl -L -C - --parallel --parallel-max 8 -o itsLARP-mac-arm64.dmg https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop/itsLARP-mac-arm64.dmg</code>
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -17,6 +17,21 @@ const C_WEB = "\x1b[35m[web]\x1b[0m ";
 const C_AI = "\x1b[33m[ai]\x1b[0m  ";
 const C_SYS = "\x1b[32m[sys]\x1b[0m ";
 
+// Detect Python launcher across platforms (preserves python3 on macOS/Linux)
+function resolvePythonCmd() {
+  if (process.platform === "win32") {
+    const candidates = ["py -3", "py", "python", "python3"];
+    for (const cmd of candidates) {
+      try {
+        execSync(`${cmd} --version`, { stdio: "ignore" });
+        return cmd;
+      } catch {}
+    }
+    return "py";
+  }
+  return "python3";
+}
+
 // 1. Check Python Venv in apps/api
 const venvPython = process.platform === "win32"
   ? path.join(API_DIR, ".venv", "Scripts", "python.exe")
@@ -29,12 +44,26 @@ const venvUvicorn = process.platform === "win32"
 if (!fs.existsSync(venvUvicorn)) {
   console.log(C_SYS + "Virtualenv not found or missing uvicorn. Initializing apps/api/.venv...");
   try {
-    execSync("python3 -m venv .venv", { cwd: API_DIR, stdio: "inherit" });
+    const pythonCmd = resolvePythonCmd();
+    execSync(`${pythonCmd} -m venv .venv`, { cwd: API_DIR, stdio: "inherit" });
     const pip = process.platform === "win32" ? path.join(API_DIR, ".venv", "Scripts", "pip.exe") : path.join(API_DIR, ".venv", "bin", "pip");
     execSync(`"${pip}" install -r requirements.txt`, { cwd: API_DIR, stdio: "inherit" });
     console.log(C_SYS + "[OK] Python dependencies installed.");
   } catch (err) {
-    console.error(C_SYS + "Failed to setup python venv automatically. Make sure python3 is installed.");
+    console.error(C_SYS + "Failed to setup python venv automatically. Make sure python is installed.");
+  }
+}
+
+// 1b. Check Web Dependencies in apps/web
+const webNodeModules = path.join(WEB_DIR, "node_modules");
+if (!fs.existsSync(webNodeModules)) {
+  console.log(C_SYS + "Web dependencies not found. Installing in apps/web...");
+  try {
+    const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+    execSync(`${npmCmd} install`, { cwd: WEB_DIR, stdio: "inherit" });
+    console.log(C_SYS + "[OK] Web dependencies installed.");
+  } catch (err) {
+    console.error(C_SYS + "Failed to install web dependencies automatically.");
   }
 }
 
