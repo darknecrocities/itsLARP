@@ -10,6 +10,7 @@
     "build": "cd apps/web && npm run build",
     "test": "node scripts/test.js",
     "desktop:verify": "node apps/desktop/scripts/verify-builds.js",
-    "desktop:start": "cd apps/desktop && npm start"
+    "desktop:start": "cd apps/desktop && npm start",
+    "start:win": "start-windows.bat"
   }
 }

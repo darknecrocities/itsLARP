@@ -6,6 +6,7 @@ const https = require("https");
 const { exec, spawn } = require("child_process");
 const fs = require("fs");
 const { checkForUpdates, downloadLatestRelease, initAutoUpdater } = require("./updater");
+const orchestrator = require("./orchestrator");
 
 let mainWindow = null;
 
@@ -28,9 +29,7 @@ function checkUrlReachable(targetUrl, timeoutMs = 800) {
           method: "HEAD",
           timeout: timeoutMs,
         },
-        (res) => {
-          resolve(res.statusCode >= 200 && res.statusCode < 500);
-        }
+        (res) => resolve(res.statusCode >= 200 && res.statusCode < 500)
       );
       req.on("error", () => resolve(false));
       req.on("timeout", () => {
@@ -62,7 +61,7 @@ async function resolveStartUrl() {
     return LOCAL_URL;
   }
 
-  // 2. Check cloud server
+  // 2. Check cloud server (direct to live workspace)
   const cloudUp = await checkUrlReachable(CLOUD_URL, 1500);
   if (cloudUp) {
     return CLOUD_URL;
@@ -97,12 +96,7 @@ function findOllamaBinary() {
         path.join(os.homedir(), ".local", "bin", "ollama"),
       ];
 
-  for (const c of candidates) {
-    if (c && fs.existsSync(c)) {
-      return c;
-    }
-  }
-  return null;
+  return candidates.find((c) => c && fs.existsSync(c)) || null;
 }
 
 /**
@@ -248,6 +242,11 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+app.on("will-quit", () => {
+  orchestrator.stopLocalServices();
+});
+
 
 function setupIpcHandlers() {
   // 1. Hardware Specs Inspection
@@ -484,4 +483,13 @@ function setupIpcHandlers() {
       return { ok: false, error: err.message };
     }
   });
+
+  // 10. Automated Background Service Orchestration
+  ipcMain.handle("orchestrator:getServicesStatus", () => orchestrator.getServicesStatus());
+  ipcMain.handle("orchestrator:startLocalStack", () => orchestrator.startLocalStack());
+  ipcMain.handle("orchestrator:stopLocalServices", () => {
+    orchestrator.stopLocalServices();
+    return { ok: true };
+  });
 }
+

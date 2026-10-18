@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   navigateWorkspace: (target) => ipcRenderer.invoke("workspace:navigate", target),
   getWorkspaceStatus: () => ipcRenderer.invoke("workspace:getStatus"),
+  startLocalStack: () => ipcRenderer.invoke("orchestrator:startLocalStack"),
+  getServicesStatus: () => ipcRenderer.invoke("orchestrator:getServicesStatus"),
+  stopLocalServices: () => ipcRenderer.invoke("orchestrator:stopLocalServices"),
   checkForUpdates: () => ipcRenderer.invoke("updater:check"),
   downloadUpdate: () => ipcRenderer.invoke("updater:download"),
   onUpdateStatus: (callback) => {

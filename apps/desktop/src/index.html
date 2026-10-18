@@ -20,7 +20,7 @@
       background: #ffffff;
       border: 1px solid #e4e4e7;
       border-radius: 8px;
-      padding: 32px;
+      padding: 30px;
       max-width: 580px;
       width: 100%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
@@ -35,7 +35,7 @@
       background: #f4f4f5;
       border: 1px solid #e4e4e7;
       border-radius: 4px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-weight: 600;
     }
     .dot {
@@ -47,6 +47,7 @@
       animation: pulse 1.5s infinite;
     }
     .dot-amber { background: #f59e0b; }
+    .dot-gray { background: #a1a1aa; animation: none; }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(0.9); }
@@ -61,23 +62,40 @@
       font-size: 13px;
       color: #71717a;
       line-height: 1.5;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .specs-box {
       background: #f4f4f5;
       border: 1px solid #e4e4e7;
       border-radius: 6px;
-      padding: 14px;
+      padding: 12px 14px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 11px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
       line-height: 1.8;
+    }
+    .services-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .service-pill {
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .action-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .btn {
       display: block;
@@ -133,36 +151,29 @@
 </head>
 <body>
   <div class="card">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-      <img src="icon.png" width="36" height="36" alt="itsLARP Logo" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.12);" />
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+      <img src="icon.png" width="34" height="34" alt="itsLARP Logo" style="border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.12);" />
       <div>
         <div class="badge" style="margin-bottom:0;">
           <span class="dot" id="headerDot"></span>
-          <span id="headerBadge">NATIVE DESKTOP OS · LAUNCHPAD</span>
+          <span id="headerBadge">NATIVE DESKTOP OS · READY</span>
         </div>
       </div>
     </div>
     <h1>itsLARP Desktop Control Center</h1>
     <p>
-      Your autonomous workforce environment. Select your workspace destination or configure on-device AI acceleration.
+      Your autonomous workforce environment. Direct access is ready — enter the live workspace immediately or initialize on-device acceleration.
     </p>
+
+    <div class="services-bar" id="servicesBar">
+      <div class="service-pill" id="webPill"><span class="dot dot-gray" id="webDot"></span><span>Web (3000)</span></div>
+      <div class="service-pill" id="apiPill"><span class="dot dot-gray" id="apiDot"></span><span>API (8000)</span></div>
+      <div class="service-pill" id="ollamaPill"><span class="dot dot-gray" id="ollamaDot"></span><span>Ollama (11434)</span></div>
+    </div>
 
     <div class="specs-box" id="specs">
       <div>[Hardware Engine] Inspecting system architecture...</div>
       <div>[Ollama Engine] Checking localhost:11434...</div>
-    </div>
-
-    <div class="specs-box" id="updateBox" style="background:#fafafa; border:1px solid #e4e4e7;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <span style="font-weight:700;">[STATUS] v1.0.0 (origin/main · ea4008c)</span>
-        <span style="font-size:10px; padding:1px 6px; background:#f4f4f5; border:1px solid #e4e4e7; border-radius:3px;">UP TO DATE</span>
-      </div>
-      <div style="color:#52525b; font-size:10px; line-height:1.6;">
-        <div>[ADDS] Official itsLARP brand icon suite for macOS Dock and Windows taskbar</div>
-        <div>[ADDS] Dynamic workspace resolution: auto-connects to cloud when local port 3000 is inactive</div>
-        <div>[ADDS] Automated background Ollama engine launcher and OS installer</div>
-        <div>[ADDS] 4-level BST agent visualizer and APA 7th Edition Resume Studio</div>
-      </div>
     </div>
 
     <div class="progress-bar-container" id="progressWrap">
@@ -172,10 +183,10 @@
 
     <div class="action-grid">
       <button class="btn" id="cloudBtn" onclick="launchCloud()">
-        Launch Cloud Workspace →
+        Enter Live Workspace (Instant) →
       </button>
-      <button class="btn btn-secondary" id="localBtn" onclick="launchLocal()">
-        Launch Local Workspace
+      <button class="btn btn-secondary" id="localBtn" onclick="handleStartLocalStack()">
+        ⚡ 1-Click Start Local Stack
       </button>
     </div>
 
@@ -195,7 +206,7 @@
     let hardware = null;
     let ollamaStatus = null;
     let autoRedirectTimeout = null;
-    let countdown = 3;
+    let countdown = 2;
 
     async function init() {
       if (!window.electronAPI) {
@@ -208,6 +219,7 @@
         hardware = await window.electronAPI.getHardwareSpecs();
         ollamaStatus = await window.electronAPI.checkOllamaStatus();
         renderSpecs();
+        await updateServicesStatus();
 
         // Listen for model pull progress
         window.electronAPI.onPullProgress((data) => {
@@ -226,26 +238,6 @@
           }
         });
 
-        // Listen for auto-update notifications
-        if (window.electronAPI.onUpdateStatus) {
-          window.electronAPI.onUpdateStatus((u) => {
-            const ub = document.getElementById("updateBox");
-            if (ub && u) {
-              ub.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-weight:700;">[STATUS] v${u.currentVersion} (${u.branch} · ${u.commitSha})</span>
-                  <span style="font-size:10px; padding:1px 6px; background:#f4f4f5; border:1px solid #e4e4e7; border-radius:3px;">${u.updateAvailable ? "UPDATE AVAILABLE" : "UP TO DATE"}</span>
-                </div>
-                <div style="color:#52525b; font-size:10px; line-height:1.6;">
-                  <div>[ADDS] Dynamic workspace resolution: auto-connects to cloud when local port 3000 is inactive</div>
-                  <div>[ADDS] Automated background Ollama engine launcher and OS installer</div>
-                  <div>[ADDS] 4-level BST agent visualizer and APA 7th Edition Resume Studio</div>
-                </div>
-              `;
-            }
-          });
-        }
-
         // Test workspace connectivity and auto-launch if ready
         const ws = await window.electronAPI.getWorkspaceStatus();
         if (ws.localReachable) {
@@ -254,11 +246,21 @@
         } else if (ws.cloudReachable) {
           startCountdown("cloud");
         } else {
-          document.getElementById("statusMsg").innerText = "Standby mode: Choose workspace or start local engine.";
+          document.getElementById("statusMsg").innerText = "Standby mode: Choose workspace or start local stack.";
         }
       } catch (err) {
         console.error("Init error:", err);
       }
+    }
+
+    async function updateServicesStatus() {
+      if (!window.electronAPI.getServicesStatus) return;
+      try {
+        const s = await window.electronAPI.getServicesStatus();
+        document.getElementById("webDot").className = s.web ? "dot" : "dot dot-gray";
+        document.getElementById("apiDot").className = s.api ? "dot" : "dot dot-gray";
+        document.getElementById("ollamaDot").className = s.ollama ? "dot" : "dot dot-gray";
+      } catch {}
     }
 
     function renderSpecs() {
@@ -292,14 +294,14 @@
 
     function startCountdown(target) {
       const msg = document.getElementById("statusMsg");
-      msg.innerHTML = `Auto-entering Cloud Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
+      msg.innerHTML = `Auto-entering Live Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
       autoRedirectTimeout = setInterval(() => {
         countdown--;
         if (countdown <= 0) {
           clearInterval(autoRedirectTimeout);
           window.electronAPI.navigateWorkspace(target);
         } else {
-          msg.innerHTML = `Auto-entering Cloud Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
+          msg.innerHTML = `Auto-entering Live Workspace in <strong>${countdown}s</strong>... <a href="#" onclick="cancelCountdown(event)" style="color:#000; text-decoration:underline;">Stay on Launchpad</a>`;
         }
       }, 1000);
     }
@@ -315,9 +317,30 @@
       window.electronAPI.navigateWorkspace("cloud");
     }
 
-    function launchLocal() {
+    async function handleStartLocalStack() {
       cancelCountdown();
-      window.electronAPI.navigateWorkspace("local");
+      const msg = document.getElementById("statusMsg");
+      const localBtn = document.getElementById("localBtn");
+      localBtn.disabled = true;
+      msg.innerText = "Starting Python API (8000) & Next.js (3000) in background...";
+
+      try {
+        const res = await window.electronAPI.startLocalStack();
+        await updateServicesStatus();
+        if (res.ready) {
+          msg.innerText = "Local stack online! Redirecting...";
+          setTimeout(() => window.electronAPI.navigateWorkspace("local"), 600);
+        } else {
+          msg.innerText = "Background services launched. Waiting for port 3000...";
+          setTimeout(async () => {
+            await updateServicesStatus();
+            window.electronAPI.navigateWorkspace("local");
+          }, 2500);
+        }
+      } catch (err) {
+        msg.innerText = `Startup notice: ${err.message || "Enter cloud workspace instead"}`;
+        localBtn.disabled = false;
+      }
     }
 
     async function handleOllamaAction() {
@@ -328,6 +351,7 @@
         setTimeout(async () => {
           ollamaStatus = await window.electronAPI.checkOllamaStatus();
           renderSpecs();
+          await updateServicesStatus();
         }, 1500);
       } else if (!ollamaStatus.installed) {
         document.getElementById("statusMsg").innerText = "Triggering automated OS installation...";

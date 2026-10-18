@@ -94,23 +94,25 @@ for (const artifact of REQUIRED_ARTIFACTS) {
   console.log(`  \x1b[32m✓\x1b[0m ${artifact.name.padEnd(32)} [${artifact.platform}/${artifact.arch}] ${sizeMb} MB (SHA256: ${hash.slice(0, 16)}...)`);
 }
 
-const sumsPath = path.join(RELEASE_DIR, "SHA256SUMS.txt");
-fs.writeFileSync(sumsPath, sums.join("\n") + "\n");
-console.log(`\n  \x1b[32m✓\x1b[0m Generated cryptographic checksums: ${sumsPath}`);
+if (sums.length > 0) {
+  const sumsPath = path.join(RELEASE_DIR, "SHA256SUMS.txt");
+  fs.writeFileSync(sumsPath, sums.join("\n") + "\n");
+  console.log(`\n  \x1b[32m✓\x1b[0m Generated cryptographic checksums: ${sumsPath}`);
 
-// Sync to apps/web/public/releases for direct frontend downloads
-const publicReleasesDir = path.resolve(__dirname, "..", "..", "web", "public", "releases");
-fs.mkdirSync(publicReleasesDir, { recursive: true });
+  // Sync to apps/web/public/releases for direct frontend downloads
+  const publicReleasesDir = path.resolve(__dirname, "..", "..", "web", "public", "releases");
+  fs.mkdirSync(publicReleasesDir, { recursive: true });
 
-for (const artifact of REQUIRED_ARTIFACTS) {
-  const src = path.join(RELEASE_DIR, artifact.name);
-  const dest = path.join(publicReleasesDir, artifact.name);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, dest);
+  for (const artifact of REQUIRED_ARTIFACTS) {
+    const src = path.join(RELEASE_DIR, artifact.name);
+    const dest = path.join(publicReleasesDir, artifact.name);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
+    }
   }
+  fs.copyFileSync(sumsPath, path.join(publicReleasesDir, "SHA256SUMS.txt"));
+  console.log(`  \x1b[32m✓\x1b[0m Synced verified release binaries to Web public/releases.`);
 }
-fs.copyFileSync(sumsPath, path.join(publicReleasesDir, "SHA256SUMS.txt"));
-console.log(`  \x1b[32m✓\x1b[0m Synced verified release binaries to Web public/releases.`);
 
 if (!allOk) {
   console.error("\x1b[31mBuild verification failed. Corrupted or missing files detected!\x1b[0m");
