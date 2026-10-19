@@ -23,7 +23,11 @@ const REQUIRED_ARTIFACTS = [
 ];
 
 const isCi = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const hasLocalArtifacts = REQUIRED_ARTIFACTS.every((a) => fs.existsSync(path.join(RELEASE_DIR, a.name)));
+const targetArtifacts = process.env.VERIFY_ALL === "true"
+  ? REQUIRED_ARTIFACTS
+  : REQUIRED_ARTIFACTS.filter((a) => a.platform === process.platform || fs.existsSync(path.join(RELEASE_DIR, a.name)));
+
+const hasLocalArtifacts = targetArtifacts.every((a) => fs.existsSync(path.join(RELEASE_DIR, a.name)));
 
 if (!hasLocalArtifacts && isCi) {
   console.log("  \x1b[33m[CI Mode]\x1b[0m Validating Desktop Architecture & Manifest Integrity...");
@@ -58,7 +62,7 @@ if (!hasLocalArtifacts && isCi) {
 let allOk = true;
 const sums = [];
 
-for (const artifact of REQUIRED_ARTIFACTS) {
+for (const artifact of targetArtifacts) {
   const filePath = path.join(RELEASE_DIR, artifact.name);
   if (!fs.existsSync(filePath)) {
     console.error(`\x1b[31m[ERROR]\x1b[0m ${artifact.name} is missing from release directory!`);

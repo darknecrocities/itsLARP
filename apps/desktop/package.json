@@ -48,6 +48,8 @@
       "oneClick": true,
       "perMachine": false,
       "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh",
       "artifactName": "${productName}-win-${arch}-setup.${ext}"
     },
     "dmg": {

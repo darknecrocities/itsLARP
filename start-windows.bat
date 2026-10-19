@@ -38,17 +38,30 @@ if not exist "apps\web\node_modules" (
 
 echo [4/4] Launching itsLARP Services and Workspace...
 echo.
+echo Ensuring ports 8000 and 3000 are clear...
+for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr ":8000 "') do (
+    if not "%%a"=="0" taskkill /F /PID %%a >nul 2>&1
+)
+for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr ":3000 "') do (
+    if not "%%a"=="0" taskkill /F /PID %%a >nul 2>&1
+)
+
 echo Launching local background services at localhost:8000 and localhost:3000...
 start "itsLARP Backend & Web" /min node scripts/dev.js
 
 timeout /t 3 /nobreak >nul
 
-if exist "%LOCALAPPDATA%\Programs\itslarp-desktop\itsLARP.exe" (
-    echo Opening itsLARP Standalone Desktop...
-    start "" "%LOCALAPPDATA%\Programs\itslarp-desktop\itsLARP.exe"
+tasklist /FI "IMAGENAME eq itsLARP.exe" 2>nul | findstr /I "itsLARP.exe" >nul
+if errorlevel 1 (
+    if exist "%LOCALAPPDATA%\Programs\itslarp-desktop\itsLARP.exe" (
+        echo Opening itsLARP Standalone Desktop...
+        start "" "%LOCALAPPDATA%\Programs\itslarp-desktop\itsLARP.exe"
+    ) else (
+        echo Opening default browser at http://localhost:3000/dashboard...
+        start "" "http://localhost:3000/dashboard"
+    )
 ) else (
-    echo Opening default browser at http://localhost:3000/dashboard...
-    start "" "http://localhost:3000/dashboard"
+    echo itsLARP Standalone Desktop is already running.
 )
 
 echo.

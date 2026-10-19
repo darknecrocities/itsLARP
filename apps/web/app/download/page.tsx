@@ -143,6 +143,7 @@ export default function DownloadPage() {
                 <div className="text-neutral-600">RAM: <strong className="text-black">16GB+ recommended</strong></div>
                 <div className="text-neutral-600">GPU: <strong className="text-ok">NVIDIA RTX / AMD Radeon</strong></div>
                 <div className="text-neutral-600">Recommended Model: <strong className="text-black">qwen2.5-coder:7b</strong></div>
+                <div className="text-neutral-600">Installer: <strong className="text-ok">Auto-closes & replaces old versions</strong></div>
               </div>
             </div>
 
@@ -387,12 +388,12 @@ export default function DownloadPage() {
                 <tr>
                   <td className="py-2.5 font-bold">itsLARP-win-x64-setup.exe</td>
                   <td>Windows 10/11 64-bit</td>
-                  <td className="text-[11px] text-neutral-600 font-mono">f6de836b271d707497c6a9f40904a33728452e771bd06182382780ecdb3c979e</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">49123a239418eba411f5b7a6c6380bfdf76789d5d632f4a13108eb042627ec29</td>
                 </tr>
                 <tr>
                   <td className="py-2.5 font-bold">itsLARP-win-x64-portable.zip</td>
                   <td>Windows Portable (No Install)</td>
-                  <td className="text-[11px] text-neutral-600 font-mono">d2678f5add1bddbc68c0b57bbcc3df19d30fd93e8d240a1caee0072374078c35</td>
+                  <td className="text-[11px] text-neutral-600 font-mono">9a5ed6894d6c06e782be5f6e4df31a7d1979596e71d1aef2137e7e5f49895655</td>
                 </tr>
               </tbody>
             </table>

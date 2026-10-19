@@ -162,6 +162,12 @@ export const LATEST_UPDATE_DATA: UpdateRelease = {
   ],
   stabilityFixes: [
     {
+      category: "Windows Setup & Lifecycle",
+      issue: "Setup installer blocked by 'itsLARP cannot be closed' dialog during update or reinstall",
+      resolution:
+        "Engineered NSIS customInit hook to automatically terminate running instances and silently uninstall older versions prior to writing files.",
+    },
+    {
       category: "Desktop Packaging",
       issue: "macOS Dock and Windows taskbar displayed default Electron atom icon",
       resolution:
