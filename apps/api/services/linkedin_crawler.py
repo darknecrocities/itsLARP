@@ -10,10 +10,12 @@ from typing import Dict, Any, List, Optional
 import httpx
 
 HTTP_TIMEOUT = httpx.Timeout(5.0, connect=2.5)
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
+SOCIAL_CRAWLER_AGENTS = [
+    "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+    "LinkedInBot/1.0 (compatible; Mozilla/5.0; Apache-HttpClient +http://www.postrank.com)",
+    "Twitterbot/1.0",
+    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+]
 
 
 def extract_linkedin_handle(raw_url: str) -> str:
@@ -284,48 +286,67 @@ async def crawl_linkedin_profile(url_or_handle: str, raw_text: str = "") -> Dict
     extracted_summary = parsed_text.get("summary", "")
     og_found = False
 
-    # Attempt public OpenGraph fetch if handle is present
+    # Attempt public OpenGraph fetch if handle is present using social metadata crawlers
     if handle:
-        try:
-            headers = {
-                "User-Agent": USER_AGENT,
-                "Accept-Language": "en-US,en;q=0.9",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            }
-            async with httpx.AsyncClient(timeout=HTTP_TIMEOUT, headers=headers, follow_redirects=True) as client:
-                resp = await client.get(f"https://www.linkedin.com/in/{handle}/")
-                if resp.status_code == 200:
-                    body = resp.text
-                    # Extract og:title (Format: "First Last - Headline - Company | LinkedIn")
-                    og_title_m = re.search(r'<meta\s+property=["\']og:title["\']\s+content=["\'](.*?)["\']', body, flags=re.I)
-                    if og_title_m:
-                        og_title = html.unescape(og_title_m.group(1))
-                        parts = og_title.split(" - ")
-                        if len(parts) >= 1 and not extracted_name:
-                            extracted_name = parts[0].strip()
-                        if len(parts) >= 2 and not extracted_headline:
-                            extracted_headline = parts[1].replace(" | LinkedIn", "").strip()
-                        og_found = True
+        for ua in SOCIAL_CRAWLER_AGENTS:
+            try:
+                headers = {
+                    "User-Agent": ua,
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                }
+                async with httpx.AsyncClient(timeout=HTTP_TIMEOUT, headers=headers, follow_redirects=True) as client:
+                    resp = await client.get(f"https://www.linkedin.com/in/{handle}/")
+                    if resp.status_code == 200:
+                        body = resp.text
+                        # Extract og:title (Format: "First Last - Headline - Company | LinkedIn")
+                        og_title_m = re.search(r'<meta\s+property=["\']og:title["\']\s+content=["\'](.*?)["\']', body, flags=re.I)
+                        if og_title_m:
+                            og_title = html.unescape(og_title_m.group(1))
+                            parts = og_title.split(" - ")
+                            if len(parts) >= 1 and not extracted_name:
+                                extracted_name = parts[0].replace(" | LinkedIn", "").strip()
+                            if len(parts) >= 2 and not extracted_headline:
+                                extracted_headline = parts[1].replace(" | LinkedIn", "").strip()
+                            og_found = True
 
-                    # Extract og:description
-                    og_desc_m = re.search(r'<meta\s+property=["\']og:description["\']\s+content=["\'](.*?)["\']', body, flags=re.I)
-                    if og_desc_m:
-                        og_desc = html.unescape(og_desc_m.group(1))
-                        if "Experience:" in og_desc and not parsed_text.get("experience"):
-                            m_exp = re.search(r"Experience:\s*([^·]+)", og_desc)
-                            if m_exp:
-                                parsed_text.setdefault("experience", []).append({
-                                    "company": m_exp.group(1).strip(),
-                                    "title": "Engineer / Contributor",
-                                    "dates": "Recent",
-                                    "text": og_desc[:250],
-                                    "bullets": [og_desc[:250]],
-                                    "metrics": ""
-                                })
-                        og_found = True
-        except Exception:
-            # Server-side authwall fallback (standard LinkedIn behavior for datacenter IPs)
-            pass
+                        # Extract og:description
+                        og_desc_m = re.search(r'<meta\s+property=["\']og:description["\']\s+content=["\'](.*?)["\']', body, flags=re.I)
+                        if og_desc_m:
+                            og_desc = html.unescape(og_desc_m.group(1))
+                            if not extracted_summary:
+                                bio_part = re.split(r"\s*·\s*(?:Experience|Education|Location):", og_desc)[0].strip()
+                                if len(bio_part) > 15 and not bio_part.startswith("View "):
+                                    extracted_summary = bio_part
+                            if not extracted_location:
+                                m_loc = re.search(r"Location:\s*([^·]+)", og_desc)
+                                if m_loc:
+                                    extracted_location = m_loc.group(1).strip()
+                            if not parsed_text.get("education"):
+                                m_edu = re.search(r"Education:\s*([^·]+)", og_desc)
+                                if m_edu:
+                                    parsed_text["education"] = m_edu.group(1).strip()
+                            if "Experience:" in og_desc and not parsed_text.get("experience"):
+                                m_exp = re.search(r"Experience:\s*([^·]+)", og_desc)
+                                if m_exp:
+                                    parsed_text.setdefault("experience", []).append({
+                                        "company": m_exp.group(1).strip(),
+                                        "title": extracted_headline or "Engineer / Contributor",
+                                        "dates": "Recent",
+                                        "text": og_desc[:250],
+                                        "bullets": [og_desc[:250]],
+                                        "metrics": ""
+                                    })
+                            og_found = True
+                        if og_found:
+                            break
+            except Exception:
+                continue
+
+    if not extracted_name and handle and "-" in handle:
+        clean_parts = [p.capitalize() for p in handle.split("-") if p and not p.isdigit()]
+        if len(clean_parts) >= 2:
+            extracted_name = " ".join(clean_parts)
 
     evidence = []
     if handle:

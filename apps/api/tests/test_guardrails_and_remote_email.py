@@ -16,6 +16,9 @@ def test_platform_accounts_guardrails_flow():
     assert "linkedin" in platform_ids
     assert "indeed" in platform_ids
 
+    # Reset any previous session state
+    client.post("/platform-accounts/disconnect", json={"platform": "linkedin"})
+
     # 2. Connect LinkedIn account with guardrails
     connect_res = client.post("/platform-accounts/connect", json={
         "platform": "linkedin",

@@ -89,7 +89,12 @@ export function ResumeDesignPreview() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const hasRealData = Boolean(p.name && (p.skills?.length > 0 || p.experience?.length > 0));
+  const hasRealData = Boolean(
+    p.name?.trim() ||
+    (p.skills && p.skills.length > 0) ||
+    (p.experience && p.experience.length > 0) ||
+    p.headline?.trim()
+  );
   const activeProfile = hasRealData ? p : BASELINE_PREVIEW_PROFILE;
 
   // Load sample jobs for tailoring inspection

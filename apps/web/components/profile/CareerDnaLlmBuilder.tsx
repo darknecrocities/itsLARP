@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "../../lib/store";
 import { api } from "../../lib/api";
 import { ChevronDown, ChevronUp, Sparkles, Globe } from "lucide-react";
@@ -23,6 +23,13 @@ export function CareerDnaLlmBuilder() {
   const [editMode, setEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // Sync stored links whenever Zustand hydrates from localStorage
+  useEffect(() => {
+    if (profile.links?.github && !githubUrl) setGithubUrl(profile.links.github);
+    if (profile.links?.linkedin && !linkedinUrl) setLinkedinUrl(profile.links.linkedin);
+    if (profile.links?.portfolio && !portfolioUrl) setPortfolioUrl(profile.links.portfolio);
+  }, [profile.links]);
+
   async function handlePasteClipboard() {
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -38,7 +45,9 @@ export function CareerDnaLlmBuilder() {
   }
 
   async function handleSyncLinkedIn() {
-    if (!linkedinUrl.trim() && !linkedinText.trim()) {
+    const activeLinkedin = linkedinUrl.trim() || profile.links?.linkedin || "";
+    const activeText = linkedinText.trim();
+    if (!activeLinkedin && !activeText) {
       setStatusMsg("Enter a LinkedIn Profile URL or paste profile text to extract.");
       return;
     }
@@ -58,8 +67,8 @@ export function CareerDnaLlmBuilder() {
         skills: string[];
         education: string;
       }>("/profile/sync-linkedin", {
-        linkedin_url: linkedinUrl.trim(),
-        linkedin_text: linkedinText.trim(),
+        linkedin_url: activeLinkedin,
+        linkedin_text: activeText,
       });
       if (res) {
         const nextExp = res.experience?.length
@@ -102,7 +111,7 @@ export function CareerDnaLlmBuilder() {
           education: res.education || profile.education,
           links: {
             ...profile.links,
-            linkedin: linkedinUrl.trim() || profile.links?.linkedin,
+            linkedin: activeLinkedin || profile.links?.linkedin,
           },
         });
         setCrawlMeta({
@@ -112,7 +121,7 @@ export function CareerDnaLlmBuilder() {
           engine: "Dynamic Extractor",
         });
         setStatusMsg(
-          `Extracted ${res.experience?.length || 0} roles and ${res.certifications?.length || 0} certifications from LinkedIn.`
+          `✓ Extracted ${res.name ? `${res.name}'s profile with ` : ""}${res.experience?.length || 0} roles and ${res.certifications?.length || 0} certifications from LinkedIn.`
         );
       }
     } catch (e: any) {
@@ -123,7 +132,12 @@ export function CareerDnaLlmBuilder() {
   }
 
   async function handleCrawlAndConstruct() {
-    if (!githubUrl.trim() && !linkedinUrl.trim() && !portfolioUrl.trim() && !linkedinText.trim()) {
+    const activeGithub = githubUrl.trim() || profile.links?.github || "";
+    const activeLinkedin = linkedinUrl.trim() || profile.links?.linkedin || "";
+    const activePortfolio = portfolioUrl.trim() || profile.links?.portfolio || "";
+    const activeText = linkedinText.trim();
+
+    if (!activeGithub && !activeLinkedin && !activePortfolio && !activeText) {
       setStatusMsg("Provide at least one source link (GitHub, LinkedIn, or Portfolio URL) or bio text.");
       return;
     }
@@ -136,11 +150,12 @@ export function CareerDnaLlmBuilder() {
         crawl_summary: { github_found: boolean; portfolio_found: boolean; linkedin_found: boolean };
         profile: any;
       }>("/profile/crawl-and-construct", {
-        github_url: githubUrl.trim(),
-        linkedin_url: linkedinUrl.trim(),
-        linkedin_text: linkedinText.trim(),
-        portfolio_url: portfolioUrl.trim(),
+        github_url: activeGithub,
+        linkedin_url: activeLinkedin,
+        linkedin_text: activeText,
+        portfolio_url: activePortfolio,
         custom_instructions: instructions.trim(),
+        profile: profile,
       });
       if (res?.profile) {
         const p = res.profile;
@@ -160,15 +175,16 @@ export function CareerDnaLlmBuilder() {
           licenses: Array.isArray(p.licenses) && p.licenses.length > 0 ? p.licenses : profile.licenses,
           github_metrics: p.github_metrics || profile.github_metrics,
           links: {
-            github: p.links?.github || githubUrl || profile.links?.github,
-            linkedin: p.links?.linkedin || linkedinUrl || profile.links?.linkedin,
-            portfolio: p.links?.portfolio || portfolioUrl || profile.links?.portfolio,
+            github: p.links?.github || activeGithub || profile.links?.github,
+            linkedin: p.links?.linkedin || activeLinkedin || profile.links?.linkedin,
+            portfolio: p.links?.portfolio || activePortfolio || profile.links?.portfolio,
           },
           evidence: Array.isArray(p.evidence) && p.evidence.length > 0 ? p.evidence : profile.evidence,
         });
         setCrawlMeta({ ...res.crawl_summary, engine: res.engine });
+        const nameGreeting = p.name ? ` for ${p.name}` : "";
         setStatusMsg(
-          `Career DNA constructed via ${res.engine === "llm" ? "Local/Cloud LLM" : "Deterministic Evidence Synthesis"}. All fields are editable below.`
+          `✓ Career DNA constructed${nameGreeting}! Loaded ${p.skills?.length || 0} skills, ${p.experience?.length || 0} roles, and ${p.projects?.length || 0} projects. Live preview updated below.`
         );
       }
     } catch (e: any) {
@@ -368,7 +384,15 @@ export function CareerDnaLlmBuilder() {
       </div>
 
       {statusMsg && (
-        <div className="p-2.5 bg-neutral-100 border border-neutral-300 rounded text-xs text-black font-mono">
+        <div
+          className={`p-2.5 rounded text-xs font-mono border transition-all ${
+            statusMsg.startsWith("✓")
+              ? "bg-black text-white border-black font-medium"
+              : statusMsg.startsWith("Failed") || statusMsg.startsWith("Provide")
+              ? "bg-neutral-100 text-red-600 border-red-300"
+              : "bg-neutral-100 border-neutral-300 text-black"
+          }`}
+        >
           {statusMsg}
         </div>
       )}

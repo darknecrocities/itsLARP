@@ -163,6 +163,32 @@ B.S. in Computer Science, Stanford University
     assert profile["name"].lower() != "octocat"
 
 
+def test_linkedin_social_crawler_and_handle_fallback():
+    from services import linkedin_crawler
+    parsed = linkedin_crawler.parse_linkedin_text_content("""Jane Smith
+Staff Backend Engineer | Scalable Cloud Systems
+San Francisco, CA
+
+About
+Passionate backend engineer with extensive experience in Go, Python, and Kubernetes.
+
+Experience
+Staff Engineer
+Stripe · Full-time
+2021 - Present · 3 yrs
+San Francisco, California, United States
+• Scaled distributed ledger services to millions of transactions daily.
+Skills: Go, Python, Kubernetes, Redis, PostgreSQL
+""")
+    assert parsed["name"] == "Jane Smith"
+    assert "Staff Backend Engineer" in parsed["headline"]
+    assert "San Francisco" in parsed["location"]
+    assert "Passionate backend engineer" in parsed["summary"]
+    assert len(parsed["experience"]) >= 1
+    assert parsed["experience"][0]["company"] == "Stripe"
+    assert "go" in parsed["skills"] or "python" in parsed["skills"]
+
+
 def test_20_configs_in_prepare_application():
     jobs_res = client.get("/jobs?q=Engineer")
     assert jobs_res.status_code == 200

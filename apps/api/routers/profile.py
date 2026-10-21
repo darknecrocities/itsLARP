@@ -53,6 +53,7 @@ class CrawlAndConstructIn(BaseModel):
     notes: str = ""
     full_name: str = ""
     headline: str = ""
+    profile: Optional[dict] = None
 
 
 class SyncLinkedInIn(BaseModel):
@@ -69,7 +70,7 @@ async def profile_sync_linkedin(b: SyncLinkedInIn):
 @router.post("/crawl-and-construct")
 async def profile_crawl_and_construct(b: CrawlAndConstructIn):
     inst = (b.custom_instructions or b.notes or "").strip()
-    current_p = {}
+    current_p = dict(b.profile or {})
     if b.full_name:
         current_p["name"] = b.full_name
     if b.headline:
