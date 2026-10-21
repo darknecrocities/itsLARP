@@ -32,7 +32,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
   const springPupilX = useSpring(rawPupilX, { damping: 26, stiffness: 220 });
   const springPupilY = useSpring(rawPupilY, { damping: 26, stiffness: 220 });
 
-  // Spring for subtle body parallax tilt (tilt toward cursor, no jumping)
+  // Spring for subtle body parallax tilt (tilt toward cursor, zero vertical jumping)
   const rawTiltZ = useMotionValue(0);
   const springTiltZ = useSpring(rawTiltZ, { damping: 30, stiffness: 120 });
 
@@ -98,10 +98,12 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [rawPupilX, rawPupilY, rawTiltZ]);
 
-  // Snip animation (pincers only, no body jumping)
+  // Snip animation (authentic scissor pinching, zero body jumping)
   const triggerDoubleSnip = useCallback(() => {
     if (isSnapping) return;
     setIsSnapping(true);
+
+    // Sequence: right claw snip -> left claw snip -> synchronized double pinch
     setRightClawOpen(true);
     setTimeout(() => {
       setRightClawOpen(false);
@@ -133,13 +135,13 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Cartoon Cloud Thought Bubble hovering right above Scuttle's head */}
+      {/* Cartoon Cloud Thought Bubble positioned above Scuttle's head, leaving right claw clear */}
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
             text={HERO_QUOTES[quoteIndex]}
             onClose={() => setSpeechVisible(false)}
-            className="-top-24 sm:-top-28 right-8 sm:right-16 z-30"
+            className="-top-32 sm:-top-36 right-20 sm:right-28 z-30"
           />
         )}
       </AnimatePresence>
@@ -147,7 +149,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       {/* Main Peeking Crab Body Wrapper with Parallax Spring (No Body Jumping) */}
       <motion.div
         style={{ rotateZ: springTiltZ }}
-        className="cursor-pointer group relative origin-bottom-right"
+        className="cursor-pointer group relative origin-bottom-right z-20"
         onClick={handleClick}
         onMouseEnter={triggerDoubleSnip}
         title="Scuttle · Click to pinch & speak!"

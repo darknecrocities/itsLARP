@@ -13,7 +13,8 @@ export interface PeekingCrabSvgProps {
 
 /**
  * Premium 2D Monochrome Vector Mascot Crab peeking in from the right edge.
- * Features articulated eye pupils, animated eyelids, crawling legs, and pinching claws.
+ * Features articulated eye pupils, animated eyelids, crawling legs, and authentic scissor-action crab pincers.
+ * All moving joints use local-coordinate translation groups (0, 0 pivot) for zero-jumping rotational precision.
  */
 export function PeekingCrabSvg({
   eyeOffset = { x: 0, y: 0 },
@@ -32,54 +33,57 @@ export function PeekingCrabSvg({
       aria-label="Scuttle 2D Peeking Mascot Crab"
       role="img"
     >
-      {/* 3 Lower Left Crawling / Walking Legs (Articulated at Hip Sockets) */}
-      <g stroke="#000000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none">
+      {/* 3 Lower Left Crawling Legs (Articulated at Hip Sockets) */}
+      <g stroke="#000000" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" fill="none">
         {/* Top Walking Leg */}
-        <motion.g
-          animate={{
-            rotate: isSnapping ? [-8, 8, -8] : [-3, 4, -3],
-          }}
-          style={{ originX: "120px", originY: "185px" }}
-          transition={{
-            duration: isSnapping ? 0.28 : 1.6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          <path d="M 120 185 L 82 200 L 52 230" />
-        </motion.g>
+        <g transform="translate(120, 185)">
+          <motion.g
+            animate={{
+              rotate: isSnapping ? [-8, 8, -8] : [-3, 4, -3],
+            }}
+            transition={{
+              duration: isSnapping ? 0.28 : 1.6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <path d="M 0 0 L -38 15 L -68 45" />
+          </motion.g>
+        </g>
 
         {/* Middle Walking Leg */}
-        <motion.g
-          animate={{
-            rotate: isSnapping ? [8, -8, 8] : [4, -3, 4],
-          }}
-          style={{ originX: "130px", originY: "215px" }}
-          transition={{
-            duration: isSnapping ? 0.32 : 1.9,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: isSnapping ? 0.05 : 0.25,
-          }}
-        >
-          <path d="M 130 215 L 94 235 L 74 272" />
-        </motion.g>
+        <g transform="translate(130, 215)">
+          <motion.g
+            animate={{
+              rotate: isSnapping ? [8, -8, 8] : [4, -3, 4],
+            }}
+            transition={{
+              duration: isSnapping ? 0.32 : 1.9,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: isSnapping ? 0.05 : 0.25,
+            }}
+          >
+            <path d="M 0 0 L -36 20 L -56 57" />
+          </motion.g>
+        </g>
 
         {/* Bottom Walking Leg */}
-        <motion.g
-          animate={{
-            rotate: isSnapping ? [-7, 7, -7] : [-4, 3, -4],
-          }}
-          style={{ originX: "148px", originY: "245px" }}
-          transition={{
-            duration: isSnapping ? 0.3 : 1.75,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: isSnapping ? 0.1 : 0.5,
-          }}
-        >
-          <path d="M 148 245 L 118 270 L 104 306" />
-        </motion.g>
+        <g transform="translate(148, 245)">
+          <motion.g
+            animate={{
+              rotate: isSnapping ? [-7, 7, -7] : [-4, 3, -4],
+            }}
+            transition={{
+              duration: isSnapping ? 0.3 : 1.75,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: isSnapping ? 0.1 : 0.5,
+            }}
+          >
+            <path d="M 0 0 L -30 25 L -44 61" />
+          </motion.g>
+        </g>
       </g>
 
       {/* Crab Carapace (Shell Body Peeking In From Right Screen Edge) */}
@@ -172,110 +176,112 @@ export function PeekingCrabSvg({
         )}
       </g>
 
-      {/* Left Arm & Claw (Authentic 2D Scissor Pincer) */}
+      {/* Left Arm & Authentic Scissor Crab Pincer */}
       <g>
-        {/* Arm Segment */}
+        {/* Arm Segment reaching to wrist */}
         <path
-          d="M 115 160 C 88 150, 68 140, 56 125"
+          d="M 115 160 C 88 152, 70 142, 58 125"
           stroke="#000000"
-          strokeWidth="4"
+          strokeWidth="4.2"
           strokeLinecap="round"
           fill="none"
         />
 
-        {/* Claw Wrist Socket */}
-        <ellipse
-          cx="56"
-          cy="125"
-          rx="9"
-          ry="8"
-          fill="#FFFFFF"
-          stroke="#000000"
-          strokeWidth="3.5"
-        />
-
-        {/* Upper Curved Pincer Jaw (Clamps Down on Pinch) */}
-        <motion.g
-          animate={{ rotate: leftClawOpen ? 18 : 0 }}
-          style={{ originX: "54px", originY: "120px" }}
-          transition={{ duration: 0.12, ease: "easeInOut" }}
-        >
-          <path
-            d="M 54 120 C 42 92, 30 86, 18 106 C 32 100, 42 108, 50 122 Z"
+        {/* Left Claw Local Coordinate Group (Origin (0,0) is Wrist Socket) */}
+        <g transform="translate(58, 125)">
+          {/* Bulbous Palm (Chela Base) */}
+          <ellipse
+            cx="0"
+            cy="0"
+            rx="11"
+            ry="10"
             fill="#FFFFFF"
             stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
+            strokeWidth="3.6"
           />
-        </motion.g>
 
-        {/* Lower Curved Pincer Jaw (Clamps Up on Pinch) */}
-        <motion.g
-          animate={{ rotate: leftClawOpen ? -18 : 0 }}
-          style={{ originX: "56px", originY: "128px" }}
-          transition={{ duration: 0.12, ease: "easeInOut" }}
-        >
-          <path
-            d="M 56 128 C 44 150, 32 150, 18 116 C 32 120, 42 122, 52 126 Z"
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
-          />
-        </motion.g>
+          {/* Upper Curved Pincer Jaw (Dactyl) — Pivots at (0, 0) */}
+          <motion.g
+            animate={{ rotate: leftClawOpen ? 24 : 0 }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 0 -4 C -14 -20, -28 -20, -38 -3 C -30 2, -18 -4, 0 1 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+
+          {/* Lower Curved Pincer Jaw (Pollex) — Pivots at (0, 0) */}
+          <motion.g
+            animate={{ rotate: leftClawOpen ? -24 : 0 }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 0 4 C -14 20, -28 20, -38 3 C -30 -2, -18 4, 0 -1 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+        </g>
       </g>
 
-      {/* Right Arm & Raised Claw (Authentic 2D Scissor Pincer) */}
+      {/* Right Raised Arm & Authentic Scissor Crab Pincer */}
       <g>
-        {/* Raised Arm Armature */}
+        {/* Raised Arm Segment reaching to wrist */}
         <path
-          d="M 210 130 C 228 105, 238 80, 236 60"
+          d="M 200 125 C 218 102, 224 78, 216 55"
           stroke="#000000"
-          strokeWidth="4"
+          strokeWidth="4.2"
           strokeLinecap="round"
           fill="none"
         />
 
-        {/* Claw Wrist Socket */}
-        <ellipse
-          cx="236"
-          cy="60"
-          rx="9"
-          ry="8"
-          fill="#FFFFFF"
-          stroke="#000000"
-          strokeWidth="3.5"
-        />
-
-        {/* Upper Curved Pincer Jaw (Clamps Down on Pinch) */}
-        <motion.g
-          animate={{ rotate: rightClawOpen ? 18 : 0 }}
-          style={{ originX: "232px", originY: "54px" }}
-          transition={{ duration: 0.12, ease: "easeInOut" }}
-        >
-          <path
-            d="M 232 54 C 224 24, 210 16, 194 32 C 208 24, 222 34, 228 56 Z"
+        {/* Right Claw Local Coordinate Group (Origin (0,0) is Wrist Socket) */}
+        <g transform="translate(216, 55)">
+          {/* Bulbous Palm (Chela Base) */}
+          <ellipse
+            cx="0"
+            cy="0"
+            rx="11"
+            ry="10"
             fill="#FFFFFF"
             stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
+            strokeWidth="3.6"
           />
-        </motion.g>
 
-        {/* Lower Curved Pincer Jaw (Clamps Up on Pinch) */}
-        <motion.g
-          animate={{ rotate: rightClawOpen ? -18 : 0 }}
-          style={{ originX: "236px", originY: "64px" }}
-          transition={{ duration: 0.12, ease: "easeInOut" }}
-        >
-          <path
-            d="M 236 64 C 226 86, 212 86, 194 44 C 208 50, 222 54, 230 62 Z"
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
-          />
-        </motion.g>
+          {/* Upper Curved Pincer Jaw (Dactyl) — Pivots at (0, 0) */}
+          <motion.g
+            animate={{ rotate: rightClawOpen ? 24 : 0 }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 0 -4 C -12 -22, -26 -22, -36 -6 C -28 0, -16 -5, 0 1 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+
+          {/* Lower Curved Pincer Jaw (Pollex) — Pivots at (0, 0) */}
+          <motion.g
+            animate={{ rotate: rightClawOpen ? -24 : 0 }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 0 4 C -12 22, -26 22, -36 6 C -28 0, -16 5, 0 -1 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+        </g>
       </g>
     </svg>
   );
