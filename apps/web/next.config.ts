@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
         source: "/releases/:file*",
         destination: "/api/download?file=:file*",
       },
+      {
+        source: "/api/py/:path*",
+        destination: "http://127.0.0.1:8000/:path*",
+      },
     ];
   },
 };

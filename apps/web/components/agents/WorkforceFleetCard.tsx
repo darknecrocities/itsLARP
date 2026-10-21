@@ -122,21 +122,32 @@ export function WorkforceFleetCard({
         {/* Target Applications Goal */}
         <div className="p-3.5 rounded-lg border border-line bg-bg space-y-2.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-ink flex items-center gap-1.5" htmlFor="target-slider">
+            <label className="text-xs font-semibold text-ink flex items-center gap-1.5" htmlFor="target-input">
               <Activity className="w-3.5 h-3.5 text-muted" />
               <span>Target Application Submissions</span>
             </label>
-            <span className="text-xs font-mono font-bold text-ink">
-              {targetJobs.toLocaleString()} Applications
-            </span>
+            <div className="flex items-center gap-1.5">
+              <input
+                id="target-input"
+                type="number"
+                min={1}
+                max={50000}
+                value={targetJobs}
+                disabled={running}
+                onChange={(e) => onTargetJobsChange(Math.max(1, Math.min(50000, Number(e.target.value) || 1)))}
+                className="w-20 px-2 py-0.5 text-xs font-mono font-bold text-right border border-line rounded bg-bg2 text-ink focus:outline-none focus:border-black"
+                title="Enter exact target number of jobs to apply for"
+              />
+              <span className="text-xs font-mono font-bold text-ink">Apps</span>
+            </div>
           </div>
 
           <input
             id="target-slider"
             type="range"
-            min={10}
+            min={1}
             max={50000}
-            step={50}
+            step={10}
             value={targetJobs}
             disabled={running}
             onChange={(e) => onTargetJobsChange(Number(e.target.value))}
@@ -145,7 +156,7 @@ export function WorkforceFleetCard({
 
           <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
             <span className="text-[11px] text-muted font-mono">Presets:</span>
-            {[50, 250, 1000, 5000, 10000, 50000].map((n) => (
+            {[10, 50, 250, 1000, 5000, 10000, 50000].map((n) => (
               <button
                 key={n}
                 type="button"

@@ -2,6 +2,7 @@ const { spawn, execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const http = require("http");
+const os = require("os");
 
 let spawnedProcesses = [];
 
@@ -21,13 +22,26 @@ function checkPortOpen(port, timeoutMs = 600) {
 }
 
 function findRepoRoot() {
+  const home = os.homedir();
+  try {
+    const cfg = path.join(home, ".itslarp", "workspace_path");
+    if (fs.existsSync(cfg)) {
+      const p = fs.readFileSync(cfg, "utf-8").trim();
+      if (p && fs.existsSync(path.join(p, "apps", "api"))) return p;
+    }
+  } catch {}
+
   const candidates = [
+    process.env.ITSLARP_REPO_ROOT,
     path.resolve(__dirname, "..", ".."),
     path.resolve(process.cwd()),
-    path.resolve(process.env.USERPROFILE || "", "Documents", "itslarp"),
+    path.join(home, ".gemini", "antigravity", "worktrees", "itsLarper", "preview_resume_career_profile"),
+    path.join(home, "Documents", "itslarp"),
+    path.join(home, "Projects", "itslarp"),
+    path.join(home, "Developer", "itslarp"),
   ];
   for (const c of candidates) {
-    if (fs.existsSync(path.join(c, "apps", "api")) && fs.existsSync(path.join(c, "apps", "web"))) {
+    if (c && fs.existsSync(path.join(c, "apps", "api")) && fs.existsSync(path.join(c, "apps", "web"))) {
       return c;
     }
   }

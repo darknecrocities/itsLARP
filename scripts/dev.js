@@ -100,51 +100,80 @@ function pipeLogs(stream, prefix) {
   });
 }
 
-// 3. Spawn FastAPI Backend (port 8000)
-const uvicornExec = fs.existsSync(venvUvicorn) ? venvUvicorn : "uvicorn";
-const apiProcess = spawn(
-  uvicornExec,
-  ["main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"],
-  {
-    cwd: API_DIR,
-    env: { ...process.env, PYTHONUNBUFFERED: "1" },
-    shell: true,
+function checkPortInUse(port) {
+  return new Promise((resolve) => {
+    const req = http.request(
+      { hostname: "127.0.0.1", port, path: "/", method: "HEAD", timeout: 400 },
+      () => resolve(true)
+    );
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+    req.end();
+  });
+}
+
+async function bootServices() {
+  // 3. Spawn FastAPI Backend (port 8000)
+  const isApiActive = await checkPortInUse(8000);
+  if (isApiActive) {
+    console.log(C_API + "\x1b[32m[OK]\x1b[0m FastAPI backend already active on port 8000. Reusing live instance.");
+  } else {
+    const uvicornExec = fs.existsSync(venvUvicorn) ? venvUvicorn : "uvicorn";
+    const apiProcess = spawn(
+      uvicornExec,
+      ["main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"],
+      {
+        cwd: API_DIR,
+        env: { ...process.env, PYTHONUNBUFFERED: "1" },
+        shell: true,
+      }
+    );
+    children.push(apiProcess);
+    pipeLogs(apiProcess.stdout, C_API);
+    pipeLogs(apiProcess.stderr, C_API);
+
+    apiProcess.on("error", (err) => {
+      console.error(C_API + "Error spawning API process: " + err.message);
+    });
+
+    apiProcess.on("exit", (code) => {
+      if (code !== 0 && code !== null) {
+        console.log(C_API + `Exited with code ${code}`);
+      }
+    });
   }
-);
-children.push(apiProcess);
-pipeLogs(apiProcess.stdout, C_API);
-pipeLogs(apiProcess.stderr, C_API);
 
-apiProcess.on("error", (err) => {
-  console.error(C_API + "Error spawning API process: " + err.message);
-});
+  // 4. Spawn Next.js Frontend (port 3000)
+  const isWebActive = await checkPortInUse(3000);
+  if (isWebActive) {
+    console.log(C_WEB + "\x1b[32m[OK]\x1b[0m Next.js web app already running on port 3000.");
+  } else {
+    const nextCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+    const webProcess = spawn(nextCmd, ["next", "dev", "-p", "3000"], {
+      cwd: WEB_DIR,
+      env: { ...process.env, NEXT_PUBLIC_API_URL: "http://localhost:8000" },
+      shell: true,
+    });
+    children.push(webProcess);
+    pipeLogs(webProcess.stdout, C_WEB);
+    pipeLogs(webProcess.stderr, C_WEB);
 
-apiProcess.on("exit", (code) => {
-  if (code !== 0 && code !== null) {
-    console.log(C_API + `Exited with code ${code}`);
+    webProcess.on("error", (err) => {
+      console.error(C_WEB + "Error spawning Web process: " + err.message);
+    });
+
+    webProcess.on("exit", (code) => {
+      if (code !== 0 && code !== null) {
+        console.log(C_WEB + `Exited with code ${code}`);
+      }
+    });
   }
-});
+}
 
-// 4. Spawn Next.js Frontend (port 3000)
-const nextCmd = process.platform === "win32" ? "npx.cmd" : "npx";
-const webProcess = spawn(nextCmd, ["next", "dev", "-p", "3000"], {
-  cwd: WEB_DIR,
-  env: { ...process.env, NEXT_PUBLIC_API_URL: "http://localhost:8000" },
-  shell: true,
-});
-children.push(webProcess);
-pipeLogs(webProcess.stdout, C_WEB);
-pipeLogs(webProcess.stderr, C_WEB);
-
-webProcess.on("error", (err) => {
-  console.error(C_WEB + "Error spawning Web process: " + err.message);
-});
-
-webProcess.on("exit", (code) => {
-  if (code !== 0 && code !== null) {
-    console.log(C_WEB + `Exited with code ${code}`);
-  }
-});
+bootServices();
 
 console.log("\n" + C_SYS + "==========================================================");
 console.log(C_SYS + "  WEBSITE APPLICATION: \x1b[1m\x1b[32mhttp://localhost:3000\x1b[0m  (Open this in browser)");

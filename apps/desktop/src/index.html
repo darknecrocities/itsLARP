@@ -246,7 +246,8 @@
         } else if (ws.cloudReachable) {
           startCountdown("cloud");
         } else {
-          document.getElementById("statusMsg").innerText = "Standby mode: Choose workspace or start local stack.";
+          document.getElementById("statusMsg").innerText = "Initializing background services stack...";
+          handleStartLocalStack();
         }
       } catch (err) {
         console.error("Init error:", err);

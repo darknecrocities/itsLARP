@@ -250,13 +250,17 @@ def _synthesize_query_opportunities(query_text: str, platforms: list[str] | None
 
     roles_spec = [
         (f"{qt}", "Full-time", 3),
-        (f"Senior {qt}", "Full-time", 6),
-        (f"Lead {qt}", "Full-time", 8),
-        (f"{qt} Intern", "Internship", 0),
-        (f"Contract {qt}", "Contract", 4),
-        (f"Part-Time {qt}", "Part-time", 2),
-        (f"Associate {qt}", "Full-time", 1),
+        (f"Senior {qt}", "Full-time", 5),
+        (f"Lead {qt}", "Full-time", 7),
+        (f"Staff {qt}", "Full-time", 8),
         (f"Principal {qt}", "Full-time", 9),
+        (f"{qt} - Autonomous Systems", "Full-time", 4),
+        (f"FullStack {qt}", "Full-time", 4),
+        (f"AI/ML {qt}", "Full-time", 4),
+        (f"Backend {qt}", "Full-time", 4),
+        (f"Distributed Systems {qt}", "Full-time", 5),
+        (f"Associate {qt}", "Full-time", 2),
+        (f"Contract {qt}", "Contract", 3),
     ]
     all_platforms = ["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Wellfound"]
     srcs = [p.capitalize() for p in (platforms or all_platforms) if p] or all_platforms

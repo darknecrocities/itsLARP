@@ -7,7 +7,7 @@ import { FIELDS, type Job } from "@/lib/data";
 import { type Change } from "@/lib/profile";
 import { useStore } from "@/lib/store";
 import { Badge, Empty, ErrorBox, PageHeader } from "@/components/ui";
-import { Check, ExternalLink, RotateCcw, AlertCircle, ShieldAlert, SlidersHorizontal } from "lucide-react";
+import { Check, ExternalLink, RotateCcw, AlertCircle, ShieldAlert, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { ClaimVerificationTable, type ClaimItem } from "@/components/apply/ClaimVerificationTable";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 
@@ -196,6 +196,13 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
         sub={`${job.location} · ${job.salary || "Salary not listed"} · Source: ${job.source} · Active Format: ${appConfig.resumeFormat}`}
         action={
           <div className="flex flex-wrap gap-2">
+            <Link
+              href="/jobs"
+              className="btn text-xs inline-flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Jobs</span>
+            </Link>
             <button
               type="button"
               onClick={() => setShowConfig(!showConfig)}
