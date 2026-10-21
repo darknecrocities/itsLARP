@@ -21,13 +21,14 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { apps, setApps, profile, fetchQuestions } = useStore();
+  const { apps, setApps, profile, fetchProfile, fetchQuestions } = useStore();
   const { data: jobs, isLoading } = useJobs();
   const feed = useSwarm((s) => s.feed);
   const [activeTab, setActiveTab] = useState<"overview" | "resume">("overview");
 
   // Sync applications and pending questions from backend database
   useEffect(() => {
+    fetchProfile();
     apiGet<any[]>("/applications")
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -36,7 +37,7 @@ export default function Dashboard() {
       })
       .catch(() => {});
     fetchQuestions();
-  }, [setApps, fetchQuestions]);
+  }, [fetchProfile, setApps, fetchQuestions]);
 
   const topJobs = (jobs || [])
     .filter((j) => (j.match?.score ?? 0) >= 60)

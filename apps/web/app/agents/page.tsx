@@ -8,7 +8,7 @@ import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
 import { WorkforceFleetCard } from "@/components/agents/WorkforceFleetCard";
 import { PreSubmissionModal } from "@/components/agents/PreSubmissionModal";
-import { Key, Zap, X, SlidersHorizontal, Eye } from "lucide-react";
+import { Key, Zap, X, SlidersHorizontal, Eye, ArrowLeft } from "lucide-react";
 
 
 const STAGE_LABELS: Record<Stage, string> = {
@@ -77,6 +77,13 @@ export default function AgentsPage() {
         sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
         action={
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="btn text-xs flex items-center gap-1.5 hover:border-black"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Dashboard</span>
+            </Link>
             <Link
               href="/resume"
               className="btn text-xs flex items-center gap-1.5 hover:border-black"
