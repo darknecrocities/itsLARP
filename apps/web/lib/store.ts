@@ -153,7 +153,12 @@ export type ResumeFormatKey =
   | "harvard_executive"
   | "silicon_valley_modern"
   | "ieee_engineering"
-  | "ats_strict";
+  | "ats_strict"
+  | "minimalist_swiss"
+  | "cambridge_classic"
+  | "modern_nordic"
+  | "staff_architect"
+  | "compact_one_page";
 
 export type ApplicationConfig = {
   // Group A: Resume Design & Tailoring (1-7)

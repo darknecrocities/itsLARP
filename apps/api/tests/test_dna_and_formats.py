@@ -63,7 +63,20 @@ def test_five_resume_formats_and_job_tailoring():
         "description": "Seeking a Principal AI Infrastructure Engineer skilled in PyTorch, FastAPI, Python, and Kubernetes."
     }
 
-    for fmt in ["apa_7th", "harvard_executive", "silicon_valley_modern", "ieee_engineering", "ats_strict"]:
+    all_10_formats = [
+        "apa_7th",
+        "harvard_executive",
+        "silicon_valley_modern",
+        "ieee_engineering",
+        "ats_strict",
+        "minimalist_swiss",
+        "cambridge_classic",
+        "modern_nordic",
+        "staff_architect",
+        "compact_one_page",
+    ]
+
+    for fmt in all_10_formats:
         r = client.post("/profile/render-resume", json={
             "profile": SYNTHETIC_CANDIDATE,
             "format": fmt,

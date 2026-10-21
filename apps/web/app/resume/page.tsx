@@ -6,6 +6,7 @@ import { useStore, type ResumeFormatKey, type Profile } from "@/lib/store";
 import { Badge, Empty, PageHeader, Reveal } from "@/components/ui";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 import { api, apiGet } from "@/lib/api";
+import { RESUME_FORMATS } from "@/lib/resumeFormats";
 
 const BASELINE_TEMPLATE_PROFILE: Profile = {
   name: "Alex Rivera",
@@ -74,14 +75,6 @@ const BASELINE_TEMPLATE_PROFILE: Profile = {
     },
   ],
 };
-
-const RESUME_FORMATS: { key: ResumeFormatKey; label: string; desc: string }[] = [
-  { key: "apa_7th", label: "APA 7th Edition CV", desc: "Academic & Research Standard" },
-  { key: "harvard_executive", label: "Harvard Executive", desc: "Reverse-Chronological" },
-  { key: "silicon_valley_modern", label: "Silicon Valley Modern", desc: "Tech & Engineering Impact" },
-  { key: "ieee_engineering", label: "IEEE Engineering", desc: "Numbered R&D Specification" },
-  { key: "ats_strict", label: "ATS Strict Parser-Safe", desc: "Workday / Greenhouse / Lever" },
-];
 
 export default function ResumeStudio() {
   const { profile: p, apps, appConfig, setAppConfig } = useStore();

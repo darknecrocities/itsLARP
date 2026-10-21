@@ -1,14 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useStore, DEFAULT_APP_CONFIG, ResumeFormatKey } from "../../lib/store";
-
-const FORMAT_OPTIONS: { key: ResumeFormatKey; label: string; desc: string }[] = [
-  { key: "apa_7th", label: "APA 7th Edition", desc: "Academic & Research CV with running head and formal software citations" },
-  { key: "harvard_executive", label: "Harvard Executive", desc: "Reverse-chronological single-column executive layout" },
-  { key: "silicon_valley_modern", label: "Silicon Valley Modern", desc: "Impact-first engineering format highlighting stack and GitHub" },
-  { key: "ieee_engineering", label: "IEEE Engineering", desc: "Numbered sections (I-V) for systems & R&D engineering" },
-  { key: "ats_strict", label: "ATS Strict Parser-Safe", desc: "Standard ASCII headings optimized for Workday, Greenhouse & Lever" },
-];
+import { useStore, DEFAULT_APP_CONFIG } from "../../lib/store";
+import { RESUME_FORMATS } from "../../lib/resumeFormats";
 
 interface ApplicationConfigPanelProps {
   compact?: boolean;
@@ -68,22 +61,29 @@ export function ApplicationConfigPanel({ compact = false, onApplyToAgents }: App
               [01] Resume Format Template (Constructed by Bots per Job)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-              {FORMAT_OPTIONS.map((f) => {
+              {RESUME_FORMATS.map((f) => {
                 const active = appConfig.resumeFormat === f.key;
                 return (
                   <button
                     key={f.key}
                     type="button"
                     onClick={() => setAppConfig({ resumeFormat: f.key })}
-                    className={`text-left p-2.5 rounded border transition ${
+                    className={`text-left p-2.5 rounded border transition cursor-pointer ${
                       active
                         ? "bg-black text-white border-black"
                         : "bg-white text-black border-neutral-300 hover:border-black"
                     }`}
                   >
-                    <div className="text-xs font-semibold">{f.label}</div>
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="text-xs font-semibold">{f.label}</div>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1">
+                      <span className={`text-[9px] font-mono px-1 py-0.2 rounded ${active ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-600"}`}>
+                        {f.tag}
+                      </span>
+                    </div>
                     {!compact && (
-                      <div className={`text-[10px] mt-1 leading-snug ${active ? "text-neutral-300" : "text-neutral-500"}`}>
+                      <div className={`text-[10px] mt-1.5 leading-snug ${active ? "text-neutral-300" : "text-neutral-500"}`}>
                         {f.desc}
                       </div>
                     )}

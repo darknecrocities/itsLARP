@@ -129,6 +129,9 @@ def profile_apa_resume(b: APAResumeIn):
 
 @router.get("/apa-resume/download")
 def profile_apa_resume_download(format: str = "html", style: str = "apa_7th"):
+    if format in resume_formats.FORMAT_LABELS:
+        style = format
+        format = "html"
     db = SessionLocal()
     try:
         rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
