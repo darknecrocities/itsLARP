@@ -33,56 +33,48 @@ export function PeekingCrabSvg({
       aria-label="Scuttle 2D Peeking Mascot Crab"
       role="img"
     >
+      <style>{`
+        @keyframes legCrawling1 {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(5deg); }
+        }
+        @keyframes legCrawling2 {
+          0%, 100% { transform: rotate(5deg); }
+          50% { transform: rotate(-4deg); }
+        }
+        @keyframes legCrawling3 {
+          0%, 100% { transform: rotate(-4deg); }
+          50% { transform: rotate(4deg); }
+        }
+        .crab-leg-1 { animation: legCrawling1 1.7s infinite ease-in-out; }
+        .crab-leg-2 { animation: legCrawling2 1.9s infinite ease-in-out 0.25s; }
+        .crab-leg-3 { animation: legCrawling3 1.8s infinite ease-in-out 0.5s; }
+        .crab-leg-1-fast { animation: legCrawling1 0.28s infinite ease-in-out; }
+        .crab-leg-2-fast { animation: legCrawling2 0.32s infinite ease-in-out; }
+        .crab-leg-3-fast { animation: legCrawling3 0.3s infinite ease-in-out; }
+      `}</style>
+
       {/* 3 Lower Left Crawling Legs (Articulated at Hip Sockets) */}
       <g stroke="#000000" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" fill="none">
         {/* Top Walking Leg */}
         <g transform="translate(120, 185)">
-          <motion.g
-            animate={{
-              rotate: isSnapping ? [-8, 8, -8] : [-3, 4, -3],
-            }}
-            transition={{
-              duration: isSnapping ? 0.28 : 1.6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
+          <g className={isSnapping ? "crab-leg-1-fast" : "crab-leg-1"}>
             <path d="M 0 0 L -38 15 L -68 45" />
-          </motion.g>
+          </g>
         </g>
 
         {/* Middle Walking Leg */}
         <g transform="translate(130, 215)">
-          <motion.g
-            animate={{
-              rotate: isSnapping ? [8, -8, 8] : [4, -3, 4],
-            }}
-            transition={{
-              duration: isSnapping ? 0.32 : 1.9,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: isSnapping ? 0.05 : 0.25,
-            }}
-          >
+          <g className={isSnapping ? "crab-leg-2-fast" : "crab-leg-2"}>
             <path d="M 0 0 L -36 20 L -56 57" />
-          </motion.g>
+          </g>
         </g>
 
         {/* Bottom Walking Leg */}
         <g transform="translate(148, 245)">
-          <motion.g
-            animate={{
-              rotate: isSnapping ? [-7, 7, -7] : [-4, 3, -4],
-            }}
-            transition={{
-              duration: isSnapping ? 0.3 : 1.75,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: isSnapping ? 0.1 : 0.5,
-            }}
-          >
+          <g className={isSnapping ? "crab-leg-3-fast" : "crab-leg-3"}>
             <path d="M 0 0 L -30 25 L -44 61" />
-          </motion.g>
+          </g>
         </g>
       </g>
 
@@ -201,9 +193,9 @@ export function PeekingCrabSvg({
           />
 
           {/* Upper Curved Pincer Jaw (Dactyl) — Pivots at (0, 0) */}
-          <motion.g
-            animate={{ rotate: leftClawOpen ? 24 : 0 }}
-            transition={{ duration: 0.11, ease: "easeInOut" }}
+          <g
+            transform={`rotate(${leftClawOpen ? 22 : 0})`}
+            style={{ transition: "transform 110ms cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             <path
               d="M 0 -4 C -14 -20, -28 -20, -38 -3 C -30 2, -18 -4, 0 1 Z"
@@ -212,12 +204,12 @@ export function PeekingCrabSvg({
               strokeWidth="3.5"
               strokeLinejoin="round"
             />
-          </motion.g>
+          </g>
 
           {/* Lower Curved Pincer Jaw (Pollex) — Pivots at (0, 0) */}
-          <motion.g
-            animate={{ rotate: leftClawOpen ? -24 : 0 }}
-            transition={{ duration: 0.11, ease: "easeInOut" }}
+          <g
+            transform={`rotate(${leftClawOpen ? -22 : 0})`}
+            style={{ transition: "transform 110ms cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             <path
               d="M 0 4 C -14 20, -28 20, -38 3 C -30 -2, -18 4, 0 -1 Z"
@@ -226,7 +218,7 @@ export function PeekingCrabSvg({
               strokeWidth="3.5"
               strokeLinejoin="round"
             />
-          </motion.g>
+          </g>
         </g>
       </g>
 
@@ -255,9 +247,9 @@ export function PeekingCrabSvg({
           />
 
           {/* Upper Curved Pincer Jaw (Dactyl) — Pivots at (0, 0) */}
-          <motion.g
-            animate={{ rotate: rightClawOpen ? 24 : 0 }}
-            transition={{ duration: 0.11, ease: "easeInOut" }}
+          <g
+            transform={`rotate(${rightClawOpen ? 22 : 0})`}
+            style={{ transition: "transform 110ms cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             <path
               d="M 0 -4 C -12 -22, -26 -22, -36 -6 C -28 0, -16 -5, 0 1 Z"
@@ -266,12 +258,12 @@ export function PeekingCrabSvg({
               strokeWidth="3.5"
               strokeLinejoin="round"
             />
-          </motion.g>
+          </g>
 
           {/* Lower Curved Pincer Jaw (Pollex) — Pivots at (0, 0) */}
-          <motion.g
-            animate={{ rotate: rightClawOpen ? -24 : 0 }}
-            transition={{ duration: 0.11, ease: "easeInOut" }}
+          <g
+            transform={`rotate(${rightClawOpen ? -22 : 0})`}
+            style={{ transition: "transform 110ms cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             <path
               d="M 0 4 C -12 22, -26 22, -36 6 C -28 0, -16 5, 0 -1 Z"
@@ -280,7 +272,7 @@ export function PeekingCrabSvg({
               strokeWidth="3.5"
               strokeLinejoin="round"
             />
-          </motion.g>
+          </g>
         </g>
       </g>
     </svg>

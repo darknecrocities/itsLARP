@@ -20,9 +20,10 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           {/* Left Column: Bold Grotesque Headline, Subtitle, Dual CTAs & Minimalist Stats */}
           <div className="lg:col-span-7 xl:col-span-7">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05] text-neutral-950">
+            <h1 className="text-[28px] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-neutral-950 break-words max-w-xl">
               No need to <br className="hidden sm:inline" />
-              manually apply to <br className="hidden sm:inline" />
+              manually apply <br className="hidden sm:inline" />
+              to{" "}
               <span className="underline decoration-neutral-300 underline-offset-8 inline-block">
                 <AnimatedLoopText
                   words={[
@@ -36,14 +37,12 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <FadeIn delay={0.15} distance={15}>
-              <p className="text-neutral-600 text-sm sm:text-lg md:text-xl mt-5 sm:mt-6 max-w-xl leading-relaxed font-normal">
-                Upload your resume or LinkedIn once. Your personal team of AI assistants searches for jobs you love across LinkedIn, JobStreet, Indeed, and Carousell, customizes your resume for each opening, and applies for you—automatically.
-              </p>
-            </FadeIn>
+            <p className="text-neutral-600 text-sm sm:text-lg md:text-xl mt-5 sm:mt-6 max-w-xl leading-relaxed font-normal">
+              Upload your resume or LinkedIn once. Your personal team of AI assistants searches for jobs you love across LinkedIn, JobStreet, Indeed, and Carousell, customizes your resume for each opening, and applies for you—automatically.
+            </p>
 
             {/* Dual Action CTAs (Solid Primary + Clean Outline Secondary) */}
-            <FadeIn delay={0.25} distance={15} className="mt-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3.5 sm:gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3.5 sm:gap-4">
               <motion.div className="w-full sm:w-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/onboarding"
@@ -62,40 +61,40 @@ export function HeroSection() {
                   <span>Watch 3 Live Demos</span>
                 </a>
               </motion.div>
-            </FadeIn>
+            </div>
 
             {/* Minimalist Metrics Strip (Mascota Studio Clean Architecture) */}
-            <FadeIn delay={0.35} distance={15} className="mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-neutral-300/80">
+            <div className="mt-8 sm:mt-16 pt-6 sm:pt-8 border-t border-neutral-300/80">
               <div className="grid grid-cols-3 max-w-lg divide-x divide-neutral-200">
-                <div className="pr-2 sm:pr-6">
+                <div className="pr-1.5 sm:pr-6">
                   <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
                     <AnimatedCounter to={1000} />
                   </div>
-                  <div className="text-[9px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
                     AI Assistants Active
                   </div>
                 </div>
-                <div className="px-2 sm:px-6">
+                <div className="px-1.5 sm:px-6">
                   <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
                     300+
                   </div>
-                  <div className="text-[9px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
                     Platforms Monitored
                   </div>
                 </div>
-                <div className="pl-2 sm:pl-6">
+                <div className="pl-1.5 sm:pl-6">
                   <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
                     0%
                   </div>
-                  <div className="text-[9px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
                     Hallucinations
                   </div>
                 </div>
               </div>
-            </FadeIn>
+            </div>
 
-            {/* Mobile / Tablet Mascot fallback positioned below hero content */}
-            <div className="lg:hidden flex flex-col items-center justify-center relative mt-12 w-full max-w-sm mx-auto overflow-visible">
+            {/* Mobile / Tablet Mascot Stage positioned below metrics strip */}
+            <div className="lg:hidden w-full mt-6 sm:mt-10 overflow-visible">
               <HeroPeekingMascot isMobile={true} />
             </div>
           </div>

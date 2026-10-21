@@ -70,6 +70,48 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     return () => clearTimeout(timeout);
   }, []);
 
+  // Snip animation (authentic scissor pinching, zero body jumping)
+  const triggerDoubleSnip = useCallback(() => {
+    if (isSnapping) return;
+    setIsSnapping(true);
+
+    // Sequence: right claw snip -> left claw snip -> synchronized double pinch
+    setRightClawOpen(true);
+    setTimeout(() => {
+      setRightClawOpen(false);
+      setLeftClawOpen(true);
+      setTimeout(() => {
+        setLeftClawOpen(false);
+        // Synchronized double snip
+        setTimeout(() => {
+          setRightClawOpen(true);
+          setLeftClawOpen(true);
+          setTimeout(() => {
+            setRightClawOpen(false);
+            setLeftClawOpen(false);
+            setIsSnapping(false);
+          }, 140);
+        }, 80);
+      }, 100);
+    }, 110);
+  }, [isSnapping]);
+
+  // Periodic autonomous gentle claw snip loop (brings mascot to life even without interaction)
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const scheduleSnip = () => {
+      const delay = Math.random() * 2500 + 3800;
+      timeout = setTimeout(() => {
+        if (!isSnapping) {
+          triggerDoubleSnip();
+        }
+        scheduleSnip();
+      }, delay);
+    };
+    scheduleSnip();
+    return () => clearTimeout(timeout);
+  }, [isSnapping, triggerDoubleSnip]);
+
   // Global mousemove handler for eye tracking and subtle parallax tilt
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -99,32 +141,6 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [rawPupilX, rawPupilY, rawTiltZ]);
 
-  // Snip animation (authentic scissor pinching, zero body jumping)
-  const triggerDoubleSnip = useCallback(() => {
-    if (isSnapping) return;
-    setIsSnapping(true);
-
-    // Sequence: right claw snip -> left claw snip -> synchronized double pinch
-    setRightClawOpen(true);
-    setTimeout(() => {
-      setRightClawOpen(false);
-      setLeftClawOpen(true);
-      setTimeout(() => {
-        setLeftClawOpen(false);
-        // Synchronized double snip
-        setTimeout(() => {
-          setRightClawOpen(true);
-          setLeftClawOpen(true);
-          setTimeout(() => {
-            setRightClawOpen(false);
-            setLeftClawOpen(false);
-            setIsSnapping(false);
-          }, 140);
-        }, 80);
-      }, 100);
-    }, 110);
-  }, [isSnapping]);
-
   const handleClick = () => {
     triggerDoubleSnip();
     setSpeechVisible(true);
@@ -135,24 +151,23 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     return (
       <div
         ref={containerRef}
-        className={`relative select-none flex flex-col items-center justify-center w-full max-w-full ${className}`}
+        className={`relative w-full h-[290px] sm:h-[330px] overflow-visible select-none ${className}`}
       >
-        {/* Cartoon Cloud Thought Bubble stacked directly above centered Scuttle */}
+        {/* Cartoon Cloud Thought Bubble positioned on open left side, trail flowing to Scuttle */}
         <AnimatePresence>
           {speechVisible && (
             <CloudDialogueBubble
               text={HERO_QUOTES[quoteIndex]}
               onClose={() => setSpeechVisible(false)}
-              isMobile={true}
-              className="relative mx-auto mb-2 w-[270px] sm:w-[310px] max-w-full"
+              className="absolute top-2 left-2 sm:left-6 w-[230px] sm:w-[260px] z-30"
             />
           )}
         </AnimatePresence>
 
-        {/* Main Mascot Body Wrapper with Parallax Spring */}
+        {/* Main Peeking Crab Body Wrapper Flush to Right Screen Edge */}
         <motion.div
           style={{ rotateZ: springTiltZ }}
-          className="cursor-pointer group relative origin-bottom z-20 flex justify-center"
+          className="cursor-pointer group absolute right-0 bottom-0 origin-bottom-right z-20"
           onClick={handleClick}
           onMouseEnter={triggerDoubleSnip}
           title="Scuttle · Click to pinch & speak!"
@@ -163,7 +178,7 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
             isSnapping={isSnapping}
             leftClawOpen={leftClawOpen}
             rightClawOpen={rightClawOpen}
-            className="w-[240px] sm:w-[280px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+            className="w-[210px] sm:w-[250px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
           />
         </motion.div>
       </div>
@@ -175,14 +190,14 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Cartoon Cloud Thought Bubble positioned above and to the left of Scuttle's head */}
+      {/* Cartoon Cloud Thought Bubble positioned cleanly to the upper-left of Scuttle */}
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
             text={HERO_QUOTES[quoteIndex]}
             onClose={() => setSpeechVisible(false)}
             isMobile={false}
-            className="absolute top-4 xl:top-8 right-56 xl:right-64 w-[310px] xl:w-[340px]"
+            className="absolute -top-4 lg:top-0 xl:top-4 right-[280px] lg:right-[300px] xl:right-[340px] w-[290px] xl:w-[320px] z-30"
           />
         )}
       </AnimatePresence>

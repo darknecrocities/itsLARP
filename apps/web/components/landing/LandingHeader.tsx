@@ -159,17 +159,17 @@ export function LandingHeader() {
             href="https://github.com/darknecrocities/itsLARP"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium flex items-center gap-1.5 border border-line hover:border-black hover:bg-neutral-100 transition-colors"
+            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium !hidden sm:!flex items-center gap-1.5 border border-line hover:border-black hover:bg-neutral-100 transition-colors"
             title="View itsLARP on GitHub (Open Source)"
           >
             <GithubIcon className="w-3.5 h-3.5 text-ink" />
-            <span className="hidden sm:inline">GitHub</span>
+            <span>GitHub</span>
           </a>
 
           {/* Download Desktop */}
           <Link
             href="/download"
-            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium hidden sm:inline-flex items-center gap-1.5 border border-line hover:border-black transition-colors"
+            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium !hidden sm:!inline-flex items-center gap-1.5 border border-line hover:border-black transition-colors"
           >
             <Download className="w-3.5 h-3.5 text-ink" />
             <span>Download</span>

@@ -55,22 +55,10 @@ export function CloudDialogueBubble({
             strokeLinejoin="round"
           />
 
-          {/* Cloud Thought Trail Bubbles */}
-          {isMobile ? (
-            /* On mobile, bubbles flow straight down into the centered mascot */
-            <>
-              <circle cx="170" cy="170" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
-              <circle cx="170" cy="188" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
-              <circle cx="170" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
-            </>
-          ) : (
-            /* On desktop, bubbles flow down and right toward Scuttle's eye stalks */
-            <>
-              <circle cx="230" cy="172" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
-              <circle cx="248" cy="189" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
-              <circle cx="260" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
-            </>
-          )}
+          {/* Cloud Thought Trail Bubbles (pointing down toward Scuttle's eye stalks) */}
+          <circle cx="230" cy="172" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
+          <circle cx="248" cy="189" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
+          <circle cx="260" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
         </svg>
 
         {/* Content Inside Cloud (Centered within generous interior bounds) */}
