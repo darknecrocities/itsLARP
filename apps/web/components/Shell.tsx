@@ -66,11 +66,33 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const profile = useStore((s) => s.profile);
   const fetchProfile = useStore((s) => s.fetchProfile);
   const fetchApps = useStore((s) => s.fetchApps);
+  const [backendLive, setBackendLive] = useState<boolean | null>(null);
 
   useEffect(() => {
     fetchProfile();
     fetchApps();
   }, [fetchProfile, fetchApps]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkBackend() {
+      try {
+        const res = await fetch("/api/backend");
+        if (res.ok) {
+          const d = await res.json();
+          if (!cancelled) setBackendLive(d.status === "online");
+        }
+      } catch {
+        if (!cancelled) setBackendLive(false);
+      }
+    }
+    checkBackend();
+    const t = setInterval(checkBackend, 25000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -269,9 +291,32 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
             {!collapsed && (
               <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-line/40 text-[10px] text-muted font-mono px-1">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block animate-pulse" />
-                  <span>Auto-Sync Ready</span>
+                <span
+                  className="flex items-center gap-1.5"
+                  title={
+                    backendLive === true
+                      ? "FastAPI backend active on port 8000"
+                      : backendLive === false
+                      ? "FastAPI backend is bootstrapping..."
+                      : "Verifying backend telemetry..."
+                  }
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full inline-block ${
+                      backendLive === true
+                        ? "bg-ok animate-pulse"
+                        : backendLive === false
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-neutral-400"
+                    }`}
+                  />
+                  <span>
+                    {backendLive === true
+                      ? "FastAPI :8000"
+                      : backendLive === false
+                      ? "FastAPI Booting..."
+                      : "Auto-Sync Ready"}
+                  </span>
                 </span>
                 <button
                   type="button"

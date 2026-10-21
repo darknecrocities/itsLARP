@@ -6,7 +6,8 @@ import { PageHeader, Reveal } from "@/components/ui";
 import { TargetingPreferences } from "@/components/TargetingPreferences";
 import { CareerDnaLlmBuilder } from "@/components/profile/CareerDnaLlmBuilder";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
-import { X, Trash2 } from "lucide-react";
+import { ResumeDesignPreview } from "@/components/resume/ResumeDesignPreview";
+import { X, Trash2, ArrowLeft } from "lucide-react";
 
 export default function ProfilePage() {
   const { profile: p, setProfile, addEvidence, clearProfile } = useStore();
@@ -131,6 +132,10 @@ export default function ProfilePage() {
         sub="The verified single source of truth for your professional background. Crawl GitHub, LinkedIn, and Portfolio links with LLM assistance or edit every field directly."
         action={
           <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Dashboard</span>
+            </Link>
             <button
               type="button"
               className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
@@ -163,6 +168,11 @@ export default function ProfilePage() {
       {/* 20-Feature Application & Resume Format Configuration */}
       <section className="mb-6">
         <ApplicationConfigPanel compact />
+      </section>
+
+      {/* Live Resume Design Preview & Architecture Inspector */}
+      <section className="mb-6">
+        <ResumeDesignPreview />
       </section>
 
       {/* Manual Evidence Modal */}

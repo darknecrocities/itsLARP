@@ -56,19 +56,29 @@ async function resolveStartUrl() {
     return process.env.DESKTOP_START_URL;
   }
 
-  // 1. Check local server
-  const localUp = await checkUrlReachable(LOCAL_URL, 500);
+  // 1. Check local server immediately
+  let localUp = await checkUrlReachable(LOCAL_URL, 600);
   if (localUp) {
     return LOCAL_URL;
   }
 
-  // 2. Check cloud server (direct to live workspace)
+  // 2. If local server is starting up, await readiness up to 3.5 seconds
+  const startTime = Date.now();
+  while (Date.now() - startTime < 3500) {
+    await new Promise((r) => setTimeout(r, 400));
+    localUp = await checkUrlReachable(LOCAL_URL, 400);
+    if (localUp) {
+      return LOCAL_URL;
+    }
+  }
+
+  // 3. Check cloud server (direct to live workspace)
   const cloudUp = await checkUrlReachable(CLOUD_URL, 1500);
   if (cloudUp) {
     return CLOUD_URL;
   }
 
-  // 3. Fallback to offline launchpad
+  // 4. Fallback to offline launchpad
   return null;
 }
 
@@ -256,6 +266,10 @@ if (!gotTheLock) {
       CLOUD_URL,
     });
     autoStartOllamaIfAvailable();
+    // Proactively start local services stack (FastAPI on 8000 + Web on 3000)
+    orchestrator.startLocalStack().catch((err) => {
+      console.log("[itsLARP Desktop] Orchestrator auto-boot notice:", err.message);
+    });
     createWindow();
     initAutoUpdater(mainWindow);
 
