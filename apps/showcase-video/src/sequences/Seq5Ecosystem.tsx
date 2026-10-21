@@ -9,10 +9,10 @@ export const Seq5Ecosystem: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Screen split at local frame 240:
-  // 0 - 240: Feature 7 (Kanban Tracking) with LEFT card & RIGHT zooming Kanban image
-  // 240 - 480: Feature 8 (Notion 2-Way Sync) with RIGHT card & LEFT zooming Notion video
-  const isNotionActive = frame >= 240;
+  // Screen split at local frame 540 (global 5100):
+  // 0 - 540: Feature 7 (Kanban Tracking) with LEFT card & RIGHT zooming Kanban image
+  // 540 - 1020: Feature 8 (Notion 2-Way Sync) with RIGHT card & LEFT zooming Notion video
+  const isNotionActive = frame >= 540;
 
   return (
     <AbsoluteFill style={{ backgroundColor: THEME.colors.bg, overflow: "hidden" }}>
@@ -28,7 +28,7 @@ export const Seq5Ecosystem: React.FC = () => {
         }}
       />
 
-      {/* Feature 7: Kanban Application Tracker (Frames 0 - 240) */}
+      {/* Feature 7: Kanban Application Tracker (Frames 0 - 540) */}
       {!isNotionActive ? (
         <EditorialSplitStage
           side="left"
@@ -36,7 +36,7 @@ export const Seq5Ecosystem: React.FC = () => {
           badgeColor={THEME.colors.accentPurple}
           title="REAL-TIME RECRUITER TRACKING"
           description="Every stage tracks live in your Kanban pipeline, moving seamlessly toward interviews."
-          startFrame={5}
+          startFrame={25}
           metrics={[
             { label: "APPLIED STAGE", value: "428 TRACKED", color: THEME.colors.ink },
             { label: "IN REVIEW", value: "64 JOBS", color: THEME.colors.accentAmber },
@@ -48,7 +48,7 @@ export const Seq5Ecosystem: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={240}
+            durationInFrames={540}
             fromScale={1.0}
             toScale={1.14}
             fromX={10}
@@ -59,6 +59,7 @@ export const Seq5Ecosystem: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(168, 85, 247, 0.25)"
               title="itslarp.app — Application Pipeline & Conversion Analytics"
             >
               <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
@@ -71,14 +72,14 @@ export const Seq5Ecosystem: React.FC = () => {
           </CameraZoomShift>
         </EditorialSplitStage>
       ) : (
-        /* Feature 8: Notion 2-Way Synchronized Database (Frames 240 - 480) */
+        /* Feature 8: Notion 2-Way Synchronized Database (Frames 540 - 1020) */
         <EditorialSplitStage
           side="right"
           badge="08 / 2-WAY NOTION SYNC"
           badgeColor={THEME.colors.accentPurple}
           title="WORKSPACE SYNCHRONIZATION"
           description="And syncs bi-directionally to your Notion workspace in under twelve milliseconds."
-          startFrame={245}
+          startFrame={565}
           metrics={[
             { label: "NOTION INTEGRATION", value: "OFFICIAL V2", color: THEME.colors.accentPurple },
             { label: "SYNC LATENCY", value: "< 12ms", color: THEME.colors.accentEmerald },
@@ -90,7 +91,7 @@ export const Seq5Ecosystem: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={240}
+            durationInFrames={480}
             fromScale={1.0}
             toScale={1.12}
             fromX={-15}
@@ -101,6 +102,7 @@ export const Seq5Ecosystem: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(168, 85, 247, 0.25)"
               title="Notion Workspace — Live 2-Way Synchronized Job Tracker"
             >
               <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -142,8 +144,8 @@ export const Seq5Ecosystem: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Transition: Feature 7 -> Feature 8 High-Speed Scanline Laser Sweep (Frames 230 - 250) */}
-      {frame >= 230 && frame <= 250 && (
+      {/* Transition: Feature 7 -> Feature 8 High-Speed Scanline Laser Sweep (Frames 530 - 550) */}
+      {frame >= 530 && frame <= 550 && (
         <div
           style={{
             position: "absolute",
@@ -154,7 +156,7 @@ export const Seq5Ecosystem: React.FC = () => {
           }}
         >
           {(() => {
-            const scanProg = interpolate(frame, [230, 250], [0, 1], {
+            const scanProg = interpolate(frame, [530, 550], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
@@ -171,7 +173,7 @@ export const Seq5Ecosystem: React.FC = () => {
                     boxShadow: `0 0 30px 10px ${THEME.colors.accentPurple}, 0 0 60px 20px #ffffff`,
                   }}
                 />
-                {frame >= 238 && frame <= 242 && (
+                {frame >= 538 && frame <= 542 && (
                   <div
                     style={{
                       position: "absolute",
@@ -187,14 +189,14 @@ export const Seq5Ecosystem: React.FC = () => {
         </div>
       )}
 
-      {/* Transition: Feature 8 -> Feature 9 Optical Flash & Shutter Outro (Frames 455 - 480) */}
-      {frame >= 455 && (
+      {/* Transition: Feature 8 -> Feature 9 Optical Flash & Shutter Outro (Frames 990 - 1020) */}
+      {frame >= 990 && (
         <div
           style={{
             position: "absolute",
             inset: 0,
             backgroundColor: "#000000",
-            opacity: interpolate(frame, [455, 480], [0, 1], {
+            opacity: interpolate(frame, [990, 1020], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             }),

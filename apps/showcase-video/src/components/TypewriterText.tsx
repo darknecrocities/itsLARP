@@ -39,7 +39,11 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
   const visibleText = text.slice(0, charsCount);
   const isTypingComplete = charsCount >= text.length;
 
-  // Cursor blinks every 16 frames; stays solid while actively typing
+  // Split into settled text and newly emerged blooming characters
+  const settledText = isTypingComplete ? visibleText : visibleText.slice(0, -2);
+  const bloomingChars = isTypingComplete ? "" : visibleText.slice(-2);
+
+  // Cursor blinks every 20 frames once complete; solid while typing
   const isBlinkVisible = isTypingComplete ? Math.floor(frame / 20) % 2 === 0 : true;
 
   return (
@@ -53,11 +57,21 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
         letterSpacing,
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
-        textShadow: "0 2px 12px rgba(0, 0, 0, 0.8)",
+        textShadow: "0 2px 14px rgba(0, 0, 0, 0.95)",
         ...style,
       }}
     >
-      <span>{visibleText}</span>
+      <span>{settledText}</span>
+      {bloomingChars && (
+        <span
+          style={{
+            color: "#ffffff",
+            textShadow: `0 0 16px ${cursorColor}, 0 0 8px #ffffff`,
+          }}
+        >
+          {bloomingChars}
+        </span>
+      )}
       {showCursor && (
         <span
           style={{

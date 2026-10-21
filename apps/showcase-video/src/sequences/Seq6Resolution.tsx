@@ -4,41 +4,42 @@ import { THEME } from "../theme";
 import { TypewriterText } from "../components/TypewriterText";
 import { DeviceFanOut } from "../components/DeviceFanOut";
 import { ScuttleMascot } from "../components/ScuttleMascot";
+import { AtmosphericDust } from "../components/AtmosphericDust";
 
 export const Seq6Resolution: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Screen split at local frame 210:
-  // 0 - 210: Feature 9 (Cross-Platform Clients 3D Fan-out)
-  // 210 - 450: Feature 10 (Final Master Lockup Assembly & Harmonic Resolve)
-  const isFinalLockup = frame >= 210;
+  // Screen split at local frame 420 (global 6000):
+  // 0 - 420: Feature 9 (Cross-Platform Clients 3D Fan-out)
+  // 420 - 900: Feature 10 (Final Master Lockup Assembly & Harmonic Resolve)
+  const isFinalLockup = frame >= 420;
 
-  // Master Lockup Spring Entrance (frame 210)
+  // Master Lockup Spring Entrance (frame 420)
   const lockupSpring = spring({
-    frame: Math.max(0, frame - 210),
+    frame: Math.max(0, frame - 420),
     fps,
     config: { damping: 24, stiffness: 180, mass: 1 },
   });
   const lockupScale = interpolate(lockupSpring, [0, 1], [0.88, 1.0]);
   const lockupOpacity = interpolate(lockupSpring, [0, 0.4], [0, 1]);
 
-  // Geometric Rule Lines drawing outward from logo (frames 230 - 330)
+  // Geometric Rule Lines drawing outward from logo (frames 460 - 600)
   const lineProgress = spring({
-    frame: Math.max(0, frame - 230),
+    frame: Math.max(0, frame - 460),
     fps,
     config: { damping: 20, stiffness: 160, mass: 0.9 },
   });
   const lineLength = interpolate(lineProgress, [0, 1], [0, 260]);
 
-  // Specular sheen sweep across final logo (frames 270 - 330)
-  const sheenX = interpolate(frame, [270, 330], [-150, 250], {
+  // Specular sheen sweep across final logo (frames 520 - 640)
+  const sheenX = interpolate(frame, [520, 640], [-150, 250], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Clean Exponential Harmonic Resolve on very last 30 frames (420 - 450)
-  const resolveFade = interpolate(frame, [420, 449], [0, 1], {
+  // Clean Exponential Harmonic Resolve on very last frames (850 - 898)
+  const resolveFade = interpolate(frame, [850, 898], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -56,6 +57,9 @@ export const Seq6Resolution: React.FC = () => {
           pointerEvents: "none",
         }}
       />
+
+      {/* Atmospheric Micro-Particles */}
+      <AtmosphericDust particleCount={24} />
 
       {!isFinalLockup ? (
         /* Part A: Feature 9 Cross-Platform Clients 3D Fan-Out & Convergence */
@@ -98,7 +102,7 @@ export const Seq6Resolution: React.FC = () => {
             </div>
             <TypewriterText
               text="Runs natively on macOS, Windows, and the Web."
-              startFrame={5}
+              startFrame={25}
               charsPerSecond={26}
               fontSize={20}
               fontWeight={700}
@@ -118,9 +122,9 @@ export const Seq6Resolution: React.FC = () => {
           <div style={{ position: "absolute", inset: 0, marginTop: 40 }}>
             <DeviceFanOut
               fanStartFrame={0}
-              fanDuration={70}
-              convergeStartFrame={110}
-              convergeDuration={70}
+              fanDuration={120}
+              convergeStartFrame={240}
+              convergeDuration={140}
             />
           </div>
         </div>
@@ -202,7 +206,7 @@ export const Seq6Resolution: React.FC = () => {
           {/* Live Typewriter Final Signoff */}
           <TypewriterText
             text="Stop applying manually. Lets Larp."
-            startFrame={250}
+            startFrame={470}
             charsPerSecond={24}
             fontSize={22}
             fontWeight={700}

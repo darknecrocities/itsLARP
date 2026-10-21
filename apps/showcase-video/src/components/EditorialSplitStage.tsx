@@ -3,6 +3,7 @@ import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { THEME } from "../theme";
 import { TypewriterText } from "./TypewriterText";
 import { ScuttleMascot } from "./ScuttleMascot";
+import { AtmosphericDust } from "./AtmosphericDust";
 
 export interface MetricItem {
   label: string;
@@ -55,6 +56,7 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
     [side === "left" ? -70 : 70, 0]
   );
   const textOpacity = interpolate(textSpring, [0, 0.35], [0, 1]);
+  const headlineTracking = interpolate(textSpring, [0, 1], [-2.4, -1.2]);
 
   return (
     <div
@@ -69,6 +71,9 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
         overflow: "hidden",
       }}
     >
+      {/* Atmospheric Micro-Particle Dust Field */}
+      <AtmosphericDust particleCount={28} color="rgba(255, 255, 255, 0.3)" />
+
       {/* 1. Pure Floating Typography (NO CARDS / NO BOXES) */}
       <div
         style={{
@@ -115,7 +120,7 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
             fontSize: 52,
             fontWeight: 900,
             color: "#ffffff",
-            letterSpacing: -1.6,
+            letterSpacing: headlineTracking,
             lineHeight: 1.05,
             textShadow: "0 4px 25px rgba(0, 0, 0, 0.95)",
           }}

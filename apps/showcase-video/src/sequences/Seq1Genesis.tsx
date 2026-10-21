@@ -11,7 +11,7 @@ export const Seq1Genesis: React.FC = () => {
   const { fps } = useVideoConfig();
 
   // Subtle camera drift backward during intro (no pulse, pure dimensional drift)
-  const driftScale = interpolate(frame, [0, 348], [1.04, 1.0], {
+  const driftScale = interpolate(frame, [0, 300], [1.04, 1.0], {
     extrapolateRight: "clamp",
   });
 
@@ -23,7 +23,7 @@ export const Seq1Genesis: React.FC = () => {
         transform: `scale(${driftScale})`,
       }}
     >
-      <ShutterBladeWipe slatCount={8} triggerFrame={290} durationInFrames={58} direction="horizontal">
+      <ShutterBladeWipe slatCount={8} triggerFrame={265} durationInFrames={35} direction="horizontal">
         <AbsoluteFill
           style={{
             display: "flex",

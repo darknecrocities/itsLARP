@@ -9,22 +9,22 @@ export const Seq2Command: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Screen split at local frame 245:
-  // 0 - 245: Feature 1 (Dashboard) with LEFT text card & RIGHT zooming image
-  // 245 - 504: Feature 2 (Career DNA) with RIGHT text card & LEFT zooming image
-  const isCareerDnaActive = frame >= 245;
+  // Screen split at local frame 360 (6.0s for Feature 1, 6.0s for Feature 2):
+  // 0 - 360: Feature 1 (Dashboard) with LEFT text card & RIGHT zooming image
+  // 360 - 720: Feature 2 (Career DNA) with RIGHT text card & LEFT zooming image
+  const isCareerDnaActive = frame >= 360;
 
-  // Transition #10: Venetian Blinds Outro at frames 460 - 504
+  // Transition #10: Venetian Blinds Outro at frames 680 - 720
   const blindsProgress = spring({
-    frame: Math.max(0, frame - 460),
+    frame: Math.max(0, frame - 680),
     fps,
     config: { damping: 24, stiffness: 190, mass: 1 },
   });
   const blindsAngle = interpolate(blindsProgress, [0, 1], [0, 90]);
 
-  // Transition: Diagonal Laser Split Wipe between Feature 1 and Feature 2 (Frames 235 - 255)
-  const isTransition1to2 = frame >= 235 && frame <= 255;
-  const diagProgress = interpolate(frame, [235, 255], [0, 1], {
+  // Transition: Diagonal Laser Split Wipe between Feature 1 and Feature 2 (Frames 345 - 370)
+  const isTransition1to2 = frame >= 345 && frame <= 370;
+  const diagProgress = interpolate(frame, [345, 370], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -51,7 +51,7 @@ export const Seq2Command: React.FC = () => {
           badgeColor={THEME.colors.accentEmerald}
           title="AUTONOMOUS BOT WORKSPACE"
           description="Stop tweaking resumes just to get ghosted. Meet itsLARP: your real-time autonomous bot command center."
-          startFrame={5}
+          startFrame={25}
           metrics={[
             { label: "BOTS CONFIGURED", value: "1,000", color: THEME.colors.accentEmerald },
             { label: "ATS READINESS", value: "99.4%", color: THEME.colors.ink },
@@ -63,7 +63,7 @@ export const Seq2Command: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={245}
+            durationInFrames={360}
             fromScale={1.0}
             toScale={1.14}
             fromX={10}
@@ -78,6 +78,7 @@ export const Seq2Command: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(16, 185, 129, 0.25)"
               title="itslarp.app — Executive Command Center & Active Bots"
             >
               <Img
@@ -93,14 +94,14 @@ export const Seq2Command: React.FC = () => {
           </CameraZoomShift>
         </EditorialSplitStage>
       ) : (
-        /* Feature 2: Career DNA Graph (Frames 245 - 504) */
+        /* Feature 2: Career DNA Graph (Frames 360 - 720) */
         <EditorialSplitStage
           side="right"
           badge="02 / CAREER DNA GRAPH"
           badgeColor={THEME.colors.accentAmber}
           title="VERIFIED SKILL EXTRACTION"
           description="It extracts your real work into a verified engineering skill graph with deep multi-modal competency clusters."
-          startFrame={250}
+          startFrame={385}
           metrics={[
             { label: "AI SYSTEMS", value: "98% MATCH", color: THEME.colors.accentEmerald },
             { label: "VECTOR GRAPH", value: "VERIFIED", color: THEME.colors.accentAmber },
@@ -112,7 +113,7 @@ export const Seq2Command: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={260}
+            durationInFrames={360}
             fromScale={1.02}
             toScale={1.16}
             fromX={-20}
@@ -127,6 +128,7 @@ export const Seq2Command: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(245, 158, 11, 0.25)"
               title="itslarp.app — Dynamic Career DNA & Profile Intelligence"
             >
               <Img
@@ -167,8 +169,8 @@ export const Seq2Command: React.FC = () => {
               transform: "skewX(-20deg)",
             }}
           />
-          {/* Specular Flash at midpoint */}
-          {frame >= 243 && frame <= 247 && (
+          {/* Specular Flash at midpoint (frame 360) */}
+          {frame >= 358 && frame <= 362 && (
             <div
               style={{
                 position: "absolute",
@@ -181,8 +183,8 @@ export const Seq2Command: React.FC = () => {
         </div>
       )}
 
-      {/* Transition #10: Venetian Blinds Transition Slat Overlay (Frames 460 - 504) */}
-      {frame >= 460 && (
+      {/* Transition #10: Venetian Blinds Transition Slat Overlay (Frames 680 - 720) */}
+      {frame >= 680 && (
         <div
           style={{
             position: "absolute",

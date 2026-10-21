@@ -10,12 +10,12 @@ export const Seq4TheDrop: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Screen split at local frame 460:
-  // 0 - 460: Feature 5 (Swarm Drop) with LEFT card & RIGHT zooming swarm video
-  // 460 - 944: Feature 6 (Guardrails) with RIGHT card & LEFT zooming guardrail image
-  const isGuardrailsActive = frame >= 460;
+  // Screen split at local frame 744 (global 3840):
+  // 0 - 744: Feature 5 (Swarm Drop) with LEFT card & RIGHT zooming swarm video
+  // 744 - 1464: Feature 6 (Guardrails) with RIGHT card & LEFT zooming guardrail image
+  const isGuardrailsActive = frame >= 744;
 
-  // Climax drop snap at frame 0 (global 1726)
+  // Climax drop snap at frame 0 (global 3096)
   const dropSnap = spring({
     frame,
     fps,
@@ -23,8 +23,8 @@ export const Seq4TheDrop: React.FC = () => {
   });
   const dropScale = interpolate(dropSnap, [0, 1], [1.14, 1.0]);
 
-  // Circular aperture mask for guardrails image (frames 460 - 520)
-  const apertureRadius = interpolate(frame, [460, 520], [0, 100], {
+  // Circular aperture mask for guardrails image (frames 744 - 804)
+  const apertureRadius = interpolate(frame, [744, 804], [0, 100], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -49,7 +49,7 @@ export const Seq4TheDrop: React.FC = () => {
         }}
       />
 
-      {/* Feature 5: Workforce Swarm Live Video (Frames 0 - 460) */}
+      {/* Feature 5: Workforce Swarm Live Video (Frames 0 - 744) */}
       {!isGuardrailsActive ? (
         <EditorialSplitStage
           side="left"
@@ -57,7 +57,7 @@ export const Seq4TheDrop: React.FC = () => {
           badgeColor={THEME.colors.accentEmerald}
           title="1,000 AUTONOMOUS AGENTS"
           description="A thousand autonomous bots running in parallel. Scouring listings, tailoring payloads, and submitting."
-          startFrame={5}
+          startFrame={25}
           metrics={[
             { label: "PARALLEL WORKERS", value: "1,000 ACTIVE", color: THEME.colors.accentEmerald },
             { label: "ATS RESOLUTION", value: "DYNAMIC", color: THEME.colors.ink },
@@ -69,7 +69,7 @@ export const Seq4TheDrop: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={460}
+            durationInFrames={744}
             fromScale={1.0}
             toScale={1.14}
             fromX={10}
@@ -80,6 +80,7 @@ export const Seq4TheDrop: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(16, 185, 129, 0.25)"
               title="itslarp.app — Workforce Swarm Dispatch & Real-Time Automation"
             >
               <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -111,8 +112,8 @@ export const Seq4TheDrop: React.FC = () => {
                   <RollingCounter
                     startVal={120}
                     endVal={1000}
-                    startFrame={10}
-                    endFrame={400}
+                    startFrame={20}
+                    endFrame={600}
                     suffix=" / 1,000"
                     fontSize={22}
                   />
@@ -122,14 +123,14 @@ export const Seq4TheDrop: React.FC = () => {
           </CameraZoomShift>
         </EditorialSplitStage>
       ) : (
-        /* Feature 6: Auto-Apply Guardrails (Frames 460 - 944) */
+        /* Feature 6: Auto-Apply Guardrails (Frames 744 - 1464) */
         <EditorialSplitStage
           side="right"
           badge="06 / RATE GUARDRAILS"
           badgeColor={THEME.colors.accentAmber}
           title="PRECISION, NOT SPAM"
           description="With strict safety guardrails: fifty applications a day max, and a ninety-eight percent match threshold. Precision, not spam."
-          startFrame={465}
+          startFrame={765}
           metrics={[
             { label: "DAILY CEILING", value: "50 APPS/DAY", color: THEME.colors.accentAmber },
             { label: "MATCH THRESHOLD", value: "98% MINIMUM", color: THEME.colors.accentEmerald },
@@ -141,7 +142,7 @@ export const Seq4TheDrop: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={480}
+            durationInFrames={720}
             fromScale={1.0}
             toScale={1.15}
             fromX={-20}
@@ -152,6 +153,7 @@ export const Seq4TheDrop: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(245, 158, 11, 0.25)"
               title="itslarp.app — Autonomous Agent Guardrails & Rate Limits"
             >
               <div
@@ -202,8 +204,8 @@ export const Seq4TheDrop: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Transition: Feature 6 -> Feature 7 Vertical Alternating Slat Wipe Outro (Frames 915 - 944) */}
-      {frame >= 915 && (
+      {/* Transition: Feature 6 -> Feature 7 Vertical Alternating Slat Wipe Outro (Frames 1435 - 1464) */}
+      {frame >= 1435 && (
         <div
           style={{
             position: "absolute",
@@ -214,7 +216,7 @@ export const Seq4TheDrop: React.FC = () => {
           }}
         >
           {Array.from({ length: 10 }).map((_, idx) => {
-            const slatProg = interpolate(frame, [915, 944], [0, 1], {
+            const slatProg = interpolate(frame, [1435, 1464], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });

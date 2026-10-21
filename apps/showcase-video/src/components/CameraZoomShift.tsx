@@ -59,6 +59,10 @@ export const CameraZoomShift: React.FC<CameraZoomShiftProps> = ({
     extrapolateRight: "clamp",
   });
 
+  // Secondary continuous robotic camera arm sway
+  const swayX = Math.sin(frame * 0.025) * 4;
+  const swayY = Math.cos(frame * 0.02) * 3;
+
   return (
     <div
       style={{
@@ -74,7 +78,7 @@ export const CameraZoomShift: React.FC<CameraZoomShiftProps> = ({
     >
       <div
         style={{
-          transform: `translate3d(${currentX}px, ${currentY}px, 0) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          transform: `translate3d(${currentX + swayX}px, ${currentY + swayY}px, 0) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transformOrigin: "center center",
           willChange: "transform",
         }}

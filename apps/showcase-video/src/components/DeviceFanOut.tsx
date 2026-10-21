@@ -118,7 +118,12 @@ export const DeviceFanOut: React.FC<DeviceFanOutProps> = ({
             boxShadow: "0 30px 100px rgba(0, 0, 0, 0.9)",
           }}
         >
-          <CinematicFrame width={1100} height={620} title={c.title}>
+          <CinematicFrame
+            width={1100}
+            height={620}
+            title={c.title}
+            ambientGlowColor="rgba(16, 185, 129, 0.2)"
+          >
             <div style={{ position: "relative", width: "100%", height: "100%" }}>
               <Img
                 src={staticFile("images/download.png")}

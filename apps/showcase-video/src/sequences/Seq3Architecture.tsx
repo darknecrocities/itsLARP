@@ -12,14 +12,14 @@ export const Seq3Architecture: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Breakdown across 874 frames:
-  // 0 - 450: Feature 3 (APA Resumes) with LEFT card & RIGHT zooming video
-  // 450 - 750: Feature 4 (Job Platforms) with RIGHT card & LEFT zooming image
-  // 750 - 874: Pre-drop tension & strobe pull-back "UNLEASH THE SWARM"
-  const isJobSection = frame >= 450 && frame < 750;
-  const isPreDrop = frame >= 750;
+  // Breakdown across 2076 frames (17.00s to 51.60s):
+  // 0 - 600: Feature 3 (APA Resumes) with LEFT text & RIGHT zooming video (10.0s)
+  // 600 - 1080: Feature 4 (Job Platforms) with RIGHT text & LEFT zooming image (8.0s)
+  // 1080 - 2076: Pre-drop tension & strobe pull-back "UNLEASH THE SWARM" (16.6s)
+  const isJobSection = frame >= 600 && frame < 1080;
+  const isPreDrop = frame >= 1080;
 
-  // Staggered Platform Icon Cascade (frames 460 - 560)
+  // Staggered Platform Icon Cascade (frames 630 - 750)
   const platforms = [
     { name: "LinkedIn", badge: "DIRECT API" },
     { name: "Indeed", badge: "SWARM EXTRACTOR" },
@@ -29,18 +29,18 @@ export const Seq3Architecture: React.FC = () => {
   ];
   const platformStaggers = platforms.map((_, i) =>
     spring({
-      frame: Math.max(0, frame - 470 - i * 12),
+      frame: Math.max(0, frame - 630 - i * 14),
       fps,
       config: { damping: 18, stiffness: 220, mass: 0.8 },
     })
   );
 
   // Pre-drop zoom and flash
-  const preDropZoom = interpolate(frame, [750, 874], [1.0, 0.88], {
+  const preDropZoom = interpolate(frame, [1080, 2076], [1.0, 0.85], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const preDropFlash = interpolate(frame, [850, 873], [0, 1], {
+  const preDropFlash = interpolate(frame, [2030, 2075], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -59,7 +59,7 @@ export const Seq3Architecture: React.FC = () => {
         }}
       />
 
-      {/* Feature 3: APA Resume Engine (Frames 0 - 450) */}
+      {/* Feature 3: APA Resume Engine (Frames 0 - 600) */}
       {!isJobSection && !isPreDrop && (
         <EditorialSplitStage
           side="left"
@@ -67,7 +67,7 @@ export const Seq3Architecture: React.FC = () => {
           badgeColor={THEME.colors.accentAmber}
           title="20 CERTIFIED ARCHITECTURES"
           description="Then it constructs twenty certified APA architectures with zero hallucinations and guaranteed ATS pass rates."
-          startFrame={5}
+          startFrame={25}
           metrics={[
             { label: "APA FORMAT", value: "7TH EDITION", color: THEME.colors.accentAmber },
             { label: "HALLUCINATIONS", value: "0.0%", color: THEME.colors.accentEmerald },
@@ -79,7 +79,7 @@ export const Seq3Architecture: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={450}
+            durationInFrames={600}
             fromScale={1.0}
             toScale={1.14}
             fromX={10}
@@ -90,6 +90,7 @@ export const Seq3Architecture: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(245, 158, 11, 0.25)"
               title="itslarp.app — APA-Certified Resume Architectures & Live PDF Engine"
             >
               <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -138,7 +139,7 @@ export const Seq3Architecture: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Feature 4: Unified Job Ingestion (Frames 450 - 750) */}
+      {/* Feature 4: Unified Job Ingestion (Frames 600 - 1080) */}
       {isJobSection && (
         <EditorialSplitStage
           side="right"
@@ -146,7 +147,7 @@ export const Seq3Architecture: React.FC = () => {
           badgeColor={THEME.colors.accentEmerald}
           title="5 MAJOR JOB PLATFORMS"
           description="Connecting across LinkedIn, Indeed, Glassdoor, and Greenhouse in one unified feed."
-          startFrame={455}
+          startFrame={625}
           metrics={[
             { label: "CONNECTED BOARDS", value: "5 PLATFORMS", color: THEME.colors.accentEmerald },
             { label: "LISTING DEDUP", value: "REAL-TIME", color: THEME.colors.ink },
@@ -158,7 +159,7 @@ export const Seq3Architecture: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={300}
+            durationInFrames={480}
             fromScale={1.0}
             toScale={1.15}
             fromX={-15}
@@ -169,6 +170,7 @@ export const Seq3Architecture: React.FC = () => {
             <CinematicFrame
               width={1180}
               height={700}
+              ambientGlowColor="rgba(16, 185, 129, 0.25)"
               title="itslarp.app — Unified Multi-Platform Recruiter Ingestion"
             >
               <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
@@ -213,8 +215,8 @@ export const Seq3Architecture: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Transition: Feature 3 -> Feature 4 Dual Curtain Push & Laser Blade Wipe (Frames 438 - 458) */}
-      {frame >= 438 && frame <= 458 && (
+      {/* Transition: Feature 3 -> Feature 4 Dual Curtain Push & Laser Blade Wipe (Frames 585 - 610) */}
+      {frame >= 585 && frame <= 610 && (
         <div
           style={{
             position: "absolute",
@@ -226,7 +228,7 @@ export const Seq3Architecture: React.FC = () => {
         >
           {/* Dual Curtain Slats sliding inwards */}
           {(() => {
-            const curProg = interpolate(frame, [438, 458], [0, 1], {
+            const curProg = interpolate(frame, [585, 610], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
@@ -304,7 +306,7 @@ export const Seq3Architecture: React.FC = () => {
             </div>
             <TypewriterText
               text="And then... we unleash the swarm."
-              startFrame={755}
+              startFrame={1135}
               charsPerSecond={22}
               fontSize={22}
               fontWeight={700}
