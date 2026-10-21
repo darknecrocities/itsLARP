@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useSpring, useMotionValue } from "framer-motion";
+import { CloudDialogueBubble } from "./CloudDialogueBubble";
 import { PeekingCrabSvg } from "./PeekingCrabSvg";
 
 const HERO_QUOTES = [
@@ -22,7 +23,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
   const [isSnapping, setIsSnapping] = useState(false);
   const [leftClawOpen, setLeftClawOpen] = useState(false);
   const [rightClawOpen, setRightClawOpen] = useState(false);
-  const [speechVisible, setSpeechVisible] = useState(false);
+  const [speechVisible, setSpeechVisible] = useState(true);
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   // Smooth springs for eye pupil tracking
@@ -97,7 +98,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [rawPupilX, rawPupilY, rawTiltZ]);
 
-  // Snip animation
+  // Snip animation (pincers only, no body jumping)
   const triggerDoubleSnip = useCallback(() => {
     setIsSnapping(true);
     setRightClawOpen(true);
@@ -131,45 +132,24 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Interactive Speech Balloon Popover */}
+      {/* Cartoon Cloud Dialogue Bubble */}
       <AnimatePresence>
         {speechVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: 12, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.92 }}
-            transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            className="absolute -top-14 right-12 z-30 max-w-xs bg-white text-black px-4 py-2.5 rounded-xl border border-black shadow-lg text-xs font-mono tracking-tight"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span>{HERO_QUOTES[quoteIndex]}</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSpeechVisible(false);
-                }}
-                className="text-neutral-500 hover:text-black font-bold p-0.5"
-                aria-label="Close message"
-              >
-                ✕
-              </button>
-            </div>
-            {/* Speech bubble tail pointer */}
-            <div className="absolute -bottom-2 right-10 w-3 h-3 bg-white border-r border-b border-black transform rotate-45" />
-          </motion.div>
+          <CloudDialogueBubble
+            text={HERO_QUOTES[quoteIndex]}
+            onClose={() => setSpeechVisible(false)}
+            className="-top-32 right-10 sm:-top-36 sm:right-16 md:-top-40 md:right-24"
+          />
         )}
       </AnimatePresence>
 
-      {/* Main Peeking Crab Body Wrapper with Idle Bob and Parallax Spring */}
+      {/* Main Peeking Crab Body Wrapper with Parallax Spring (No Body Jumping) */}
       <motion.div
         style={{ rotateZ: springTiltZ }}
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
         className="cursor-pointer group relative origin-bottom-right"
         onClick={handleClick}
         onMouseEnter={triggerDoubleSnip}
-        title="Scuttle · Click to interact!"
+        title="Scuttle · Click to pinch & speak!"
       >
         <PeekingCrabSvg
           eyeOffset={pupilCoords}
@@ -177,7 +157,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
           isSnapping={isSnapping}
           leftClawOpen={leftClawOpen}
           rightClawOpen={rightClawOpen}
-          className="w-[240px] sm:w-[280px] md:w-[320px] lg:w-[360px] xl:w-[400px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+          className="w-[280px] sm:w-[360px] md:w-[440px] lg:w-[540px] xl:w-[640px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </motion.div>
     </div>

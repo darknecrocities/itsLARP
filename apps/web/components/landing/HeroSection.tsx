@@ -19,7 +19,7 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           {/* Left Column: Bold Grotesque Headline, Subtitle, Dual CTAs & Minimalist Stats */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8 xl:col-span-7">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.03] text-neutral-950">
               No need to <br className="hidden sm:inline" />
               manually apply to <br className="hidden sm:inline" />
@@ -93,13 +93,18 @@ export function HeroSection() {
                 </div>
               </div>
             </FadeIn>
-          </div>
 
-          {/* Right Column: Premium 2D Cursor-Interactive Peeking Crab Mascot */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end relative pt-6 lg:pt-0">
-            <HeroPeekingMascot />
+            {/* Mobile / Tablet Mascot fallback positioned below hero content */}
+            <div className="lg:hidden flex justify-center relative mt-10">
+              <HeroPeekingMascot />
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Desktop Mascot: Anchored Directly Flush to Right Viewport Edge */}
+      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+        <HeroPeekingMascot />
       </div>
     </section>
   );

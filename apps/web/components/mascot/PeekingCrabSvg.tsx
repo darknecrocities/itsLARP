@@ -41,25 +41,60 @@ export function PeekingCrabSvg({
 
       {/* Main Mascot Group with Depth Shadow */}
       <g filter="url(#crab-shadow)">
-        {/* 3 Lower Left Skittering Walking Legs */}
+        {/* 3 Lower Left Active Crawling Legs */}
         <g stroke="#000000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
           {/* Top Leg */}
           <motion.path
             d="M 120 185 L 82 200 L 52 230"
-            animate={isSnapping ? { d: ["M 120 185 L 82 200 L 52 230", "M 120 185 L 78 194 L 48 234", "M 120 185 L 82 200 L 52 230"] } : {}}
-            transition={{ duration: 0.25 }}
+            animate={{
+              d: [
+                "M 120 185 L 82 200 L 52 230",
+                "M 120 185 L 74 194 L 44 224",
+                "M 120 185 L 86 206 L 58 236",
+                "M 120 185 L 82 200 L 52 230",
+              ],
+            }}
+            transition={{
+              duration: isSnapping ? 0.35 : 1.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
           {/* Middle Leg */}
           <motion.path
             d="M 130 215 L 94 235 L 74 272"
-            animate={isSnapping ? { d: ["M 130 215 L 94 235 L 74 272", "M 130 215 L 90 230 L 70 276", "M 130 215 L 94 235 L 74 272"] } : {}}
-            transition={{ duration: 0.25, delay: 0.04 }}
+            animate={{
+              d: [
+                "M 130 215 L 94 235 L 74 272",
+                "M 130 215 L 88 227 L 66 264",
+                "M 130 215 L 98 241 L 80 278",
+                "M 130 215 L 94 235 L 74 272",
+              ],
+            }}
+            transition={{
+              duration: isSnapping ? 0.35 : 2.1,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: isSnapping ? 0.05 : 0.3,
+            }}
           />
           {/* Bottom Leg */}
           <motion.path
             d="M 148 245 L 118 270 L 104 306"
-            animate={isSnapping ? { d: ["M 148 245 L 118 270 L 104 306", "M 148 245 L 114 265 L 100 310", "M 148 245 L 118 270 L 104 306"] } : {}}
-            transition={{ duration: 0.25, delay: 0.08 }}
+            animate={{
+              d: [
+                "M 148 245 L 118 270 L 104 306",
+                "M 148 245 L 112 262 L 94 298",
+                "M 148 245 L 122 276 L 110 312",
+                "M 148 245 L 118 270 L 104 306",
+              ],
+            }}
+            transition={{
+              duration: isSnapping ? 0.35 : 1.9,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: isSnapping ? 0.1 : 0.6,
+            }}
           />
         </g>
 
@@ -157,12 +192,8 @@ export function PeekingCrabSvg({
           )}
         </g>
 
-        {/* Left Arm & Claw (Resting / Gripping the Border) */}
-        <motion.g
-          animate={leftClawOpen ? { rotate: -8, y: -4 } : { rotate: 0, y: 0 }}
-          style={{ originX: "90px", originY: "155px" }}
-          transition={{ duration: 0.18 }}
-        >
+        {/* Left Arm & Claw (Resting / Gripping the Border - Stable Arm, Pinching Blade) */}
+        <g>
           {/* Arm Segment */}
           <path
             d="M 115 160 C 85 150, 60 140, 48 115"
@@ -172,7 +203,7 @@ export function PeekingCrabSvg({
             fill="none"
           />
 
-          {/* Lower Claw Bulb */}
+          {/* Lower Claw Fixed Bulb */}
           <path
             d="M 48 115 C 38 105, 20 102, 12 118 C 4 134, 20 152, 45 138 Z"
             fill="#FFFFFF"
@@ -181,31 +212,24 @@ export function PeekingCrabSvg({
             strokeLinejoin="round"
           />
 
-          {/* Upper Claw Pincer Blade (Articulated Snip) */}
-          <motion.path
-            d="M 38 110 C 32 90, 16 78, 6 82 C -4 86, 4 106, 22 118 Z"
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
-            animate={{ rotate: leftClawOpen ? -20 : 0 }}
-            style={{ originX: "38px", originY: "110px" }}
-            transition={{ duration: 0.16 }}
-          />
-        </motion.g>
+          {/* Upper Claw Pincer Blade (Pinching Motion Only) */}
+          <motion.g
+            animate={{ rotate: leftClawOpen ? -24 : 0 }}
+            style={{ transformOrigin: "38px 110px" }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+          >
+            <path
+              d="M 38 110 C 32 90, 16 78, 6 82 C -4 86, 4 106, 22 118 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.4"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+        </g>
 
-        {/* Right Arm & Raised Claw (Waving / Snipping in the Air) */}
-        <motion.g
-          animate={
-            isSnapping
-              ? { rotate: [0, 8, -6, 0] }
-              : rightClawOpen
-              ? { rotate: 12, y: -6 }
-              : { rotate: 0, y: 0 }
-          }
-          style={{ originX: "220px", originY: "115px" }}
-          transition={{ duration: 0.22 }}
-        >
+        {/* Right Arm & Raised Claw (Stable Arm, Pinching Blade) */}
+        <g>
           {/* Raised Arm Armature */}
           <path
             d="M 215 115 C 235 90, 245 65, 235 35"
@@ -224,18 +248,21 @@ export function PeekingCrabSvg({
             strokeLinejoin="round"
           />
 
-          {/* Right Articulated Pincer Blade (Snip Action) */}
-          <motion.path
-            d="M 242 30 C 248 10, 266 -2, 276 2 C 286 6, 278 26, 260 38 Z"
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
-            animate={{ rotate: rightClawOpen ? 26 : 0 }}
-            style={{ originX: "242px", originY: "30px" }}
-            transition={{ duration: 0.16 }}
-          />
-        </motion.g>
+          {/* Right Articulated Pincer Blade (Pinching Motion Only) */}
+          <motion.g
+            animate={{ rotate: rightClawOpen ? 28 : 0 }}
+            style={{ transformOrigin: "242px 30px" }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+          >
+            <path
+              d="M 242 30 C 248 10, 266 -2, 276 2 C 286 6, 278 26, 260 38 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.4"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+        </g>
       </g>
     </svg>
   );
