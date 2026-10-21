@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#121215" />
+      <stop offset="100%" stop-color="#050507" />
+    </linearGradient>
+    <linearGradient id="glyphGrad" x1="120" y1="120" x2="380" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E4E4E7" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="320" y1="120" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Base Squircle with hairline border -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" filter="url(#subtleGlow)" />
+  <rect x="16.5" y="16.5" width="479" height="479" rx="111.5" stroke="#27272A" stroke-width="1.5" />
+
+  <!-- Background precision grid pattern (subtle architectural lines) -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+    <line x1="96" y1="96" x2="416" y2="96" />
+    <line x1="96" y1="176" x2="416" y2="176" />
+    <line x1="96" y1="256" x2="416" y2="256" />
+    <line x1="96" y1="336" x2="416" y2="336" />
+    <line x1="96" y1="416" x2="416" y2="416" />
+    <line x1="96" y1="96" x2="96" y2="416" />
+    <line x1="176" y1="96" x2="176" y2="416" />
+    <line x1="256" y1="96" x2="256" y2="416" />
+    <line x1="336" y1="96" x2="336" y2="416" />
+    <line x1="416" y1="96" x2="416" y2="416" />
+  </g>
+
+  <!-- Core Glyph: Precision Geometric "L" + Ascending Vector Arrow -->
+  <!-- Vertical Stem & Horizontal Base -->
+  <path d="M144 144 C144 135.163 151.163 128 160 128 H212 C220.837 128 228 135.163 228 144 V300 H352 C360.837 300 368 307.163 368 316 V368 C368 376.837 360.837 384 352 384 H160 C151.163 384 144 376.837 144 368 V144 Z" fill="url(#glyphGrad)" />
+
+  <!-- Autonomous Forward Ray / Vector Wedge (Ascending Arrow Symbolizing Job Applications & Swarm Launch) -->
+  <path d="M268 244 L368 144 M368 144 H296 M368 144 V216" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Radar Status Pulse / Swarm Beacon (Active Emerald Dot) -->
+  <circle cx="384" cy="128" r="14" fill="url(#accentGrad)" />
+  <circle cx="384" cy="128" r="22" stroke="#10B981" stroke-width="2" opacity="0.4" />
+
+  <!-- Precision Orbit Nodes (Representing 3 Swarm Pools: 300 Scrapers, 300 Tailors, 400 Appliers) -->
+  <circle cx="228" cy="192" r="5" fill="#09090B" />
+  <circle cx="228" cy="248" r="5" fill="#09090B" />
+  <circle cx="292" cy="342" r="5" fill="#09090B" />
+</svg>

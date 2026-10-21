@@ -11,6 +11,8 @@
     "test": "node scripts/test.js",
     "desktop:verify": "node apps/desktop/scripts/verify-builds.js",
     "desktop:start": "cd apps/desktop && npm start",
+    "video:render": "cd apps/showcase-video && npm run build",
+    "video:preview": "cd apps/showcase-video && npm run dev",
     "start:win": "start-windows.bat"
   }
 }
