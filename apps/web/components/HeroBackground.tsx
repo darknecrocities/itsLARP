@@ -31,9 +31,19 @@ export function HeroBackground() {
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+      {/* Architectural Vertical Column Grid Lines (Mascota Studio Style) */}
+      <div className="absolute inset-0 max-w-7xl mx-auto px-6 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 pointer-events-none">
+        {Array.from({ length: 10 }).map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-full border-r border-neutral-200/40 ${idx === 0 ? "border-l" : ""} ${idx >= 6 ? "hidden sm:block" : ""} ${idx >= 8 ? "hidden md:block" : ""}`}
+          />
+        ))}
+      </div>
+
       {/* SVG Geometric Dot Matrix */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-[0.04]"
+        className="absolute inset-0 w-full h-full opacity-[0.035]"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
