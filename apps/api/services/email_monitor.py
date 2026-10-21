@@ -85,11 +85,12 @@ async def process_recruiter_response(
     if target_app:
         target_app.status = classification
         events = list(target_app.events or [])
-        events.append({
+        events.insert(0, {
             "at": now_iso,
-            "text": f"Email ({classification.upper()}): {subject}"
+            "text": f"Recruiter Email ({classification.upper()}): {subject}"
         })
         target_app.events = events
+        flag_modified(target_app, "events")
         app_updated = True
 
         notion_rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "notion").first()
