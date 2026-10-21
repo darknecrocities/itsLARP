@@ -22,7 +22,9 @@ import {
   PanelLeftOpen,
   FileText,
   Sparkles,
+  Bell,
 } from "lucide-react";
+import { apiGet } from "@/lib/api";
 
 interface NavItem {
   href: string;
@@ -33,6 +35,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { href: "/dashboard", target: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/notifications", target: "/notifications", label: "Notifications", icon: Bell },
   { href: "/profile", target: "/profile", label: "Career Profile", icon: User },
   { href: "/resume", target: "/resume", label: "APA Resume & 20 Configs", icon: FileText },
   { href: "/jobs", target: "/jobs", label: "Jobs", icon: Briefcase },
@@ -70,11 +73,32 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const fetchProfile = useStore((s) => s.fetchProfile);
   const fetchApps = useStore((s) => s.fetchApps);
   const [backendLive, setBackendLive] = useState<boolean | null>(null);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
 
   useEffect(() => {
     fetchProfile();
     fetchApps();
   }, [fetchProfile, fetchApps]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkUnread() {
+      try {
+        const res = await apiGet<{ unread_count: number }>("/notifications/feed?unread_only=true&limit=1");
+        if (!cancelled && typeof res?.unread_count === "number") {
+          setUnreadNotifs(res.unread_count);
+        }
+      } catch {
+        // Non-blocking fallback
+      }
+    }
+    checkUnread();
+    const interval = setInterval(checkUnread, 10000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [path]);
 
   useEffect(() => {
     let cancelled = false;
@@ -275,13 +299,24 @@ export function Shell({ children }: { children: React.ReactNode }) {
                             : "text-dmuted hover:bg-bg hover:text-ink border border-transparent hover:border-line"
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative flex items-center gap-2.5 min-w-0">
                           <Icon className="w-4 h-4 shrink-0" />
+                          {collapsed && item.target === "/notifications" && unreadNotifs > 0 && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                          )}
                           {!collapsed && <span className="truncate">{item.label}</span>}
                         </div>
-                        {!collapsed && active && (
+                        {!collapsed && item.target === "/notifications" && unreadNotifs > 0 ? (
+                          <span
+                            className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${
+                              active ? "bg-white text-black" : "bg-emerald-500 text-white"
+                            }`}
+                          >
+                            {unreadNotifs}
+                          </span>
+                        ) : !collapsed && active ? (
                           <span className="w-1.5 h-1.5 rounded-full bg-white opacity-80 shrink-0" />
-                        )}
+                        ) : null}
                       </Link>
                     </li>
                   );

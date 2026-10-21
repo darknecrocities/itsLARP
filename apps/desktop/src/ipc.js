@@ -264,9 +264,13 @@ function setupIpcHandlers(ctx) {
             if (win.isMinimized()) win.restore();
             win.show();
             win.focus();
-            if (payload?.url) {
-              win.webContents.send("notification:navigate", payload.url);
-            }
+            const targetUrl = payload?.url || "/notifications";
+            win.webContents.send("notification:navigate", targetUrl);
+            win.webContents
+              .executeJavaScript(
+                `if (typeof window !== 'undefined') { window.location.href = '${targetUrl}'; }`
+              )
+              .catch(() => {});
           }
         });
         notif.show();

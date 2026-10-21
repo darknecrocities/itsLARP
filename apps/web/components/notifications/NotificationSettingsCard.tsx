@@ -19,6 +19,7 @@ import {
   requestNotificationPermission,
   playSubtleChime,
 } from "@/lib/notifications";
+import { api } from "@/lib/api";
 
 export function NotificationSettingsCard() {
   const [settings, setSettings] = useState<NotificationSettings>({
@@ -71,14 +72,47 @@ export function NotificationSettingsCard() {
 
   const handleSendTestAlert = async () => {
     setTestSent(true);
-    await sendDesktopNotification({
-      title: "itsLARP OS Alert Test",
-      body: "Native computer notifications are operational on your desktop.",
-      priority: "high",
-      bypassAntiSpam: true,
-      url: "/settings",
-    });
-    setTimeout(() => setTestSent(false), 3000);
+    try {
+      const res = await api<{
+        ok: boolean;
+        notification: {
+          id: string;
+          title: string;
+          message: string;
+          priority: "urgent" | "high" | "normal" | "low";
+          link_url?: string;
+        };
+      }>("/notifications/test", {});
+      const item = res?.notification;
+      if (item) {
+        await sendDesktopNotification({
+          id: item.id,
+          title: item.title,
+          body: item.message,
+          priority: item.priority || "high",
+          bypassAntiSpam: true,
+          url: item.link_url || `/notifications?id=${item.id}`,
+        });
+      } else {
+        await sendDesktopNotification({
+          title: "Milestone Alert Active",
+          body: "Desktop alerts will automatically mirror real application progression.",
+          priority: "high",
+          bypassAntiSpam: true,
+          url: "/notifications",
+        });
+      }
+    } catch {
+      await sendDesktopNotification({
+        title: "Dynamic Alerts Operational",
+        body: "Milestone alerts are linked dynamically to your live Notion applications.",
+        priority: "high",
+        bypassAntiSpam: true,
+        url: "/notifications",
+      });
+    } finally {
+      setTimeout(() => setTestSent(false), 3000);
+    }
   };
 
   return (

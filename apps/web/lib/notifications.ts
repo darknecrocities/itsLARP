@@ -166,29 +166,30 @@ export async function sendDesktopNotification(payload: NotificationPayload): Pro
   let webDispatched = false;
   if ("Notification" in window) {
     try {
+      const targetUrl = payload.url || "/notifications";
       if (Notification.permission === "granted") {
         const notif = new Notification(payload.title, {
           body: payload.body,
           icon: payload.icon || "/branding/icon-192.png",
           tag: payload.tag || dedupeKey,
         });
-        if (payload.url) {
-          notif.onclick = () => {
-            window.focus();
-            if (payload.url && payload.url.startsWith("/")) {
-              window.location.href = payload.url;
-            }
-          };
-        }
+        notif.onclick = () => {
+          window.focus();
+          window.location.href = targetUrl;
+        };
         webDispatched = true;
       } else if (Notification.permission !== "denied" && payload.bypassAntiSpam) {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-          new Notification(payload.title, {
+          const notif = new Notification(payload.title, {
             body: payload.body,
             icon: payload.icon || "/branding/icon-192.png",
             tag: payload.tag || dedupeKey,
           });
+          notif.onclick = () => {
+            window.focus();
+            window.location.href = targetUrl;
+          };
           webDispatched = true;
         }
       }
@@ -205,7 +206,8 @@ export async function sendDesktopNotification(payload: NotificationPayload): Pro
           title: payload.title,
           message: payload.body,
           event_type: "desktop_alert",
-          recipient: "parejasarronkian@gmail.com",
+          priority: payload.priority || "high",
+          link_url: payload.url || "/notifications",
         }),
       }).catch(() => {});
       webDispatched = true;
