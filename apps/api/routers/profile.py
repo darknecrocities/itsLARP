@@ -53,12 +53,24 @@ class CrawlAndConstructIn(BaseModel):
     notes: str = ""
     full_name: str = ""
     headline: str = ""
+    profile: Optional[dict] = None
+
+
+class SyncLinkedInIn(BaseModel):
+    linkedin_url: str = ""
+    linkedin_text: str = ""
+
+
+@router.post("/sync-linkedin")
+async def profile_sync_linkedin(b: SyncLinkedInIn):
+    from services import linkedin_crawler
+    return await linkedin_crawler.crawl_linkedin_profile(b.linkedin_url, b.linkedin_text)
 
 
 @router.post("/crawl-and-construct")
 async def profile_crawl_and_construct(b: CrawlAndConstructIn):
     inst = (b.custom_instructions or b.notes or "").strip()
-    current_p = {}
+    current_p = dict(b.profile or {})
     if b.full_name:
         current_p["name"] = b.full_name
     if b.headline:
@@ -129,6 +141,9 @@ def profile_apa_resume(b: APAResumeIn):
 
 @router.get("/apa-resume/download")
 def profile_apa_resume_download(format: str = "html", style: str = "apa_7th"):
+    if format in resume_formats.FORMAT_LABELS:
+        style = format
+        format = "html"
     db = SessionLocal()
     try:
         rec = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()

@@ -209,6 +209,18 @@ def approve_application(b: ApproveIn):
             em_settings["responses"] = resps[:50]
             em_rec.settings = em_settings
             flag_modified(em_rec, "settings")
+
+            from services.email_monitor import record_device_notification
+            record_device_notification(
+                db=db,
+                event_type="application_submitted",
+                title=f"🚀 Application Submitted: {company}",
+                message=f"Application for {role} at {company} was successfully submitted.",
+                recipient=cand_email,
+                priority="high",
+                link_url="/applications",
+                tag=f"app_submitted:{company}:{role[:20]}",
+            )
         except Exception:
             pass
 

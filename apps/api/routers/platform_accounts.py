@@ -182,6 +182,7 @@ def disconnect_platform_account(payload: Dict[str, str]):
         if rec:
             rec.connected = False
             rec.auth_token = ""
+            rec.applications_today = 0
             db.commit()
         return {"ok": True, "platform": pid, "connected": False}
     finally:

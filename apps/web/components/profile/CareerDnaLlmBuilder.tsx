@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "../../lib/store";
 import { api } from "../../lib/api";
 import { ChevronDown, ChevronUp, Sparkles, Globe } from "lucide-react";
@@ -23,8 +23,121 @@ export function CareerDnaLlmBuilder() {
   const [editMode, setEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // Sync stored links whenever Zustand hydrates from localStorage
+  useEffect(() => {
+    if (profile.links?.github && !githubUrl) setGithubUrl(profile.links.github);
+    if (profile.links?.linkedin && !linkedinUrl) setLinkedinUrl(profile.links.linkedin);
+    if (profile.links?.portfolio && !portfolioUrl) setPortfolioUrl(profile.links.portfolio);
+  }, [profile.links]);
+
+  async function handlePasteClipboard() {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        if (text.trim()) {
+          setLinkedinText(text.trim());
+          setStatusMsg("Pasted profile text from clipboard. Click 'Sync LinkedIn Only' or 'Crawl All Links' to extract.");
+        }
+      }
+    } catch {
+      setStatusMsg("Clipboard permission unavailable. Please paste directly into the box below.");
+    }
+  }
+
+  async function handleSyncLinkedIn() {
+    const activeLinkedin = linkedinUrl.trim() || profile.links?.linkedin || "";
+    const activeText = linkedinText.trim();
+    if (!activeLinkedin && !activeText) {
+      setStatusMsg("Enter a LinkedIn Profile URL or paste profile text to extract.");
+      return;
+    }
+    setCrawling(true);
+    setStatusMsg("Extracting dynamic LinkedIn experience, licenses, and certifications...");
+    try {
+      const res = await api<{
+        ok: boolean;
+        handle: string;
+        name: string;
+        headline: string;
+        location?: string;
+        summary?: string;
+        experience: any[];
+        certifications: any[];
+        licenses: any[];
+        skills: string[];
+        education: string;
+      }>("/profile/sync-linkedin", {
+        linkedin_url: activeLinkedin,
+        linkedin_text: activeText,
+      });
+      if (res) {
+        const nextExp = res.experience?.length
+          ? [
+              ...res.experience,
+              ...(profile.experience || []).filter(
+                (e) => !res.experience.some((re) => re.company.toLowerCase() === e.company.toLowerCase())
+              ),
+            ]
+          : profile.experience || [];
+        const nextCerts = res.certifications?.length
+          ? [
+              ...res.certifications,
+              ...(profile.certifications || []).filter(
+                (c) => !res.certifications.some((rc) => rc.name.toLowerCase() === c.name.toLowerCase())
+              ),
+            ]
+          : profile.certifications || [];
+        const nextLics = res.licenses?.length
+          ? [
+              ...res.licenses,
+              ...(profile.licenses || []).filter(
+                (l) => !res.licenses.some((rl) => rl.name.toLowerCase() === l.name.toLowerCase())
+              ),
+            ]
+          : profile.licenses || [];
+        const nextSkills = res.skills?.length
+          ? Array.from(new Set([...(profile.skills || []), ...res.skills]))
+          : profile.skills || [];
+
+        setProfile({
+          name: res.name || profile.name,
+          headline: res.headline || profile.headline,
+          location: res.location || profile.location,
+          summary: res.summary || profile.summary,
+          experience: nextExp,
+          certifications: nextCerts,
+          licenses: nextLics,
+          skills: nextSkills,
+          education: res.education || profile.education,
+          links: {
+            ...profile.links,
+            linkedin: activeLinkedin || profile.links?.linkedin,
+          },
+        });
+        setCrawlMeta({
+          github_found: Boolean(crawlMeta?.github_found),
+          portfolio_found: Boolean(crawlMeta?.portfolio_found),
+          linkedin_found: true,
+          engine: "Dynamic Extractor",
+        });
+        setStatusMsg(
+          `✓ Extracted ${res.name ? `${res.name}'s profile with ` : ""}${res.experience?.length || 0} roles and ${res.certifications?.length || 0} certifications from LinkedIn.`
+        );
+      }
+    } catch (e: any) {
+      setStatusMsg(`LinkedIn extraction notice: ${e?.message || "Check link or paste profile text."}`);
+    } finally {
+      setCrawling(false);
+    }
+  }
+
   async function handleCrawlAndConstruct() {
-    if (!githubUrl.trim() && !linkedinUrl.trim() && !portfolioUrl.trim() && !linkedinText.trim()) {
+    const activeGithub = githubUrl.trim() || profile.links?.github || "";
+    const activeLinkedin = linkedinUrl.trim() || profile.links?.linkedin || "";
+    const activePortfolio = portfolioUrl.trim() || profile.links?.portfolio || "";
+    const activeText = linkedinText.trim();
+
+    if (!activeGithub && !activeLinkedin && !activePortfolio && !activeText) {
       setStatusMsg("Provide at least one source link (GitHub, LinkedIn, or Portfolio URL) or bio text.");
       return;
     }
@@ -37,11 +150,12 @@ export function CareerDnaLlmBuilder() {
         crawl_summary: { github_found: boolean; portfolio_found: boolean; linkedin_found: boolean };
         profile: any;
       }>("/profile/crawl-and-construct", {
-        github_url: githubUrl.trim(),
-        linkedin_url: linkedinUrl.trim(),
-        linkedin_text: linkedinText.trim(),
-        portfolio_url: portfolioUrl.trim(),
+        github_url: activeGithub,
+        linkedin_url: activeLinkedin,
+        linkedin_text: activeText,
+        portfolio_url: activePortfolio,
         custom_instructions: instructions.trim(),
+        profile: profile,
       });
       if (res?.profile) {
         const p = res.profile;
@@ -61,15 +175,16 @@ export function CareerDnaLlmBuilder() {
           licenses: Array.isArray(p.licenses) && p.licenses.length > 0 ? p.licenses : profile.licenses,
           github_metrics: p.github_metrics || profile.github_metrics,
           links: {
-            github: p.links?.github || githubUrl || profile.links?.github,
-            linkedin: p.links?.linkedin || linkedinUrl || profile.links?.linkedin,
-            portfolio: p.links?.portfolio || portfolioUrl || profile.links?.portfolio,
+            github: p.links?.github || activeGithub || profile.links?.github,
+            linkedin: p.links?.linkedin || activeLinkedin || profile.links?.linkedin,
+            portfolio: p.links?.portfolio || activePortfolio || profile.links?.portfolio,
           },
           evidence: Array.isArray(p.evidence) && p.evidence.length > 0 ? p.evidence : profile.evidence,
         });
         setCrawlMeta({ ...res.crawl_summary, engine: res.engine });
+        const nameGreeting = p.name ? ` for ${p.name}` : "";
         setStatusMsg(
-          `Career DNA constructed via ${res.engine === "llm" ? "Local/Cloud LLM" : "Deterministic Evidence Synthesis"}. All fields are editable below.`
+          `✓ Career DNA constructed${nameGreeting}! Loaded ${p.skills?.length || 0} skills, ${p.experience?.length || 0} roles, and ${p.projects?.length || 0} projects. Live preview updated below.`
         );
       }
     } catch (e: any) {
@@ -190,15 +305,24 @@ export function CareerDnaLlmBuilder() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] font-mono uppercase text-neutral-700 block mb-1">
-            Optional LinkedIn Bio / Experience Paste
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-mono uppercase text-neutral-700">
+              LinkedIn Profile Text / Active Tab Paste
+            </label>
+            <button
+              type="button"
+              onClick={handlePasteClipboard}
+              className="text-[10px] font-mono text-neutral-600 hover:text-black underline"
+            >
+              Paste from Clipboard
+            </button>
+          </div>
           <textarea
             value={linkedinText}
             onChange={(e) => setLinkedinText(e.target.value)}
             rows={2}
-            placeholder="Paste LinkedIn About/Experience text if profile is private..."
-            className="w-full px-3 py-2 text-xs border border-neutral-300 rounded bg-white text-black focus:outline-none focus:border-black"
+            placeholder="Paste LinkedIn About/Experience/Licenses text (or click Paste from Clipboard)..."
+            className="w-full px-3 py-2 text-xs border border-neutral-300 rounded bg-white text-black focus:outline-none focus:border-black font-mono"
           />
         </div>
         <div>
@@ -224,7 +348,15 @@ export function CareerDnaLlmBuilder() {
             onClick={handleCrawlAndConstruct}
             className="px-4 py-2 text-xs font-semibold bg-black text-white hover:bg-neutral-800 rounded disabled:opacity-50 transition"
           >
-            {crawling ? "Crawling Links & Synthesizing DNA..." : "Crawl Links & Construct Career DNA with LLM"}
+            {crawling ? "Crawling Links & Synthesizing DNA..." : "Crawl All Links & Construct Career DNA"}
+          </button>
+          <button
+            type="button"
+            disabled={crawling}
+            onClick={handleSyncLinkedIn}
+            className="px-3 py-2 text-xs font-medium border border-neutral-300 bg-white text-black hover:bg-neutral-100 rounded disabled:opacity-50 transition"
+          >
+            Sync LinkedIn Only
           </button>
           <button
             type="button"
@@ -252,7 +384,15 @@ export function CareerDnaLlmBuilder() {
       </div>
 
       {statusMsg && (
-        <div className="p-2.5 bg-neutral-100 border border-neutral-300 rounded text-xs text-black font-mono">
+        <div
+          className={`p-2.5 rounded text-xs font-mono border transition-all ${
+            statusMsg.startsWith("✓")
+              ? "bg-black text-white border-black font-medium"
+              : statusMsg.startsWith("Failed") || statusMsg.startsWith("Provide")
+              ? "bg-neutral-100 text-red-600 border-red-300"
+              : "bg-neutral-100 border-neutral-300 text-black"
+          }`}
+        >
           {statusMsg}
         </div>
       )}

@@ -10,6 +10,7 @@ import re
 from typing import Dict, Any, List, Optional
 import httpx
 from . import resume_parser
+from . import linkedin_crawler
 from .ai_gateway import ai_gateway
 
 HTTP_TIMEOUT = httpx.Timeout(4.5, connect=2.0)
@@ -94,7 +95,7 @@ async def crawl_github_user(github_input: str) -> Dict[str, Any]:
         total_stars = sum(r.get("stargazers_count", 0) for r in repos_data)
         top_langs = list(dict.fromkeys([r.get("language") for r in repos_data if r.get("language")]))[:5]
         pub_repos = user_data.get("public_repos", len(repos_data))
-        contrib_note = "11,000+ lifetime contributions · Ranked #11 in Philippines" if username.lower() == "darknecrocities" else f"{pub_repos} public repositories"
+        contrib_note = f"{pub_repos} public repositories · {total_stars} stars"
         gh_metrics = {
             "username": username,
             "public_repos": pub_repos,
@@ -192,45 +193,31 @@ async def crawl_portfolio_site(url: str) -> Dict[str, Any]:
 
 def parse_linkedin_input(linkedin_url: str, linkedin_text: str) -> Dict[str, Any]:
     """Extracts structured career attributes from LinkedIn URL and/or pasted profile content."""
-    url = (linkedin_url or "").strip()
-    text = (linkedin_text or "").strip()
-    handle = ""
-    m = re.search(r"linkedin\.com/in/([a-zA-Z0-9_-]+)", url, flags=re.I)
-    if m:
-        handle = m.group(1)
-    elif url and not url.startswith("http") and " " not in url:
-        handle = url.strip("@/")
-        url = f"https://www.linkedin.com/in/{handle}"
+    handle = linkedin_crawler.extract_linkedin_handle(linkedin_url)
+    clean_url = f"https://www.linkedin.com/in/{handle}/" if handle else (linkedin_url or "").strip()
+    parsed_content = linkedin_crawler.parse_linkedin_text_content(linkedin_text) if linkedin_text.strip() else {}
 
-    combined = f"{text}\n{url}".strip()
-    parsed = resume_parser.parse_resume_content(combined, "LinkedIn Profile") if text else {}
     evidence = []
-    certs = []
-    licenses = []
     if handle:
-        evidence.append({"source": "LinkedIn Profile", "text": f"Verified LinkedIn profile link: https://www.linkedin.com/in/{handle}"})
-    if text:
-        for chunk in [c.strip() for c in re.split(r"\n+", text) if len(c.strip()) > 20][:8]:
-            evidence.append({"source": "LinkedIn Experience", "text": chunk[:350]})
-        for line in text.splitlines():
-            ls = line.strip().lstrip("•-* ")
-            if any(k in ls.lower() for k in ["certif", "credential", "hackathon", "award", "specialization"]) and 8 < len(ls) < 140:
-                parts = ls.split(" - ") if " - " in ls else ls.split(" | ") if " | " in ls else [ls, "Verified Authority"]
-                certs.append({"name": parts[0].strip(), "issuer": parts[1].strip() if len(parts) > 1 else "Professional Body", "date": "Verified"})
-            elif "license" in ls.lower() and 8 < len(ls) < 140:
-                parts = ls.split(" - ") if " - " in ls else [ls, "Regulatory Body"]
-                licenses.append({"name": parts[0].strip(), "authority": parts[1].strip() if len(parts) > 1 else "Accredited Agency", "date": "Active"})
+        evidence.append({"source": "LinkedIn Profile", "text": f"Verified profile link: {clean_url}"})
+    if parsed_content.get("experience"):
+        evidence.append({"source": "LinkedIn Experience", "text": f"Extracted {len(parsed_content['experience'])} experience roles."})
+    if parsed_content.get("certifications"):
+        evidence.append({"source": "LinkedIn Certifications", "text": f"Extracted {len(parsed_content['certifications'])} certifications."})
 
     return {
-        "ok": bool(handle or text),
+        "ok": bool(handle or linkedin_text.strip()),
         "handle": handle,
-        "linkedin_url": f"https://www.linkedin.com/in/{handle}" if handle else url,
-        "skills": parsed.get("skills", []),
-        "experience": parsed.get("experience", []),
-        "education": parsed.get("education", ""),
-        "headline": parsed.get("headline", ""),
-        "certifications": certs[:6],
-        "licenses": licenses[:4],
+        "linkedin_url": clean_url,
+        "name": parsed_content.get("name", ""),
+        "headline": parsed_content.get("headline", ""),
+        "location": parsed_content.get("location", ""),
+        "summary": parsed_content.get("summary", ""),
+        "skills": parsed_content.get("skills", []),
+        "experience": parsed_content.get("experience", []),
+        "education": parsed_content.get("education", ""),
+        "certifications": parsed_content.get("certifications", []),
+        "licenses": parsed_content.get("licenses", []),
         "evidence": evidence,
     }
 
@@ -250,8 +237,8 @@ async def construct_dna_with_llm(
     final_instructions = custom_instructions or instructions
     gh_task = crawl_github_user(github_url or current_profile.get("links", {}).get("github", ""))
     pf_task = crawl_portfolio_site(portfolio_url or current_profile.get("links", {}).get("portfolio", ""))
-    gh_res, pf_res = await asyncio.gather(gh_task, pf_task)
-    li_res = parse_linkedin_input(linkedin_url or current_profile.get("links", {}).get("linkedin", ""), linkedin_text)
+    li_task = linkedin_crawler.crawl_linkedin_profile(linkedin_url or current_profile.get("links", {}).get("linkedin", ""), linkedin_text)
+    gh_res, pf_res, li_res = await asyncio.gather(gh_task, pf_task, li_task)
 
     corpus_parts = []
     if final_instructions:
@@ -278,10 +265,12 @@ async def construct_dna_with_llm(
         corpus_parts.append(f"EXISTING PROFILE STATE:\n{json.dumps({k: v for k, v in current_profile.items() if k != 'evidence'})[:2000]}")
 
     full_corpus = "\n\n".join(corpus_parts)
+    # Personal info & deterministic parsing strictly comes from Resume or LinkedIn (never Portfolio or GitHub)
+    resume_candidate_text = (resume_text or "").strip() or (linkedin_text or "").strip()
     det_parsed = resume_parser.parse_resume_content(
-        "\n".join([resume_text, linkedin_text, pf_res.get("raw_text", ""), final_instructions]),
-        "Career Corpus"
-    )
+        resume_candidate_text,
+        "Uploaded Resume" if resume_text.strip() else "LinkedIn Profile"
+    ) if resume_candidate_text else {}
 
     merged_skills = list(dict.fromkeys(
         (current_profile.get("skills") or [])
@@ -304,32 +293,6 @@ async def construct_dna_with_llm(
     merged_lics = list(current_profile.get("licenses") or []) + (li_res.get("licenses") or [])
     gh_metrics = gh_res.get("github_metrics") or current_profile.get("github_metrics") or {}
 
-    # Real-world verification grounding for Arron Kian Parejas / darknecrocities
-    is_arron = any(k in f"{github_url} {linkedin_url} {portfolio_url} {current_profile.get('name', '')} {current_profile.get('email', '')}".lower() for k in ["darknecrocities", "arron", "parejas"])
-    if is_arron:
-        if not any("flyrank" in (e.get("company", "")).lower() for e in merged_exp):
-            merged_exp.insert(0, {
-                "company": "Flyrank.ai",
-                "title": "Machine Learning Engineer",
-                "dates": "2024 - Present",
-                "text": "Architecting edge computer vision pipelines, multi-agent LLM reasoning workflows, and low-latency inference systems.",
-                "metrics": "Reduced model inference latency by 38% across edge deployment fleet"
-            })
-        if not any("google developer groups" in (e.get("company", "")).lower() for e in merged_exp):
-            merged_exp.append({
-                "company": "Google Developer Groups (GDG) on Campus HAU",
-                "title": "Chapter Lead & Technical Director",
-                "dates": "2023 - 2024",
-                "text": "Directed developer community initiatives, mentored 1,000+ engineers in AI/Cloud systems, and organized national tech summits.",
-                "metrics": "Grew community engagement to 1,000+ active student engineers"
-            })
-        if not merged_certs:
-            merged_certs = [
-                {"name": "17x National & Global Hackathon Champion", "issuer": "Major Tech & Collegiate Hackathons", "date": "Verified"},
-                {"name": "Google Cloud Computing Foundations", "issuer": "Google Cloud / GDG", "date": "Verified"},
-                {"name": "Machine Learning Specialization", "issuer": "DeepLearning.AI", "date": "Verified"}
-            ]
-
     merged_ev = (
         (gh_res.get("evidence") or [])
         + (pf_res.get("evidence") or [])
@@ -350,38 +313,59 @@ async def construct_dna_with_llm(
         links["github"] = github_url
     if li_res.get("linkedin_url"):
         links["linkedin"] = li_res["linkedin_url"]
+    elif linkedin_url:
+        links["linkedin"] = linkedin_url
     if pf_res.get("url"):
         links["portfolio"] = pf_res["url"]
     elif gh_res.get("blog"):
         links["portfolio"] = gh_res["blog"]
+    elif portfolio_url:
+        links["portfolio"] = portfolio_url
+
+    # Source Priority: User edits -> Resume -> LinkedIn ONLY.
+    # Never extract personal identity, contacts, or executive summary from GitHub or Portfolio.
+    cand_name = (current_profile.get("name") or det_parsed.get("name") or li_res.get("name") or "").strip()
+    cand_headline = (current_profile.get("headline") or det_parsed.get("headline") or li_res.get("headline") or "").strip()
+    cand_email = (current_profile.get("email") or det_parsed.get("email") or "").strip()
+    cand_phone = (current_profile.get("phone") or det_parsed.get("phone") or "").strip()
+    cand_location = (current_profile.get("location") or det_parsed.get("location") or li_res.get("location") or "Remote").strip()
+    cand_edu = (current_profile.get("education") or det_parsed.get("education") or li_res.get("education") or "").strip()
+    cand_summary = (current_profile.get("summary") or det_parsed.get("summary") or li_res.get("summary") or "").strip()
+
+    if not cand_summary:
+        sk_preview = ", ".join(merged_skills[:6]) if merged_skills else "software engineering"
+        yrs = current_profile.get("years") or det_parsed.get("years") or 2
+        cand_summary = f"{cand_headline or 'Software Engineer'} with {yrs}+ years of experience building software systems utilizing {sk_preview}."
 
     base_profile = {
-        "name": current_profile.get("name") or gh_res.get("name") or det_parsed.get("name") or ("Arron Kian Parejas" if is_arron else "Candidate"),
-        "headline": current_profile.get("headline") or gh_res.get("headline") or li_res.get("headline") or det_parsed.get("headline") or ("AI & Machine Learning Engineer · Software Developer" if is_arron else "Software & AI Systems Engineer"),
-        "email": current_profile.get("email") or gh_res.get("email") or det_parsed.get("email") or ("parejasarronkian@gmail.com" if is_arron else ""),
-        "phone": current_profile.get("phone") or "",
-        "location": current_profile.get("location") or gh_res.get("location") or det_parsed.get("location") or "Remote / Philippines",
-        "years": current_profile.get("years") or det_parsed.get("years") or 3,
-        "education": current_profile.get("education") or li_res.get("education") or det_parsed.get("education") or ("B.S. in Computer Science, Holy Angel University" if is_arron else "B.S. in Computer Science"),
-        "summary": current_profile.get("summary") or pf_res.get("description") or gh_res.get("headline") or "",
-        "target_roles": current_profile.get("target_roles") or ["AI Engineer", "Machine Learning Engineer", "Full Stack Engineer"],
+        "name": cand_name,
+        "headline": cand_headline,
+        "email": cand_email,
+        "phone": cand_phone,
+        "location": cand_location,
+        "years": current_profile.get("years") or det_parsed.get("years") or 2,
+        "education": cand_edu,
+        "summary": cand_summary,
+        "target_roles": current_profile.get("target_roles") or ["Software Engineer", "Full Stack Engineer"],
         "target_companies": current_profile.get("target_companies") or ["all"],
         "work_types": current_profile.get("work_types") or ["fulltime", "remote"],
-        "skills": merged_skills or ["python", "pytorch", "fastapi", "react", "next.js", "docker", "typescript"],
+        "skills": merged_skills or ["python", "typescript", "react", "docker"],
         "experience": merged_exp[:8],
         "projects": unique_projects[:8],
-        "certifications": merged_certs[:6],
-        "licenses": merged_lics[:4],
+        "certifications": merged_certs[:8],
+        "licenses": merged_lics[:6],
         "github_metrics": gh_metrics,
         "links": links,
         "evidence": merged_ev[:30],
     }
 
     system_prompt = (
-        "You are an elite Career DNA Architect. Synthesize the candidate's real crawled GitHub, Portfolio, LinkedIn, "
-        "Resume, and User Instructions into a structured JSON profile. Never invent unverified employers; refine "
-        "summaries, headlines, target_roles, experience bullets, and project descriptions for maximum clarity. "
-        "Return ONLY valid JSON."
+        "You are an elite Career DNA Architect. "
+        "MANDATORY RULE: Candidate personal info (name, headline, email, phone, location, education) "
+        "and executive summary MUST strictly come from the RESUME or LINKEDIN sources ONLY. "
+        "NEVER use GitHub bio/handles or Portfolio meta tags for personal info or executive summary. "
+        "GitHub and Portfolio sources must ONLY be used for extracting repositories, projects, code metrics, and technical skills. "
+        "Never invent unverified employers. Return ONLY valid JSON."
     )
     user_prompt = f"""Construct the candidate's accurate Career DNA JSON from these sources:
 {full_corpus[:4500]}
@@ -400,9 +384,29 @@ Return ONLY a JSON object with keys:
             cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_llm.strip(), flags=re.I)
             llm_data = json.loads(cleaned)
             if isinstance(llm_data, dict):
-                for key in ["name", "headline", "email", "phone", "location", "education", "summary"]:
-                    if llm_data.get(key) and isinstance(llm_data[key], str):
-                        base_profile[key] = llm_data[key].strip()
+                gh_u = (gh_res.get("username") or "").lower()
+                gh_bio = (gh_res.get("headline") or "").strip().lower()
+                pf_d = (pf_res.get("description") or "").strip().lower()
+
+                if llm_data.get("name") and isinstance(llm_data["name"], str) and not cand_name:
+                    if llm_data["name"].strip().lower() != gh_u:
+                        cand_name = llm_data["name"].strip()
+                if llm_data.get("headline") and isinstance(llm_data["headline"], str) and not cand_headline:
+                    hl = llm_data["headline"].strip()
+                    if hl.lower() not in [gh_bio, pf_d]:
+                        cand_headline = hl
+                if llm_data.get("email") and isinstance(llm_data["email"], str) and not cand_email:
+                    if "@" in llm_data["email"] and not llm_data["email"].endswith("users.noreply.github.com"):
+                        cand_email = llm_data["email"].strip()
+                if llm_data.get("location") and isinstance(llm_data["location"], str) and cand_location == "Remote":
+                    cand_location = llm_data["location"].strip()
+                if llm_data.get("education") and isinstance(llm_data["education"], str) and not cand_edu:
+                    cand_edu = llm_data["education"].strip()
+                if llm_data.get("summary") and isinstance(llm_data["summary"], str):
+                    sm = llm_data["summary"].strip()
+                    if sm.lower() not in [gh_bio, pf_d] and (not cand_summary or len(cand_summary) < 20):
+                        cand_summary = sm
+
                 if isinstance(llm_data.get("years"), (int, float)):
                     base_profile["years"] = int(llm_data["years"])
                 if isinstance(llm_data.get("skills"), list) and llm_data["skills"]:
@@ -418,12 +422,15 @@ Return ONLY a JSON object with keys:
     except Exception:
         pass
 
-    if not base_profile["summary"]:
-        sk_preview = ", ".join(base_profile["skills"][:6])
-        base_profile["summary"] = (
-            f"{base_profile['headline']} with {base_profile['years']}+ years of experience building software systems "
-            f"utilizing {sk_preview}. Grounded in {len(base_profile['evidence'])} verified career evidence records."
-        )
+    base_profile.update({
+        "name": cand_name,
+        "headline": cand_headline,
+        "email": cand_email,
+        "phone": cand_phone,
+        "location": cand_location,
+        "education": cand_edu,
+        "summary": cand_summary,
+    })
 
     return {
         "ok": True,

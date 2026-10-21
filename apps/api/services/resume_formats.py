@@ -12,6 +12,7 @@ the candidate's resume to fit each job description before applying.
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from . import apa_resume
+from . import resume_additional_formats
 
 FORMAT_LABELS = {
     "apa_7th": "APA 7th Edition (Academic & Research CV)",
@@ -19,6 +20,11 @@ FORMAT_LABELS = {
     "silicon_valley_modern": "Silicon Valley Modern (Tech & Impact)",
     "ieee_engineering": "IEEE Engineering Standard (Numbered)",
     "ats_strict": "ATS Strict Parser-Friendly (Workday / Greenhouse)",
+    "minimalist_swiss": "Swiss Clean Grid (International Typographic)",
+    "cambridge_classic": "Cambridge Classic (Collegiate & Advisory)",
+    "modern_nordic": "Nordic Minimalist Tech (Clean Functionalism)",
+    "staff_architect": "Staff+ Systems Architect (Decisions & Scale)",
+    "compact_one_page": "Compact 1-Page High-Density (Wall Street / Quant)",
 }
 
 
@@ -151,6 +157,10 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
                     out.pop()
             return "\n".join(out)
         return base_text
+
+    add_text = resume_additional_formats.render_additional_text(profile, fmt, cfg)
+    if add_text:
+        return add_text
 
     name = (profile.get("name") or "Candidate Name").strip()
     headline = profile.get("headline") or "Software Engineer"
@@ -321,11 +331,16 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
 
 
 def render_resume_html(profile: Dict[str, Any], fmt: str = "apa_7th", config: Optional[Dict[str, Any]] = None) -> str:
-    """Renders print-ready monochrome HTML resume for any of the 5 formats."""
+    """Renders print-ready monochrome HTML resume for any of the 10 formats."""
     if fmt == "apa_7th":
         return apa_resume.generate_apa_html(profile)
 
     cfg = config or {}
+    label = FORMAT_LABELS.get(fmt, fmt)
+    add_html = resume_additional_formats.render_additional_html(profile, fmt, label, cfg)
+    if add_html:
+        return add_html
+
     name = (profile.get("name") or "Candidate Name").strip()
     headline = profile.get("headline") or "Software Engineer"
     email = profile.get("email") or "candidate@example.com"

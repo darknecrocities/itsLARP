@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from typing import Optional, List
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy.orm.attributes import flag_modified
 from services import swarm
-from services.database import SessionLocal, ProfileRecord, AgentQuestionRecord
+from services import email_monitor
+from services.database import SessionLocal, ProfileRecord, AgentQuestionRecord, IntegrationRecord
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
@@ -82,5 +85,106 @@ def dismiss_question(question_id: str):
         for run in swarm.RUNS.values():
             run.pending_questions = [q for q in run.pending_questions if q.get("id") != question_id]
         return {"ok": True}
+    finally:
+        db.close()
+
+
+@router.get("/feed")
+def get_notification_feed(
+    unread_only: bool = False,
+    important_only: bool = True,
+    limit: int = 25
+):
+    """Returns recent device/desktop activity notifications with priority anti-spam filtering."""
+    db = SessionLocal()
+    try:
+        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "email").first()
+        if not rec or not rec.settings:
+            return {"ok": True, "notifications": [], "unread_count": 0}
+
+        notifs = list(rec.settings.get("device_notifications") or [])
+
+        # Priority filtering to prevent spamming
+        if important_only:
+            notifs = [n for n in notifs if n.get("priority") in ("urgent", "high")]
+
+        if unread_only:
+            notifs = [n for n in notifs if not n.get("read", False)]
+
+        unread_count = sum(1 for n in (rec.settings.get("device_notifications") or []) if not n.get("read", False))
+
+        return {
+            "ok": True,
+            "notifications": notifs[:limit],
+            "unread_count": unread_count,
+            "important_only": important_only,
+        }
+    finally:
+        db.close()
+
+
+class MarkReadIn(BaseModel):
+    ids: Optional[List[str]] = None
+
+
+@router.post("/read")
+def mark_notifications_read(b: Optional[MarkReadIn] = None):
+    """Marks specific notifications as read."""
+    db = SessionLocal()
+    try:
+        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "email").first()
+        if not rec or not rec.settings:
+            return {"ok": True, "updated": 0}
+
+        settings = dict(rec.settings)
+        notifs = list(settings.get("device_notifications") or [])
+        target_ids = set(b.ids) if (b and b.ids) else None
+
+        updated_count = 0
+        for n in notifs:
+            if target_ids is None or n.get("id") in target_ids:
+                if not n.get("read", False):
+                    n["read"] = True
+                    updated_count += 1
+
+        settings["device_notifications"] = notifs
+        rec.settings = settings
+        flag_modified(rec, "settings")
+        db.commit()
+
+        return {"ok": True, "updated": updated_count}
+    finally:
+        db.close()
+
+
+@router.post("/read-all")
+def mark_all_notifications_read():
+    """Marks all stored notifications as read."""
+    return mark_notifications_read(None)
+
+
+class TestNotificationIn(BaseModel):
+    title: Optional[str] = "🎉 Interview Request: Askable"
+    message: Optional[str] = "Recruiter invitation to technical round received for Senior Frontend Role."
+    priority: Optional[str] = "urgent"
+    event_type: Optional[str] = "recruiter_interview"
+    link_url: Optional[str] = "/applications"
+
+
+@router.post("/test")
+def emit_test_notification(b: Optional[TestNotificationIn] = None):
+    """Generates an immediate test notification to verify OS and desktop toast dispatch."""
+    body = b or TestNotificationIn()
+    db = SessionLocal()
+    try:
+        item = email_monitor.record_device_notification(
+            db=db,
+            event_type=body.event_type or "recruiter_interview",
+            title=body.title or "🎉 Interview Request: Askable",
+            message=body.message or "Invitation to technical screening received.",
+            priority=body.priority or "urgent",
+            link_url=body.link_url or "/applications",
+        )
+        return {"ok": True, "notification": item}
     finally:
         db.close()

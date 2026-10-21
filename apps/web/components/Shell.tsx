@@ -8,6 +8,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
 import { WalkthroughProvider, WalkthroughSpotlightOverlay } from "@/components/walkthrough";
 import { MascotInteractive } from "@/components/mascot";
+import { DesktopNotificationWatcher } from "@/components/notifications/DesktopNotificationWatcher";
 import {
   LayoutDashboard,
   User,
@@ -166,6 +167,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <WalkthroughProvider>
           {children}
           <WalkthroughSpotlightOverlay />
+          <DesktopNotificationWatcher />
         </WalkthroughProvider>
       </QueryClientProvider>
     );
@@ -398,6 +400,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
         {/* Global Walkthrough Spotlight Overlay */}
         <WalkthroughSpotlightOverlay />
+
+        {/* Global Desktop & OS Activity Notification Watcher */}
+        <DesktopNotificationWatcher />
       </WalkthroughProvider>
     </QueryClientProvider>
   );

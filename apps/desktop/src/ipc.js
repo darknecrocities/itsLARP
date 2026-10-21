@@ -241,7 +241,7 @@ function setupIpcHandlers(ctx) {
     return downloadLatestRelease(process.platform, process.arch);
   });
 
-  // 9. Cross-Platform Native Notification Dispatcher
+  // 9. Cross-Platform Native Notification Dispatcher (Windows Action Center & macOS Notification Center)
   ipcMain.handle("notification:show", async (_event, payload) => {
     try {
       if (Notification.isSupported()) {
@@ -251,6 +251,18 @@ function setupIpcHandlers(ctx) {
           body: payload?.body || "",
           icon: iconPath || undefined,
           silent: false,
+          urgency: payload?.priority === "urgent" ? "critical" : "normal",
+        });
+        notif.on("click", () => {
+          const win = getMainWindow();
+          if (win) {
+            if (win.isMinimized()) win.restore();
+            win.show();
+            win.focus();
+            if (payload?.url) {
+              win.webContents.send("notification:navigate", payload.url);
+            }
+          }
         });
         notif.show();
         return { ok: true };

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Download, Printer, Copy, Check, ExternalLink, Sparkles, FileText, Code2 } from "lucide-react";
 import { useStore, type ResumeFormatKey, type Profile } from "@/lib/store";
 import { api, apiGet } from "@/lib/api";
+import { RESUME_FORMATS, generateClientFallback, getFormatLabel } from "@/lib/resumeFormats";
 
 const SHOWCASE_PREVIEW_PROFILE: Profile = {
   name: "Alex Rivera",
@@ -112,124 +113,6 @@ const SAMPLE_TAILOR_TARGETS = [
   },
 ];
 
-const FORMAT_OPTIONS: { key: ResumeFormatKey; label: string; desc: string }[] = [
-  { key: "apa_7th", label: "APA 7th Edition", desc: "Academic running head & citations" },
-  { key: "harvard_executive", label: "Harvard Executive", desc: "Reverse-chronological leadership" },
-  { key: "silicon_valley_modern", label: "Silicon Valley Modern", desc: "Impact-first engineering format" },
-  { key: "ieee_engineering", label: "IEEE Engineering", desc: "Numbered technical specification" },
-  { key: "ats_strict", label: "ATS Strict Parser-Safe", desc: "100% parse-proof ASCII hierarchy" },
-];
-
-function generateClientFallback(
-  p: Profile,
-  fmt: ResumeFormatKey
-): { text: string; html: string; format_label: string } {
-  const name = p.name || "Alex Rivera";
-  const headline = p.headline || "Lead AI Systems Engineer & Distributed Architect";
-  const surname = (name.trim().split(" ").pop() || "RIVERA").toUpperCase();
-  const year = new Date().getFullYear();
-  const skillsList = p.skills?.join(", ") || "Python, PyTorch, Distributed Systems, FastAPI";
-
-  const lines: string[] = [];
-  if (fmt === "apa_7th") {
-    lines.push(`RUNNING HEAD: ${surname} / CURRICULUM VITAE                               Page 1`);
-    lines.push("=".repeat(72));
-    lines.push(name.padStart(36 + name.length / 2));
-    lines.push(headline.padStart(36 + headline.length / 2));
-    lines.push(`${p.email} | ${p.location} | ${p.links?.github}`.padStart(50));
-    lines.push("=".repeat(72));
-    lines.push("\nProfessional Abstract\n" + "-".repeat(72));
-    lines.push(p.summary || "Technical practitioner with 6+ years delivering verified systems.");
-    lines.push("\nAcademic Credentials & Honors\n" + "-".repeat(72));
-    lines.push(p.education || "B.S. in Computer Science");
-    lines.push("\nCore Competencies\n" + "-".repeat(72));
-    lines.push(skillsList);
-    lines.push("\nSoftware Artifacts & Contributions (APA 7th Format)\n" + "-".repeat(72));
-    p.projects.forEach((proj) => {
-      lines.push(`${name}. (${year}). ${proj.name} [Computer software / ${proj.tech?.join(", ")}].`);
-      lines.push(`    Evidence URL: ${proj.url}`);
-      lines.push(`    System Description: ${proj.text}`);
-    });
-  } else {
-    lines.push(name.toUpperCase());
-    lines.push(headline);
-    lines.push(`${p.email} | ${p.phone} | ${p.location}`);
-    lines.push("=".repeat(72));
-    lines.push("\nEXECUTIVE SUMMARY\n" + "-".repeat(72));
-    lines.push(p.summary || "Technical leader specializing in high-throughput distributed systems.");
-    lines.push("\nCORE COMPETENCIES & TOOLING\n" + "-".repeat(72));
-    lines.push(skillsList);
-    lines.push("\nPROFESSIONAL SYSTEMS EXPERIENCE\n" + "-".repeat(72));
-    p.experience.forEach((exp) => {
-      lines.push(`${exp.role} | ${exp.company} (${exp.dates})`);
-      if (exp.metrics) lines.push(`Verified Impact: ${exp.metrics}`);
-      exp.bullets?.forEach((b) => lines.push(`  - ${b}`));
-    });
-    lines.push("\nACADEMIC PREPARATION\n" + "-".repeat(72));
-    lines.push(p.education);
-  }
-
-  const rawText = lines.join("\n");
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${name} - Resume (${fmt})</title>
-  <style>
-    body { font-family: ${fmt === "apa_7th" ? "Georgia, serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"}; font-size: 10.5pt; line-height: 1.5; color: #111; background: #fff; margin: 0 auto; max-width: 8.2in; padding: 0.4in; }
-    .header { text-align: ${fmt === "harvard_executive" ? "center" : "left"}; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
-    h1 { font-size: 18pt; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
-    .headline { font-size: 11pt; color: #333; margin: 2px 0; font-style: ${fmt === "apa_7th" ? "italic" : "normal"}; }
-    .contact { font-size: 9pt; color: #555; font-family: monospace; }
-    .section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #111; padding-bottom: 2px; margin: 12px 0 6px 0; letter-spacing: 0.5px; }
-    .item { margin-bottom: 8px; }
-    .item-header { display: flex; justify-content: space-between; font-weight: 600; font-size: 10pt; }
-    p { margin: 2px 0 6px 0; }
-    @media print { body { padding: 0; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>${name}</h1>
-    <div class="headline">${headline}</div>
-    <div class="contact">${p.email} | ${p.location} | ${p.links?.github}</div>
-  </div>
-  <div class="section-title">Professional Summary</div>
-  <p>${p.summary}</p>
-  <div class="section-title">Core Competencies</div>
-  <p>${skillsList}</p>
-  <div class="section-title">Experience</div>
-  ${p.experience
-    .map(
-      (e) => `<div class="item">
-        <div class="item-header"><span>${e.role} &mdash; ${e.company}</span><span>${e.dates}</span></div>
-        ${e.metrics ? `<p style="font-size: 9pt; font-style: italic;">Verified Metric: ${e.metrics}</p>` : ""}
-        <p>${e.bullets?.join(" ") || ""}</p>
-      </div>`
-    )
-    .join("")}
-  <div class="section-title">Software Artifacts & Contributions</div>
-  ${p.projects
-    .map(
-      (proj) => `<div class="item">
-        <div class="item-header"><span>${proj.name}</span><span>${proj.tech?.join(", ")}</span></div>
-        <p>${proj.text}</p>
-      </div>`
-    )
-    .join("")}
-  <div class="section-title">Academic Preparation</div>
-  <p><strong>${p.education}</strong></p>
-</body>
-</html>`;
-
-  const labelObj = FORMAT_OPTIONS.find((f) => f.key === fmt);
-  return {
-    text: rawText,
-    html,
-    format_label: labelObj ? labelObj.label : fmt,
-  };
-}
-
 interface InteractiveResumePreviewProps {
   initialFormat?: ResumeFormatKey;
 }
@@ -326,7 +209,7 @@ export function InteractiveResumePreview({
               Inspect Real Generated Resumes
             </h2>
             <p className="text-neutral-600 text-xs sm:text-sm mt-1.5 leading-relaxed">
-              Toggle between the 5 architectures below to witness how running heads, academic citations,
+              Toggle between the 10 clean & professional architectures below to witness how running heads, academic citations,
               leadership scopes, and technical Roman numerals transform the document in real time.
             </p>
           </div>
@@ -364,7 +247,7 @@ export function InteractiveResumePreview({
 
         {/* Style Selector Tabs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
-          {FORMAT_OPTIONS.map((opt) => {
+          {RESUME_FORMATS.map((opt) => {
             const active = selectedFormat === opt.key;
             return (
               <button

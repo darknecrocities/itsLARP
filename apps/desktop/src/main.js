@@ -245,6 +245,9 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
+    if (process.platform === "win32") {
+      app.setAppUserModelId("com.itslarp.desktop");
+    }
     const iconPath = getAppIconPath();
     if (process.platform === "darwin" && app.dock && iconPath) {
       try {

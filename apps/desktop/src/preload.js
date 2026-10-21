@@ -27,4 +27,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => ipcRenderer.removeListener("updater:status", handler);
   },
   showNotification: (options) => ipcRenderer.invoke("notification:show", options),
+  onNotificationNavigate: (callback) => {
+    const handler = (_event, url) => callback(url);
+    ipcRenderer.on("notification:navigate", handler);
+    return () => ipcRenderer.removeListener("notification:navigate", handler);
+  },
 });

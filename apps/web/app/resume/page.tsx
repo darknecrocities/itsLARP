@@ -5,7 +5,9 @@ import { Download, Printer, ArrowRight, Check, SlidersHorizontal, FileText, Spar
 import { useStore, type ResumeFormatKey, type Profile } from "@/lib/store";
 import { Badge, Empty, PageHeader, Reveal } from "@/components/ui";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
+import { TargetJobSimulator } from "@/components/resume/TargetJobSimulator";
 import { api, apiGet } from "@/lib/api";
+import { RESUME_FORMATS } from "@/lib/resumeFormats";
 
 const BASELINE_TEMPLATE_PROFILE: Profile = {
   name: "Alex Rivera",
@@ -75,21 +77,14 @@ const BASELINE_TEMPLATE_PROFILE: Profile = {
   ],
 };
 
-const RESUME_FORMATS: { key: ResumeFormatKey; label: string; desc: string }[] = [
-  { key: "apa_7th", label: "APA 7th Edition CV", desc: "Academic & Research Standard" },
-  { key: "harvard_executive", label: "Harvard Executive", desc: "Reverse-Chronological" },
-  { key: "silicon_valley_modern", label: "Silicon Valley Modern", desc: "Tech & Engineering Impact" },
-  { key: "ieee_engineering", label: "IEEE Engineering", desc: "Numbered R&D Specification" },
-  { key: "ats_strict", label: "ATS Strict Parser-Safe", desc: "Workday / Greenhouse / Lever" },
-];
-
 export default function ResumeStudio() {
-  const { profile: p, apps, appConfig, setAppConfig } = useStore();
+  const { profile: p, apps, appConfig, setAppConfig, fetchProfile, fetchApps } = useStore();
   const [renderedText, setRenderedText] = useState("");
   const [renderedHtml, setRenderedHtml] = useState("");
   const [formatLabel, setFormatLabel] = useState("APA 7th Edition");
   const [viewMode, setViewMode] = useState<"formatted" | "plaintext">("formatted");
   const [availableJobs, setAvailableJobs] = useState<any[]>([]);
+  const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string>("master");
   const [loadingRender, setLoadingRender] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -99,18 +94,17 @@ export default function ResumeStudio() {
   const activeProfile = hasProfile ? p : BASELINE_TEMPLATE_PROFILE;
 
   useEffect(() => {
-    apiGet<any[]>("/jobs?q=Engineer")
+    fetchProfile();
+    fetchApps();
+    apiGet<any[]>("/jobs")
       .then((res) => {
-        if (Array.isArray(res)) setAvailableJobs(res.slice(0, 25));
+        if (Array.isArray(res)) setAvailableJobs(res);
       })
       .catch(() => {});
-  }, []);
+  }, [fetchProfile, fetchApps]);
 
   useEffect(() => {
-    const targetJob =
-      selectedJobId === "master"
-        ? null
-        : availableJobs.find((j) => j.id === selectedJobId) || null;
+    const targetJob = selectedJob || (selectedJobId === "master" ? null : availableJobs.find((j) => j.id === selectedJobId) || null);
 
     setLoadingRender(true);
     api<{
@@ -132,7 +126,7 @@ export default function ResumeStudio() {
       })
       .catch(() => {})
       .finally(() => setLoadingRender(false));
-  }, [activeProfile, appConfig, selectedJobId, availableJobs]);
+  }, [activeProfile, appConfig, selectedJobId, selectedJob, availableJobs]);
 
   const handleApplyToAgents = () => {
     setAppliedToast(true);
@@ -267,51 +261,50 @@ export default function ResumeStudio() {
           </div>
         </div>
 
-        {/* Target Job Fit Selector & View Mode */}
-        <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex-1 min-w-[260px]">
-                <label className="text-[11px] font-mono uppercase text-neutral-600 block mb-1">
-                  Dynamic Bot Job-Fit Preview (Adjusts Skills, Summary & Projects to Target JD)
-                </label>
-                <select
-                  value={selectedJobId}
-                  onChange={(e) => setSelectedJobId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded bg-white text-black font-mono"
-                >
-                  <option value="master">Master Career DNA Resume (Unfiltered Baseline)</option>
-                  {availableJobs.map((j) => (
-                    <option key={j.id} value={j.id}>
-                      Tailor for: {j.title} @ {j.company} ({j.skills?.slice(0, 3).join(", ")})
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* Dynamic Target Job Simulation Engine */}
+        <TargetJobSimulator
+          activeProfile={activeProfile}
+          availableJobs={availableJobs}
+          apps={apps}
+          selectedJob={selectedJob}
+          onSelectJob={(job) => {
+            setSelectedJob(job);
+            setSelectedJobId(job ? job.id : "master");
+          }}
+          appConfig={appConfig}
+          loading={loadingRender}
+        />
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("formatted")}
-                  className={`px-3 py-2 text-xs font-mono rounded border ${
-                    viewMode === "formatted"
-                      ? "bg-black text-white border-black"
-                      : "bg-white text-black border-neutral-300"
-                  }`}
-                >
-                  Document Preview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("plaintext")}
-                  className={`px-3 py-2 text-xs font-mono rounded border ${
-                    viewMode === "plaintext"
-                      ? "bg-black text-white border-black"
-                      : "bg-white text-black border-neutral-300"
-                  }`}
-                >
-                  Raw Text
-                </button>
-              </div>
-            </div>
+        {/* View Mode Switcher */}
+        <div className="pt-2 flex items-center justify-between gap-3">
+          <div className="text-xs font-mono text-neutral-600">
+            Preview Viewport: <span className="font-semibold text-black uppercase">{viewMode}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setViewMode("formatted")}
+              className={`px-3 py-1.5 text-xs font-mono rounded border ${
+                viewMode === "formatted"
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-black border-neutral-300"
+              }`}
+            >
+              Document Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("plaintext")}
+              className={`px-3 py-1.5 text-xs font-mono rounded border ${
+                viewMode === "plaintext"
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-black border-neutral-300"
+              }`}
+            >
+              Raw Text
+            </button>
+          </div>
+        </div>
 
             {/* Live Rendered Display Box */}
             <div data-tour="resume-preview-document" className="border border-neutral-300 rounded-lg p-4 bg-neutral-50 text-black">
