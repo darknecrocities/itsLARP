@@ -8,7 +8,6 @@ import {
   ApaResumeHero,
   ResumeStylesMatrix,
   InteractiveResumePreview,
-  AgentTailoringWorkflow,
 } from "@/components/apa-resume";
 import { type ResumeFormatKey } from "@/lib/store";
 
@@ -33,10 +32,7 @@ export default function ApaResumeShowcasePage() {
         {/* 3. Live Interactive Document Preview */}
         <InteractiveResumePreview initialFormat={selectedFormat} />
 
-        {/* 4. How Autonomous Agents Tailor Resumes */}
-        <AgentTailoringWorkflow />
-
-        {/* 5. Bottom Dual CTA Section */}
+        {/* 4. Bottom Dual CTA Section */}
         <section className="py-16 sm:py-20 border-b border-line bg-white text-center">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <span className="text-[11px] font-mono uppercase tracking-widest text-neutral-500 font-semibold">

@@ -285,7 +285,7 @@ export function ResumeStylesMatrix({
               </div>
               <div className="p-3 bg-neutral-900 text-white rounded-lg text-xs font-mono leading-relaxed">
                 <div className="text-neutral-400 text-[10px] mb-1">Standard Citation Syntax:</div>
-                <div className="text-emerald-300 text-[11px]">{currentStyle.citationRule}</div>
+                <div className="text-white text-[11px]">{currentStyle.citationRule}</div>
               </div>
 
               <div className="mt-4 p-3 border border-neutral-200 rounded-lg text-[11px] text-neutral-600 leading-snug">
