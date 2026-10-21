@@ -15,9 +15,10 @@ const HERO_QUOTES = [
 
 interface HeroPeekingMascotProps {
   className?: string;
+  isMobile?: boolean;
 }
 
-export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
+export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeekingMascotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSnapping, setIsSnapping] = useState(false);
@@ -130,18 +131,58 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
     setQuoteIndex((prev) => (prev + 1) % HERO_QUOTES.length);
   };
 
+  if (isMobile) {
+    return (
+      <div
+        ref={containerRef}
+        className={`relative select-none flex flex-col items-center justify-center w-full max-w-full ${className}`}
+      >
+        {/* Cartoon Cloud Thought Bubble stacked directly above centered Scuttle */}
+        <AnimatePresence>
+          {speechVisible && (
+            <CloudDialogueBubble
+              text={HERO_QUOTES[quoteIndex]}
+              onClose={() => setSpeechVisible(false)}
+              isMobile={true}
+              className="relative mx-auto mb-2 w-[270px] sm:w-[310px] max-w-full"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Main Mascot Body Wrapper with Parallax Spring */}
+        <motion.div
+          style={{ rotateZ: springTiltZ }}
+          className="cursor-pointer group relative origin-bottom z-20 flex justify-center"
+          onClick={handleClick}
+          onMouseEnter={triggerDoubleSnip}
+          title="Scuttle · Click to pinch & speak!"
+        >
+          <PeekingCrabSvg
+            eyeOffset={pupilCoords}
+            isBlinking={isBlinking}
+            isSnapping={isSnapping}
+            leftClawOpen={leftClawOpen}
+            rightClawOpen={rightClawOpen}
+            className="w-[240px] sm:w-[280px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+          />
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Cartoon Cloud Thought Bubble positioned above Scuttle's head, leaving right claw clear */}
+      {/* Cartoon Cloud Thought Bubble positioned above and to the left of Scuttle's head */}
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
             text={HERO_QUOTES[quoteIndex]}
             onClose={() => setSpeechVisible(false)}
-            className="-top-32 sm:-top-36 right-20 sm:right-28 z-30"
+            isMobile={false}
+            className="absolute top-4 xl:top-8 right-56 xl:right-64 w-[310px] xl:w-[340px]"
           />
         )}
       </AnimatePresence>
@@ -160,7 +201,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
           isSnapping={isSnapping}
           leftClawOpen={leftClawOpen}
           rightClawOpen={rightClawOpen}
-          className="w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] xl:w-[500px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+          className="w-[420px] lg:w-[460px] xl:w-[500px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </motion.div>
     </div>

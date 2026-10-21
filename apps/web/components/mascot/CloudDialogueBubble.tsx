@@ -6,6 +6,7 @@ interface CloudDialogueBubbleProps {
   text: string;
   onClose: () => void;
   className?: string;
+  isMobile?: boolean;
 }
 
 /**
@@ -17,6 +18,7 @@ export function CloudDialogueBubble({
   text,
   onClose,
   className = "",
+  isMobile = false,
 }: CloudDialogueBubbleProps) {
   return (
     <motion.div
@@ -24,11 +26,11 @@ export function CloudDialogueBubble({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.88, y: -8 }}
       transition={{ type: "spring", stiffness: 380, damping: 25 }}
-      className={`absolute z-30 select-none ${className}`}
+      className={`z-30 select-none ${className}`}
       role="dialog"
       aria-label="Scuttle message"
     >
-      <div className="relative w-[280px] sm:w-[320px] md:w-[340px]">
+      <div className="relative w-full max-w-[340px] mx-auto">
         {/* SVG Puffy Cloud Vector Silhouette */}
         <svg
           viewBox="0 0 340 210"
@@ -53,15 +55,27 @@ export function CloudDialogueBubble({
             strokeLinejoin="round"
           />
 
-          {/* Cloud Thought Trail Bubbles (pointing down toward Scuttle's eye stalks) */}
-          <circle cx="230" cy="172" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
-          <circle cx="248" cy="189" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
-          <circle cx="260" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
+          {/* Cloud Thought Trail Bubbles */}
+          {isMobile ? (
+            /* On mobile, bubbles flow straight down into the centered mascot */
+            <>
+              <circle cx="170" cy="170" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
+              <circle cx="170" cy="188" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
+              <circle cx="170" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
+            </>
+          ) : (
+            /* On desktop, bubbles flow down and right toward Scuttle's eye stalks */
+            <>
+              <circle cx="230" cy="172" r="9.5" fill="#FFFFFF" stroke="#000000" strokeWidth="2.8" />
+              <circle cx="248" cy="189" r="6" fill="#FFFFFF" stroke="#000000" strokeWidth="2.2" />
+              <circle cx="260" cy="202" r="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.8" />
+            </>
+          )}
         </svg>
 
         {/* Content Inside Cloud (Centered within generous interior bounds) */}
         <div className="absolute inset-x-8 top-6 bottom-14 flex items-center justify-center text-center px-4 pointer-events-none">
-          <p className="text-[11px] sm:text-xs font-mono font-medium text-neutral-900 leading-snug break-words max-w-[200px] select-text pointer-events-auto">
+          <p className="text-[11px] sm:text-xs font-mono font-medium text-neutral-900 leading-snug break-words max-w-[210px] select-text pointer-events-auto">
             {text}
           </p>
         </div>
