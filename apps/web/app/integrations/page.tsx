@@ -138,7 +138,7 @@ export default function Integrations() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="integrations-header">
       <PageHeader
         title="Integrations & Response Monitoring"
         sub="Connect Notion to track applications, configure email remote control for parejasarronkian@gmail.com, and select target job platforms."
@@ -170,7 +170,7 @@ export default function Integrations() {
       <EmailRemoteControlCard />
 
       {/* Notion Integration Card */}
-      <section className="card p-6 bg-white border border-neutral-300 rounded-lg">
+      <section data-tour="integrations-notion-card" className="card p-6 bg-white border border-neutral-300 rounded-lg">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2.5">
             <NotionIcon className="w-6 h-6" />
@@ -218,6 +218,7 @@ export default function Integrations() {
         <div className="pt-4 border-t border-neutral-200 mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2">
             <button
+              data-tour="integrations-notion-btn"
               className="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center gap-1.5"
               disabled={busy || !token.trim()}
               onClick={autoCreateList}

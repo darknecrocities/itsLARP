@@ -140,43 +140,47 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHeader
-        title="Career Profile & Resume Studio"
-        sub="The verified source of truth for your background. Import from GitHub, LinkedIn, or personal website, or customize each section below."
-        action={
-          <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
-            </Link>
-            <button
-              type="button"
-              className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
-              onClick={() => {
-                if (window.confirm("Reset your career profile? This will clear local entries.")) {
-                  clearProfile();
-                }
-              }}
-            >
-              Reset Profile
-            </button>
-            <Link href="/resume" className="btn text-xs">
-              Resume Studio
-            </Link>
-            <Link href="/onboarding" className="btn text-xs">
-              Upload PDF
-            </Link>
-          </div>
-        }
-      />
+      <div data-tour="profile-header">
+        <PageHeader
+          title="Career Profile & Resume Studio"
+          sub="The verified source of truth for your background. Import from GitHub, LinkedIn, or personal website, or customize each section below."
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
+              </Link>
+              <button
+                type="button"
+                data-tour="profile-save-btn"
+                className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
+                onClick={() => {
+                  if (window.confirm("Reset your career profile? This will clear local entries.")) {
+                    clearProfile();
+                  }
+                }}
+              >
+                Reset Profile
+              </button>
+              <Link href="/resume" className="btn text-xs">
+                Resume Studio
+              </Link>
+              <Link href="/onboarding" className="btn text-xs">
+                Upload PDF
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
       {/* Online Importer */}
-      <section className="mb-5">
+      <section data-tour="profile-crawler-section" className="mb-5">
         <CareerDnaLlmBuilder />
       </section>
 
       {/* Live Resume Design Preview */}
       <CollapsibleSection
+        dataTour="profile-resume-preview-section"
         title="Live Resume Preview & Export"
         subtitle="Inspect and download your tailored resume in APA 7th, Compact, or Modern styles"
         icon={<FileText className="w-4 h-4" />}
@@ -208,6 +212,7 @@ export default function ProfilePage() {
       {/* Personal Info & Executive Summary */}
       <Reveal>
         <CollapsibleSection
+          dataTour="profile-personal-info-section"
           title="Personal Information & Executive Summary"
           subtitle="Your contact details, headline, and bio"
           icon={<User className="w-4 h-4" />}
@@ -216,11 +221,23 @@ export default function ProfilePage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <label className="label-xs" htmlFor="pname">Full Name</label>
-              <input id="pname" className="input mt-1" value={p.name} onChange={(e) => setProfile({ name: e.target.value })} />
+              <input
+                id="pname"
+                data-tour="profile-name-input"
+                className="input mt-1"
+                value={p.name}
+                onChange={(e) => setProfile({ name: e.target.value })}
+              />
             </div>
             <div>
               <label className="label-xs" htmlFor="phline">Professional Headline</label>
-              <input id="phline" className="input mt-1" value={p.headline} onChange={(e) => setProfile({ headline: e.target.value })} />
+              <input
+                id="phline"
+                data-tour="profile-headline-input"
+                className="input mt-1"
+                value={p.headline}
+                onChange={(e) => setProfile({ headline: e.target.value })}
+              />
             </div>
             <div>
               <label className="label-xs" htmlFor="pemail">Email Address</label>
@@ -260,6 +277,7 @@ export default function ProfilePage() {
       {/* Employment History */}
       <Reveal i={1}>
         <CollapsibleSection
+          dataTour="profile-experience-section"
           title={`Work Experience (${(p.experience || []).length})`}
           subtitle="Past positions with verified achievements and impact"
           icon={<Briefcase className="w-4 h-4" />}
@@ -313,6 +331,7 @@ export default function ProfilePage() {
       {/* Technical Skills */}
       <Reveal i={2}>
         <CollapsibleSection
+          dataTour="profile-skills-section"
           title={`Technical Skills (${p.skills.length})`}
           subtitle="Verified engineering competencies used for job matching"
           icon={<Code className="w-4 h-4" />}
@@ -345,6 +364,7 @@ export default function ProfilePage() {
       {/* Featured Projects */}
       <Reveal i={3}>
         <CollapsibleSection
+          dataTour="profile-projects-section"
           title={`Projects & Portfolios (${(p.projects || []).length})`}
           subtitle="Key engineering repositories and applications"
           icon={<FolderGit2 className="w-4 h-4" />}
@@ -392,6 +412,7 @@ export default function ProfilePage() {
       {/* Verified Evidence Details */}
       <Reveal i={4}>
         <CollapsibleSection
+          dataTour="profile-proof-section"
           title={`Verified Career Details & Proof (${p.evidence.length})`}
           subtitle="All claims in your resumes are verified against these recorded evidence items"
           icon={<CheckCircle2 className="w-4 h-4" />}

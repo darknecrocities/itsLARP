@@ -138,10 +138,10 @@ export function PipelineSvgGraph({
 
             {/* Neural Network Layer Headers */}
             <g id="neural-layer-indicators" opacity={0.85} className="font-mono text-[10px]">
-              <text x="110" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 1: SENSORY INPUTS</text>
-              <text x="350" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 2: FEATURE EXTRACTION</text>
-              <text x="590" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 3: SYNAPTIC SCORING</text>
-              <text x="830" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 4: ACTIONS & OUTPUTS</text>
+              <text data-tour="agents-layer-sensory" x="110" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 1: SENSORY INPUTS</text>
+              <text data-tour="agents-layer-feature" x="350" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 2: FEATURE EXTRACTION</text>
+              <text data-tour="agents-layer-scoring" x="590" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 3: SYNAPTIC SCORING</text>
+              <text data-tour="agents-layer-output" x="830" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 4: ACTIONS & OUTPUTS</text>
 
               <text x="110" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">Profile, feeds & rules</text>
               <text x="350" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">ATS & safety limits</text>

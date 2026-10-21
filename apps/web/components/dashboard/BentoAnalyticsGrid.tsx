@@ -142,7 +142,7 @@ export function BentoAnalyticsGrid() {
     <div className="space-y-4 mb-8">
       {/* Primary KPI Strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Reveal i={0} className="card p-4 bg-bg border border-line">
+        <Reveal i={0} data-tour="dashboard-stat-total-apps" className="card p-4 bg-bg border border-line">
           <div className="flex items-center justify-between text-muted mb-1">
             <span className="label-xs">Applications Applied</span>
             <Send className="w-3.5 h-3.5 text-ink" />
@@ -155,7 +155,7 @@ export function BentoAnalyticsGrid() {
           </div>
         </Reveal>
 
-        <Reveal i={1} className="card p-4 bg-bg border border-line">
+        <Reveal i={1} data-tour="dashboard-stat-velocity" className="card p-4 bg-bg border border-line">
           <div className="flex items-center justify-between text-muted mb-1">
             <span className="label-xs">Active Agents Working</span>
             <Bot className="w-3.5 h-3.5 text-ink" />
@@ -168,7 +168,7 @@ export function BentoAnalyticsGrid() {
           </div>
         </Reveal>
 
-        <Reveal i={2} className="card p-4 bg-bg border border-line">
+        <Reveal i={2} data-tour="dashboard-stat-responses" className="card p-4 bg-bg border border-line">
           <div className="flex items-center justify-between text-muted mb-1">
             <span className="label-xs">Successful Applications</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-ink" />
@@ -198,7 +198,7 @@ export function BentoAnalyticsGrid() {
       {/* Bento Grid Analytics */}
       <section className="grid grid-cols-1 md:grid-cols-12 gap-4">
         {/* Bento Tile 1: 7-Day Application Velocity (Span 7 cols) */}
-        <Reveal i={4} className="md:col-span-7 card p-5 bg-bg border border-line flex flex-col justify-between">
+        <Reveal i={4} data-tour="dashboard-chart-velocity" className="md:col-span-7 card p-5 bg-bg border border-line flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-line">
               <div>
@@ -250,7 +250,7 @@ export function BentoAnalyticsGrid() {
         </Reveal>
 
         {/* Bento Tile 2: Conversion & Success Funnel (Span 5 cols) */}
-        <Reveal i={5} className="md:col-span-5 card p-5 bg-bg border border-line flex flex-col justify-between">
+        <Reveal i={5} data-tour="dashboard-funnel-breakdown" className="md:col-span-5 card p-5 bg-bg border border-line flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-line">
               <div>

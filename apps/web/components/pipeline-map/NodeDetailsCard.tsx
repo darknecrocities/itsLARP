@@ -19,6 +19,7 @@ export function NodeDetailsCard({ selectedNode, onFilterPool }: NodeDetailsCardP
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        data-tour="agents-synapse-inspector"
         className="mt-4 p-4 sm:p-5 bg-neutral-100 border border-neutral-300 rounded font-sans"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-3 font-mono">

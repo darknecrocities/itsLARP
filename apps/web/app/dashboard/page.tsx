@@ -48,29 +48,39 @@ export default function Dashboard() {
 
   return (
     <>
-      <PageHeader
-        title="Command Workspace"
-        sub="Monitor your autonomous workforce, review live application conversion analytics, inspect complete resumes, and auto-apply strategic recommendations."
-        action={
-          <div className="flex gap-2">
-            <Link href="/agents" className="btn btn-primary flex items-center gap-1.5">
-              <Bot className="w-3.5 h-3.5" />
-              Launch Agents
-            </Link>
-            <Link href="/jobs" className="btn">
-              Discover Jobs
-            </Link>
-          </div>
-        }
-      />
+      <div data-tour="dashboard-header">
+        <PageHeader
+          title="Command Workspace"
+          sub="Monitor your autonomous workforce, review live application conversion analytics, inspect complete resumes, and auto-apply strategic recommendations."
+          action={
+            <div className="flex gap-2">
+              <Link
+                href="/agents"
+                data-tour="dashboard-launch-agents-btn"
+                className="btn btn-primary flex items-center gap-1.5"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                Launch Agents
+              </Link>
+              <Link
+                href="/jobs"
+                data-tour="dashboard-explore-jobs-btn"
+                className="btn"
+              >
+                Discover Jobs
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
       {/* Active Agent Questions / Clarification Notifications */}
-      <section className="mb-6">
+      <section data-tour="dashboard-questions-drawer" className="mb-6">
         <AgentQuestionsDrawer />
       </section>
 
       {/* Synchronized Bento Analytics Grid */}
-      <section className="mb-8">
+      <section data-tour="dashboard-analytics-grid" className="mb-8">
         <BentoAnalyticsGrid />
       </section>
 
@@ -107,7 +117,7 @@ export default function Dashboard() {
       {activeTab === "overview" ? (
         <div className="grid lg:grid-cols-2 gap-8">
           <Reveal i={1}>
-            <div className="flex justify-between items-center mb-3">
+            <div data-tour="dashboard-recommended-jobs" className="flex justify-between items-center mb-3">
               <h2 className="text-xl font-semibold">High-Compatibility Roles</h2>
               <Link href="/jobs" className="text-xs text-muted hover:underline flex items-center gap-1">
                 View all ({jobs?.length || 0}) <ArrowRight className="w-3 h-3" />
@@ -159,7 +169,7 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div className="card font-mono text-xs p-3.5 h-64 overflow-y-auto space-y-2 bg-bg2/30">
+            <div data-tour="dashboard-activity-feed" className="card font-mono text-xs p-3.5 h-64 overflow-y-auto space-y-2 bg-bg2/30">
               {feed.length > 0 ? (
                 feed.slice(0, 15).map((l, i) => (
                   <div key={i} className="flex gap-2 truncate">

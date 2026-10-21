@@ -115,23 +115,29 @@ export default function JobsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Jobs"
-        sub="Browse openings found for you across top job boards, scored by how well they match your profile."
-        action={
-          <div className="flex gap-2">
-            <button className="btn btn-primary" onClick={() => setShowImport(true)}>
-              + Add Job / URL
-            </button>
-            <Link href="/agents" className="btn">
-              Launch Agents
-            </Link>
-          </div>
-        }
-      />
+      <div data-tour="jobs-header">
+        <PageHeader
+          title="Jobs"
+          sub="Browse openings found for you across top job boards, scored by how well they match your profile."
+          action={
+            <div className="flex gap-2">
+              <button
+                data-tour="jobs-import-modal-btn"
+                className="btn btn-primary"
+                onClick={() => setShowImport(true)}
+              >
+                + Add Job / URL
+              </button>
+              <Link href="/agents" className="btn">
+                Launch Agents
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
       {/* Target Platforms Bar */}
-      <div className="card p-3 mb-6 bg-bg2/40 border border-line flex flex-wrap items-center justify-between gap-3">
+      <div data-tour="jobs-platform-filters" className="card p-3 mb-6 bg-bg2/40 border border-line flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted">Target Platforms:</span>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -259,7 +265,7 @@ export default function JobsPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((j) => {
+              {rows.map((j, idx) => {
                 const m = j.match;
                 const score = m?.score ?? 0;
                 const existing = apps.find(
@@ -272,7 +278,11 @@ export default function JobsPage() {
                 const isOngoing = existing && !isRejected;
 
                 return (
-                  <tr key={j.id} className="border-b border-line hover:bg-bg2 transition-colors">
+                  <tr
+                    key={j.id}
+                    data-tour={idx === 0 ? "jobs-listing-card" : undefined}
+                    className="border-b border-line hover:bg-bg2 transition-colors"
+                  >
                     <td className="py-3 font-medium">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Link
@@ -304,8 +314,8 @@ export default function JobsPage() {
                               key={s}
                               className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
                                 profile.skills.some((ps) => ps.toLowerCase() === s.toLowerCase())
-                                  ? "bg-black text-white"
-                                  : "bg-line/40 text-muted"
+                                    ? "bg-black text-white"
+                                    : "bg-line/40 text-muted"
                               }`}
                             >
                               {s}
@@ -328,9 +338,11 @@ export default function JobsPage() {
                           {existing.status}
                         </Badge>
                       ) : m ? (
-                        <Badge tone={score >= 80 ? "ok" : score >= 60 ? "n" : "warn"}>
-                          {score}% · {m.label}
-                        </Badge>
+                        <span data-tour={idx === 0 ? "jobs-match-badge" : undefined}>
+                          <Badge tone={score >= 80 ? "ok" : score >= 60 ? "n" : "warn"}>
+                            {score}% · {m.label}
+                          </Badge>
+                        </span>
                       ) : (
                         "—"
                       )}
@@ -338,6 +350,7 @@ export default function JobsPage() {
                     <td className="text-right">
                       <Link
                         href={`/apply/${j.id}`}
+                        data-tour={idx === 0 ? "jobs-apply-btn" : undefined}
                         className={`btn text-xs py-1 px-2.5 ${
                           isRejected
                             ? "bg-black text-white hover:bg-neutral-800"

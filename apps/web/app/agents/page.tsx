@@ -67,43 +67,46 @@ export default function AgentsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Your Auto-Apply Agents"
-        sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="btn text-xs flex items-center gap-1.5 hover:border-black"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
-            </Link>
-            <Link
-              href="/resume"
-              className="btn text-xs flex items-center gap-1.5 hover:border-black"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Resume & Apply Configs</span>
-            </Link>
+      <div data-tour="agents-header">
+        <PageHeader
+          title="Your Auto-Apply Agents"
+          sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard"
+                data-tour="agents-back-btn"
+                className="btn text-xs flex items-center gap-1.5 hover:border-black"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
+              </Link>
+              <Link
+                href="/resume"
+                className="btn text-xs flex items-center gap-1.5 hover:border-black"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Resume & Apply Configs</span>
+              </Link>
 
-            <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
-              <Key className="w-3.5 h-3.5" />
-              <span>Logins</span>
-            </button>
-            <button
-              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
-              onClick={() => setShowNotionModal(true)}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              <span>Notion Sync</span>
-            </button>
-          </div>
-        }
-      />
+              <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
+                <Key className="w-3.5 h-3.5" />
+                <span>Logins</span>
+              </button>
+              <button
+                className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
+                onClick={() => setShowNotionModal(true)}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Notion Sync</span>
+              </button>
+            </div>
+          }
+        />
+      </div>
 
       {/* Workforce Fleet Scaler */}
-      <div className="mb-4">
+      <div data-tour="agents-fleet-card" className="mb-4">
         <WorkforceFleetCard
           workers={selectedWorkers}
           onWorkersChange={setSelectedWorkers}

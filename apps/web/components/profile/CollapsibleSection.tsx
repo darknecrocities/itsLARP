@@ -11,6 +11,7 @@ interface CollapsibleSectionProps {
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  dataTour?: string;
 }
 
 export function CollapsibleSection({
@@ -22,11 +23,12 @@ export function CollapsibleSection({
   action,
   children,
   className = "card p-5 mb-5",
+  dataTour,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <section className={className}>
+    <section className={className} data-tour={dataTour}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200/80 pb-3">
         <div
           className="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-[200px]"

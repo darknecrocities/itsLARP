@@ -117,7 +117,7 @@ export function EmailRemoteControlCard() {
   };
 
   return (
-    <div className="card p-5 mb-5 space-y-4">
+    <div data-tour="integrations-email-card" className="card p-5 mb-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 pb-3">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded bg-black text-white">
@@ -132,12 +132,23 @@ export function EmailRemoteControlCard() {
         </div>
 
         <div className="flex items-center gap-2">
-          {data?.connected && (
-            <span className="text-[11px] px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Active · {data.email}</span>
-            </span>
-          )}
+          <span
+            data-tour="integrations-email-badge"
+            className={`text-[11px] px-2.5 py-1 rounded font-medium flex items-center gap-1.5 ${
+              data?.connected
+                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                : "bg-neutral-100 text-neutral-700 border border-neutral-300 font-mono"
+            }`}
+          >
+            {data?.connected ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Active · {data.email || emailInput}</span>
+              </>
+            ) : (
+              <span>Candidate: {emailInput}</span>
+            )}
+          </span>
           <button
             type="button"
             onClick={fetchStatus}
@@ -193,6 +204,7 @@ export function EmailRemoteControlCard() {
           </button>
           <button
             type="button"
+            data-tour="integrations-notify-toggle"
             onClick={handleSendTestNotification}
             disabled={loading}
             className="btn text-xs py-2 px-3 border border-neutral-300 hover:bg-neutral-100 flex items-center gap-1"
@@ -227,9 +239,10 @@ export function EmailRemoteControlCard() {
         </p>
 
         {/* Quick Test Action Buttons */}
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div data-tour="integrations-command-input" className="flex flex-wrap gap-2 pt-1">
           <button
             type="button"
+            data-tour="integrations-command-btn"
             onClick={() => handleExecuteCommand("STATUS")}
             disabled={simulating}
             className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 hover:border-black font-mono"
@@ -264,10 +277,35 @@ export function EmailRemoteControlCard() {
           </button>
         </div>
 
+        {/* Device Alerts Dispatch Log */}
+        <div data-tour="integrations-alerts-log" className="pt-2 border-t border-neutral-200">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-600 mb-1.5">
+            <span className="flex items-center gap-1">
+              <Bell className="w-3 h-3 text-black" />
+              <span>Device Alerts Dispatch Log ({emailInput}):</span>
+            </span>
+            <span className="text-[10px] text-neutral-400 font-mono">Live Sync</span>
+          </div>
+          {data?.device_notifications && data.device_notifications.length > 0 ? (
+            <div className="space-y-1 font-mono text-[11px]">
+              {data.device_notifications.slice(0, 2).map((n) => (
+                <div key={n.id} className="p-2 bg-white rounded border border-neutral-200 flex justify-between">
+                  <span className="font-semibold text-black">{n.title}: {n.message}</span>
+                  <span className="text-[10px] text-neutral-400">{new Date(n.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-2 bg-white rounded border border-neutral-200 text-[11px] text-neutral-500 font-mono">
+              Ready to stream alerts. Click "Test Alert" above to dispatch a browser alert.
+            </div>
+          )}
+        </div>
+
         {/* Recent Commands Log */}
-        {data?.commands_log && data.commands_log.length > 0 && (
-          <div className="pt-2 border-t border-neutral-200">
-            <div className="text-[11px] font-semibold text-neutral-600 mb-1.5">Executed Remote Email Commands:</div>
+        <div data-tour="integrations-command-history" className="pt-2 border-t border-neutral-200">
+          <div className="text-[11px] font-semibold text-neutral-600 mb-1.5">Executed Remote Email Commands:</div>
+          {data?.commands_log && data.commands_log.length > 0 ? (
             <div className="max-h-36 overflow-y-auto space-y-1.5 font-mono text-[11px]">
               {data.commands_log.slice(0, 4).map((c, i) => (
                 <div key={i} className="p-2 bg-white rounded border border-neutral-200 text-neutral-700">
@@ -279,8 +317,12 @@ export function EmailRemoteControlCard() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="p-2 bg-white rounded border border-neutral-200 text-[11px] text-neutral-500 font-mono">
+              No remote commands yet. Dispatch STATUS or APPLY to test execution.
+            </div>
+          )}
+        </div>
       </div>
 
       {statusMsg && (

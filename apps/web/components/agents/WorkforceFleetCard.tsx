@@ -56,6 +56,7 @@ export function WorkforceFleetCard({
           {running ? (
             <button
               type="button"
+              data-tour="agents-emergency-stop-btn"
               onClick={onStop}
               className="btn btn-primary bg-black text-white hover:bg-neutral-800 text-xs px-4 py-2 font-medium"
             >
@@ -64,6 +65,7 @@ export function WorkforceFleetCard({
           ) : (
             <button
               type="button"
+              data-tour="agents-deploy-btn"
               onClick={() => onStart(workers)}
               className="btn btn-primary bg-black text-white hover:bg-neutral-800 text-xs px-4 py-2 font-medium"
             >
@@ -89,6 +91,7 @@ export function WorkforceFleetCard({
 
           <input
             id="worker-slider"
+            data-tour="agents-bots-slider"
             type="range"
             min={100}
             max={50000}
@@ -129,6 +132,7 @@ export function WorkforceFleetCard({
             <div className="flex items-center gap-1.5">
               <input
                 id="target-input"
+                data-tour="agents-target-input"
                 type="number"
                 min={1}
                 max={50000}
@@ -154,7 +158,7 @@ export function WorkforceFleetCard({
             className="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black"
           />
 
-          <div className="flex flex-wrap items-center justify-between gap-1 pt-1">
+          <div data-tour="agents-target-presets" className="flex flex-wrap items-center justify-between gap-1 pt-1">
             <span className="text-[11px] text-muted font-mono">Presets:</span>
             {[10, 50, 250, 1000, 5000, 10000, 50000].map((n) => (
               <button
