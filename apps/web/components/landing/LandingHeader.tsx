@@ -175,11 +175,6 @@ export function LandingHeader() {
             <span>Download</span>
           </Link>
 
-          {/* Sign In (Desktop) */}
-          <Link href="/login" className="btn text-xs py-1.5 px-3 hidden md:inline-flex">
-            Sign In
-          </Link>
-
           {/* Primary CTA */}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Link
@@ -261,20 +256,14 @@ export function LandingHeader() {
                   <span>Download Desktop (macOS / Windows)</span>
                 </Link>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="btn text-xs py-2 text-center"
-                  >
-                    Sign In
-                  </Link>
+                <div className="pt-1">
                   <Link
                     href="/onboarding"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="btn btn-primary text-xs py-2 text-center font-semibold"
+                    className="btn btn-primary text-xs py-2.5 text-center font-semibold w-full flex items-center justify-center gap-1.5"
                   >
-                    Auto-Apply →
+                    <span>Auto-Apply</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
