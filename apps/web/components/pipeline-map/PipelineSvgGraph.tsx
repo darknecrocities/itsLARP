@@ -136,51 +136,55 @@ export function PipelineSvgGraph({
               </filter>
             </defs>
 
-            {/* Depth Level Indicator Labels on Left Margin */}
-            <g id="tree-level-indicators" opacity={0.65} className="font-mono text-[10px]">
-              <text x="18" y="58" fill="#525252" fontWeight="bold">L0 • ROOT DISPATCHER</text>
-              <text x="18" y="178" fill="#525252" fontWeight="bold">L1 • SWARM PARTITIONS</text>
-              <text x="18" y="298" fill="#525252" fontWeight="bold">L2 • SPECIALIZED HUBS</text>
-              <text x="18" y="380" fill="#525252" fontWeight="bold">L3 • WORKER PODS</text>
+            {/* Neural Network Layer Headers */}
+            <g id="neural-layer-indicators" opacity={0.85} className="font-mono text-[10px]">
+              <text x="110" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 1: SENSORY INPUTS</text>
+              <text x="350" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 2: FEATURE EXTRACTION</text>
+              <text x="590" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 3: SYNAPTIC SCORING</text>
+              <text x="830" y="22" textAnchor="middle" fill="#171717" fontWeight="bold">LAYER 4: ACTIONS & OUTPUTS</text>
+
+              <text x="110" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">Profile, feeds & rules</text>
+              <text x="350" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">ATS & safety limits</text>
+              <text x="590" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">Cosine fit & tailoring</text>
+              <text x="830" y="34" textAnchor="middle" fill="#737373" fontSize="8.5">Submissions & sync</text>
             </g>
 
-            {/* Tree Edge Branches */}
-            <g id="tree-branches">
+            {/* Neural Synapses */}
+            <g id="neural-synapses">
               {GRAPH_EDGES.map(([fromId, toId]) => {
-                const fromNode = GRAPH_NODES.find((n) => n.id === fromId)!;
-                const toNode = GRAPH_NODES.find((n) => n.id === toId)!;
+                const fromNode = GRAPH_NODES.find((n) => n.id === fromId);
+                const toNode = GRAPH_NODES.find((n) => n.id === toId);
+                if (!fromNode || !toNode) return null;
                 const isSelected = selectedNodeId === fromId || selectedNodeId === toId;
-                const isBridge = fromId === 5 && toId === 6;
-                const isFeedback = fromId === 7 && toId === 1;
+                const isFeedback = fromId === 9 && toId === 2;
 
-                let d = `M ${fromNode.x} ${fromNode.y} C ${fromNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${(fromNode.y + toNode.y) / 2}, ${toNode.x} ${toNode.y}`;
-                if (isBridge) {
-                  d = `M ${fromNode.x} ${fromNode.y} Q 450 340, ${toNode.x} ${toNode.y}`;
-                } else if (isFeedback) {
-                  d = `M ${fromNode.x} ${fromNode.y} C 870 190, 620 25, ${toNode.x} ${toNode.y}`;
+                const midX = fromNode.x + (toNode.x - fromNode.x) * 0.5;
+                let d = `M ${fromNode.x} ${fromNode.y} C ${midX} ${fromNode.y}, ${midX} ${toNode.y}, ${toNode.x} ${toNode.y}`;
+                if (isFeedback) {
+                  d = `M ${fromNode.x} ${fromNode.y} C 800 440, 160 440, ${toNode.x} ${toNode.y}`;
                 }
 
                 return (
-                  <g key={`edge-${fromId}-${toId}`}>
+                  <g key={`synapse-${fromId}-${toId}`}>
                     <path
                       d={d}
                       fill="none"
-                      stroke={isBridge ? "#f59e0b" : isFeedback ? "#6366f1" : "#171717"}
-                      strokeWidth={isSelected ? 3.5 : isBridge ? 2 : 2.5}
-                      strokeDasharray={isBridge || isFeedback ? "5 4" : undefined}
-                      opacity={isSelected ? 0.95 : 0.45}
+                      stroke={isFeedback ? "#ec4899" : isSelected ? "#000000" : "#a3a3a3"}
+                      strokeWidth={isSelected ? 2.5 : 1.25}
+                      strokeDasharray={isFeedback ? "4 4" : undefined}
+                      opacity={isSelected ? 0.95 : 0.35}
                       strokeLinecap="round"
                     />
                     {isNetworkActive && (
                       <path
                         d={d}
                         fill="none"
-                        stroke={isBridge ? "#f59e0b" : "#000000"}
-                        strokeWidth={isSelected ? 2 : 1.5}
+                        stroke={isFeedback ? "#ec4899" : isSelected ? "#000000" : "#525252"}
+                        strokeWidth={isSelected ? 1.75 : 1}
                         strokeDasharray="4 6"
                         strokeLinecap="round"
                         className="flow-active"
-                        opacity={0.7}
+                        opacity={0.6}
                       />
                     )}
                   </g>
@@ -415,18 +419,18 @@ export function PipelineSvgGraph({
         <div className="mt-2 text-[10px] sm:text-[11px] text-neutral-600 font-mono flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-black inline-block" />
-            <span>Root / Hub</span>
+            <span>Neural Node</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
-            <span>Active Agent</span>
+            <span>Active Synapse / Agent</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-            <span>In-Flight Data</span>
+            <span>In-Flight Tensor</span>
           </span>
           <span className="text-neutral-500 font-sans hidden sm:inline">
-            (Click any node to inspect agent telemetry)
+            (Click any node to inspect layer weights & telemetry)
           </span>
         </div>
       </div>

@@ -9,6 +9,7 @@ from .analytics import router as analytics_router
 from .notion import router as notion_router
 from .notifications import router as notifications_router
 from .email_monitor import router as email_monitor_router
+from .platform_accounts import router as platform_accounts_router
 
 __all__ = [
     "ai_router",
@@ -21,4 +22,5 @@ __all__ = [
     "notion_router",
     "notifications_router",
     "email_monitor_router",
+    "platform_accounts_router",
 ]

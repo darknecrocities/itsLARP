@@ -29,5 +29,6 @@ export interface GraphNode {
   desc: string;
   stats: { label: string; val: string }[];
   poolKey: "all" | "discovery" | "tailor" | "apply" | "notion";
+  layer?: number;
 }
 
