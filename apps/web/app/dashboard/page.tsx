@@ -9,6 +9,7 @@ import { Badge, Empty, PageHeader, Reveal, Stat } from "@/components/ui";
 import { BentoAnalyticsGrid } from "@/components/dashboard/BentoAnalyticsGrid";
 import { LLMRecommendationsCard } from "@/components/LLMRecommendationsCard";
 import { AgentQuestionsDrawer } from "@/components/AgentQuestionsDrawer";
+import { MascotCompanionCard } from "@/components/mascot";
 import {
   FileText,
   Briefcase,
@@ -73,6 +74,19 @@ export default function Dashboard() {
           }
         />
       </div>
+
+      {/* Scuttle Mascot Assistant Companion */}
+      <section className="mb-6">
+        <MascotCompanionCard
+          title="Scuttle · Command Companion"
+          statusLabel={apps.length > 0 ? `${apps.length} Applications Live` : "System Active"}
+          customQuote={
+            apps.length > 0
+              ? `Watching ${apps.length} verified submissions across Google, Microsoft, Meta and leading engineering teams. Move your cursor to see me look around!`
+              : "Welcome to your command workspace! I'm Scuttle. Move your cursor around to watch my eyes track your moves, or tap me to snip!"
+          }
+        />
+      </section>
 
       {/* Active Agent Questions / Clarification Notifications */}
       <section data-tour="dashboard-questions-drawer" className="mb-6">

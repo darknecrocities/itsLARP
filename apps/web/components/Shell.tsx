@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { BrandLogo } from "@/components/BrandLogo";
 import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
 import { WalkthroughProvider, WalkthroughSpotlightOverlay } from "@/components/walkthrough";
+import { MascotInteractive } from "@/components/mascot";
 import {
   LayoutDashboard,
   User,
@@ -306,6 +307,29 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </div>
                 {collapsed && <User className="w-4 h-4 text-ink" />}
               </Link>
+
+              {/* Scuttle Mascot Sidebar Dock */}
+              <div
+                className={`mt-2.5 p-2 bg-neutral-50 rounded border border-neutral-200 flex items-center ${
+                  collapsed ? "justify-center" : "gap-2.5"
+                } cursor-pointer hover:border-black transition-colors`}
+                title="Scuttle the Crab Mascot (Tap to snip!)"
+              >
+                <MascotInteractive size={collapsed ? "xs" : "sm"} mood="idle" interactive={true} />
+                {!collapsed && (
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-bold text-black flex items-center justify-between">
+                      <span>Scuttle</span>
+                      <span className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1 rounded border border-emerald-200">
+                        2D Bot
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-neutral-500 truncate font-mono">
+                      Tap to snip & chat
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {!collapsed && (
                 <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-line/40 text-[10px] text-muted font-mono px-1">

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MascotInteractive } from "@/components/mascot";
 
 const LIVE_OPPORTUNITIES = [
   {
@@ -66,10 +67,10 @@ export function HeroAgentMiniHUD() {
         transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
         className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-xs text-black"
       >
-        {/* HUD Header (No Badges) */}
+        {/* HUD Header with Mascot Companion */}
         <div className="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+          <div className="flex items-center gap-2.5">
+            <MascotInteractive size="xs" mood="working" interactive={true} />
             <span className="font-bold tracking-tight text-sm">Live Job Match Activity</span>
           </div>
           <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">

@@ -9,6 +9,7 @@ import { NotionSyncModal } from "@/components/NotionSyncModal";
 import { WorkforceFleetCard } from "@/components/agents/WorkforceFleetCard";
 import { PreSubmissionModal } from "@/components/agents/PreSubmissionModal";
 import { PlatformGuardrailsModal } from "@/components/agents/PlatformGuardrailsModal";
+import { MascotCompanionCard } from "@/components/mascot";
 import { Key, Zap, X, SlidersHorizontal, Eye, ArrowLeft, ShieldCheck } from "lucide-react";
 
 
@@ -101,6 +102,19 @@ export default function AgentsPage() {
                 <span>Notion Sync</span>
               </button>
             </div>
+          }
+        />
+      </div>
+
+      {/* Scuttle Mascot Swarm Commander */}
+      <div className="mb-4">
+        <MascotCompanionCard
+          title="Scuttle · Swarm Fleet Commander"
+          statusLabel={running ? `Deploying ${selectedWorkers} Bots` : "Swarm Idle & Ready"}
+          customQuote={
+            running
+              ? `Parallel swarm is active! Disagreeable form-filling in progress across 5 platforms. Targeting ${targetJobsGoal} jobs.`
+              : "Fleet standing by. Adjust your worker concurrency and target job count, then hit Deploy Bots!"
           }
         />
       </div>
