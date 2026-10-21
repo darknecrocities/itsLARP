@@ -19,10 +19,10 @@ export function AppDemosSection() {
           </div>
 
           {/* Video Selector Tabs */}
-          <div className="flex flex-wrap gap-2 text-xs">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 text-xs w-full md:w-auto">
             <button
               onClick={() => setVideoTab("swarm")}
-              className={`px-3.5 py-2 border rounded transition-all flex items-center gap-2 ${
+              className={`w-full sm:w-auto px-3.5 py-2 border rounded transition-all flex items-center justify-center sm:justify-start gap-2 ${
                 videoTab === "swarm"
                   ? "bg-black text-white border-black shadow-sm font-semibold"
                   : "bg-white text-muted border-line hover:text-ink hover:border-black/30"
@@ -32,7 +32,7 @@ export function AppDemosSection() {
             </button>
             <button
               onClick={() => setVideoTab("resume")}
-              className={`px-3.5 py-2 border rounded transition-all flex items-center gap-2 ${
+              className={`w-full sm:w-auto px-3.5 py-2 border rounded transition-all flex items-center justify-center sm:justify-start gap-2 ${
                 videoTab === "resume"
                   ? "bg-black text-white border-black shadow-sm font-semibold"
                   : "bg-white text-muted border-line hover:text-ink hover:border-black/30"
@@ -42,7 +42,7 @@ export function AppDemosSection() {
             </button>
             <button
               onClick={() => setVideoTab("notion")}
-              className={`px-3.5 py-2 border rounded transition-all flex items-center gap-2 ${
+              className={`w-full sm:w-auto px-3.5 py-2 border rounded transition-all flex items-center justify-center sm:justify-start gap-2 ${
                 videoTab === "notion"
                   ? "bg-black text-white border-black shadow-sm font-semibold"
                   : "bg-white text-muted border-line hover:text-ink hover:border-black/30"

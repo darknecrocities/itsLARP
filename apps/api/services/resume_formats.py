@@ -203,6 +203,15 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
                 lines.append(f"{p.get('name', 'Project')} ({tech_s})")
                 lines.append(f"  • {p.get('text', '')}")
                 lines.append("")
+        certs = profile.get("certifications") or []
+        lics = profile.get("licenses") or []
+        if certs or lics:
+            lines.extend(["HONORS, CERTIFICATIONS & LICENSES", "-" * 76])
+            for c in certs:
+                lines.append(f"  • {c.get('name')} — {c.get('issuer')} ({c.get('date', 'Verified')})")
+            for l in lics:
+                lines.append(f"  • {l.get('name')} — {l.get('authority')} ({l.get('date', 'Active')})")
+            lines.append("")
         lines.extend(["EDUCATION", "-" * 76, f"{education}", ""])
         return "\n".join(lines)
 
@@ -228,6 +237,15 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
             for p in projects:
                 lines.append(f"  * {p.get('name', 'Project')} [{', '.join(p.get('tech') or [])}]")
                 lines.append(f"    {p.get('text', '')}")
+            lines.append("")
+        certs = profile.get("certifications") or []
+        lics = profile.get("licenses") or []
+        if certs or lics:
+            lines.append("CREDENTIALS & HONORS")
+            for c in certs:
+                lines.append(f"  * {c.get('name')} // {c.get('issuer')}")
+            for l in lics:
+                lines.append(f"  * {l.get('name')} // {l.get('authority')}")
             lines.append("")
         lines.append(f"EDUCATION: {education}")
         return "\n".join(lines)
@@ -258,7 +276,15 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
         for idx, p in enumerate(projects, 1):
             lines.append(f"   [IV.{idx}] {p.get('name', 'Artifact')} ({', '.join(p.get('tech') or [])})")
             lines.append(f"          {p.get('text', '')}")
-        lines.extend(["", "V. ACADEMIC CREDENTIALS", f"   {education}", ""])
+        certs = profile.get("certifications") or []
+        lics = profile.get("licenses") or []
+        if certs or lics:
+            lines.extend(["", "V. CERTIFICATIONS, LICENSES & HONORS"])
+            for idx, c in enumerate(certs, 1):
+                lines.append(f"   [V.{idx}] {c.get('name')}, Issued by {c.get('issuer')}")
+            for idx, l in enumerate(lics, len(certs) + 1):
+                lines.append(f"   [V.{idx}] {l.get('name')}, {l.get('authority')}")
+        lines.extend(["", "VI. ACADEMIC CREDENTIALS" if (certs or lics) else "V. ACADEMIC CREDENTIALS", f"   {education}", ""])
         return "\n".join(lines)
 
     # Default / ats_strict
@@ -282,6 +308,14 @@ def render_resume_text(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
     for p in projects:
         lines.append(f"{p.get('name', 'Project')} | {', '.join(p.get('tech') or [])}")
         lines.append(f"- {p.get('text', '')}")
+    certs = profile.get("certifications") or []
+    lics = profile.get("licenses") or []
+    if certs or lics:
+        lines.extend(["", "CERTIFICATIONS & LICENSES"])
+        for c in certs:
+            lines.append(f"- {c.get('name')} | {c.get('issuer')}")
+        for l in lics:
+            lines.append(f"- {l.get('name')} | {l.get('authority')}")
     lines.extend(["", "EDUCATION", education])
     return "\n".join(lines)
 
@@ -329,6 +363,16 @@ def render_resume_html(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
         f'<div class="item"><div class="item-head"><span>{p.get("name", "Project")}</span><span class="mono">{", ".join(p.get("tech") or [])}</span></div><p>{p.get("text", "")}</p></div>'
         for p in projects
     )
+    certs = profile.get("certifications") or []
+    lics = profile.get("licenses") or []
+    cert_items = "".join(
+        f'<div class="item"><div class="item-head"><span>{c.get("name")}</span><span>{c.get("issuer")} ({c.get("date", "Verified")})</span></div></div>'
+        for c in certs
+    ) + "".join(
+        f'<div class="item"><div class="item-head"><span>{l.get("name")}</span><span>{l.get("authority")} ({l.get("date", "Active")})</span></div></div>'
+        for l in lics
+    )
+    cert_html = f'<div class="section-title">{"VI. CERTIFICATIONS & HONORS" if fmt == "ieee_engineering" else "CERTIFICATIONS & HONORS"}</div>{cert_items}' if cert_items else ""
 
     sec_titles = (
         ("I. ENGINEERING SUMMARY", "II. TECHNICAL COMPETENCIES", "III. PROFESSIONAL EXPERIENCE", "IV. VERIFIED PROJECTS", "V. EDUCATION")
@@ -401,6 +445,7 @@ def render_resume_html(profile: Dict[str, Any], fmt: str = "apa_7th", config: Op
   <p style="margin: 0 0 10px 0;">{skills_html}</p>
   {f'<div class="section-title">{sec_titles[2]}</div>{exp_html}' if exp_html else ''}
   {f'<div class="section-title">{sec_titles[3]}</div>{proj_html}' if proj_html else ''}
+  {cert_html}
   <div class="section-title">{sec_titles[4]}</div>
   <p style="margin: 0;"><strong>{education}</strong></p>
 </body>

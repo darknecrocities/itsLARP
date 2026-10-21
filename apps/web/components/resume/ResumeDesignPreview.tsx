@@ -39,24 +39,18 @@ const BASELINE_PREVIEW_PROFILE: Profile = {
   ],
   experience: [
     {
-      company: "NeuralScale AI",
-      role: "Lead Systems Architect",
-      dates: "2023 - Present",
-      metrics: "Reduced LLM inference p99 latency by 42% across 10M daily requests",
-      bullets: [
-        "Architected scalable LLM inference clusters using Triton and vLLM serving 10M+ queries daily.",
-        "Engineered autonomous multi-agent verification pipelines with strict SLA monitoring and zero downtime.",
-      ],
+      company: "Flyrank.ai",
+      role: "Machine Learning Engineer",
+      dates: "2024 - Present",
+      metrics: "Reduced LLM & computer vision inference p99 latency by 38%",
+      bullets: ["Architected edge CV pipelines and multi-agent reasoning systems."],
     },
     {
-      company: "Vanguard Cloud Technologies",
-      role: "Senior Distributed Systems Engineer",
-      dates: "2020 - 2023",
-      metrics: "Maintained 99.99% availability for enterprise microservice infrastructure",
-      bullets: [
-        "Implemented real-time data streaming pipelines processing 50k+ events/sec with Apache Kafka and PostgreSQL.",
-        "Standardized containerized orchestration patterns across 40+ engineering microservices.",
-      ],
+      company: "Google Developer Groups on Campus HAU",
+      role: "Chapter Lead & Technical Director",
+      dates: "2023 - 2024",
+      metrics: "Mentored 1,000+ engineers in AI & cloud computing",
+      bullets: ["Led developer initiatives and technical workshops across campuses."],
     },
   ],
   projects: [
@@ -194,6 +188,19 @@ function generateClientFallback(
             </div>`
           )
           .join("")
+      : ""
+  }
+  ${
+    (p.certifications?.length || p.licenses?.length)
+      ? `<div class="section-title">Certifications & Honors</div>` +
+        [
+          ...(p.certifications || []).map(
+            (c) => `<div class="item"><div class="item-header"><span>${c.name}</span><span>${c.issuer}</span></div></div>`
+          ),
+          ...(p.licenses || []).map(
+            (l) => `<div class="item"><div class="item-header"><span>${l.name}</span><span>${l.authority}</span></div></div>`
+          ),
+        ].join("")
       : ""
   }
   <div class="section-title">Academic Preparation</div>

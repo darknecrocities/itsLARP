@@ -72,7 +72,7 @@ export function FadeIn({
     <motion.div
       initial={{ opacity: 0, ...offset }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once, margin: "-40px" }}
+      viewport={{ once, margin: "0px", amount: 0 }}
       transition={{
         duration,
         delay,
@@ -195,7 +195,7 @@ export function AnimatedCounter({
 }) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-30px" });
+  const inView = useInView(ref, { once: true, margin: "0px" });
 
   useEffect(() => {
     if (!inView) return;

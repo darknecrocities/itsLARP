@@ -13,15 +13,14 @@ export function LandingFooter() {
             <p className="text-muted text-[11px] mt-1.5">Your AI Job-Hunting Team · Windows & macOS Native Desktop</p>
           </div>
 
-          <div className="flex flex-wrap gap-6 text-muted">
+          <div className="flex flex-wrap items-center gap-6 text-muted">
             <Link href="/download" className="hover:text-ink transition-colors font-semibold text-ink">Download</Link>
-            <Link href="/dashboard" className="hover:text-ink transition-colors">Dashboard</Link>
-            <Link href="/profile" className="hover:text-ink transition-colors">Profile</Link>
-            <Link href="/resume" className="hover:text-ink transition-colors">APA Resume</Link>
-            <Link href="/agents" className="hover:text-ink transition-colors">1,000 Agents</Link>
-            <Link href="/applications" className="hover:text-ink transition-colors">Applications</Link>
-            <Link href="/integrations" className="hover:text-ink transition-colors">Notion</Link>
-            <Link href="/settings" className="hover:text-ink transition-colors">Settings</Link>
+            <Link href="/#workforce-demo" className="hover:text-ink transition-colors">How It Works</Link>
+            <Link href="/apa-resume" className="hover:text-ink transition-colors flex items-center gap-1 font-medium">
+              <span>APA Resume</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 bg-neutral-200 text-neutral-800 rounded font-bold">CV</span>
+            </Link>
+            <Link href="/#principles" className="hover:text-ink transition-colors">Explore</Link>
           </div>
 
           <div className="flex items-center gap-2 text-muted text-[11px]">

@@ -122,16 +122,16 @@ export function WorkforceDemoSection() {
               className="card p-8 md:p-10 bg-white text-black border border-line shadow-lg font-serif max-w-3xl mx-auto"
             >
               {/* APA Running Head */}
-              <div className="flex justify-between items-center text-xs text-neutral-500 font-mono border-b border-neutral-300 pb-2 mb-6">
-                <span>RUNNING HEAD: CHEN / CURRICULUM VITAE</span>
-                <span>Page 1</span>
+              <div className="flex justify-between items-center text-[10px] sm:text-xs text-neutral-500 font-mono border-b border-neutral-300 pb-2 mb-6">
+                <span className="truncate">RUNNING HEAD: CHEN / CURRICULUM VITAE</span>
+                <span className="shrink-0 ml-2">Page 1</span>
               </div>
 
               {/* APA Title Block */}
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold">{SAMPLE_PROFILE.name}</h3>
                 <div className="text-sm italic text-neutral-700 mt-0.5">{SAMPLE_PROFILE.headline}</div>
-                <div className="text-xs text-neutral-500 font-mono mt-1">
+                <div className="text-[11px] sm:text-xs text-neutral-500 font-mono mt-1 break-words">
                   {SAMPLE_PROFILE.email} | {SAMPLE_PROFILE.location} | {SAMPLE_PROFILE.links.github}
                 </div>
               </div>

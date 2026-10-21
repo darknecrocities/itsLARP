@@ -42,7 +42,7 @@ const NAV: NavItem[] = [
   { href: "/settings", target: "/settings", label: "Settings", icon: Settings },
 ];
 
-const BARE = ["/", "/login", "/onboarding", "/download"];
+const BARE = ["/", "/login", "/onboarding", "/download", "/apa-resume"];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();

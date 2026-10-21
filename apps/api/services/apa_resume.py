@@ -92,7 +92,19 @@ def generate_apa_text(profile: Dict[str, Any]) -> str:
         lines.append(f"    Description: {p_text}")
         lines.append("")
 
-    # Section 6: Verifiable Evidence Index
+    # Section 6: Certifications & Honors
+    certs = profile.get("certifications") or []
+    lics = profile.get("licenses") or []
+    if certs or lics:
+        lines.append("Certifications and Professional Honors".center(72))
+        lines.append("-" * 72)
+        for c in certs:
+            lines.append(f"• {c.get('name')} — {c.get('issuer')} ({c.get('date', 'Verified')})")
+        for l in lics:
+            lines.append(f"• {l.get('name')} — {l.get('authority')} ({l.get('date', 'Active')})")
+        lines.append("")
+
+    # Section 7: Verifiable Evidence Index
     evidence = profile.get("evidence") or []
     if evidence:
         lines.append("Verifiable Evidence Corpus".center(72))
@@ -152,6 +164,16 @@ def generate_apa_html(profile: Dict[str, Any]) -> str:
             '''
             for e in experience
         )
+
+    certs_list = profile.get("certifications") or []
+    lics_list = profile.get("licenses") or []
+    certs_html = "".join(
+        f'<div class="apa-exp-block"><h3 class="apa-level-2">{c.get("name")}</h3><p class="apa-body" style="text-indent:0;">Issuer: {c.get("issuer")} &bull; Verified: {c.get("date", "Active")}</p></div>'
+        for c in certs_list
+    ) + "".join(
+        f'<div class="apa-exp-block"><h3 class="apa-level-2">{l.get("name")}</h3><p class="apa-body" style="text-indent:0;">Authority: {l.get("authority")} &bull; Credential #: {l.get("number", "Active")}</p></div>'
+        for l in lics_list
+    )
 
     evidence_html = "".join(
         f'''
@@ -348,6 +370,11 @@ def generate_apa_html(profile: Dict[str, Any]) -> str:
     Documented according to APA 7th Edition software and technical project referencing:
   </p>
   {projects_html}
+
+  {f'''
+  <div class="apa-level-1">Certifications & Honors</div>
+  {certs_html}
+  ''' if certs_html else ''}
 
   {f'''
   <div class="apa-level-1">Verifiable Evidence Corpus</div>

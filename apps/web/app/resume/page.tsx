@@ -254,45 +254,21 @@ export default function ResumeStudio() {
               SECTION 2: RESUME DESIGN ARCHITECTURE & LIVE PREVIEW
             </div>
             <h3 className="text-sm font-semibold text-black mt-0.5">
-              Live Design Preview (Updates instantly when you customize any configuration)
+              Live Design Preview (Synchronized with Active Architecture Format & 20 Configs)
             </h3>
           </div>
-          <div className="text-xs font-mono text-neutral-600">
-            {activeProfile.evidence.length} Evidence Records
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-neutral-600">
+              {activeProfile.evidence.length} Evidence Records
+            </span>
+            <span className="px-2.5 py-0.5 rounded bg-black text-white text-[11px] font-mono font-medium">
+              {RESUME_FORMATS.find((f) => f.key === appConfig.resumeFormat)?.label || appConfig.resumeFormat}
+            </span>
           </div>
         </div>
 
-            {/* 5 Architecture Selector */}
-            <div>
-              <label className="text-[11px] font-mono uppercase text-neutral-700 block mb-1.5">
-                Select Resume Design Format
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-                {RESUME_FORMATS.map((fmt) => {
-                  const active = appConfig.resumeFormat === fmt.key;
-                  return (
-                    <button
-                      key={fmt.key}
-                      type="button"
-                      onClick={() => setAppConfig({ resumeFormat: fmt.key })}
-                      className={`p-3 rounded border text-left transition ${
-                        active
-                          ? "bg-black text-white border-black"
-                          : "bg-white text-black border-neutral-300 hover:border-black"
-                      }`}
-                    >
-                      <div className="text-xs font-semibold">{fmt.label}</div>
-                      <div className={`text-[10px] font-mono mt-1 ${active ? "text-neutral-300" : "text-neutral-500"}`}>
-                        {fmt.desc}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Target Job Fit Selector & View Mode */}
-            <div className="pt-3 border-t border-neutral-200 flex flex-wrap items-center justify-between gap-3">
+        {/* Target Job Fit Selector & View Mode */}
+        <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
               <div className="flex-1 min-w-[260px]">
                 <label className="text-[11px] font-mono uppercase text-neutral-600 block mb-1">
                   Dynamic Bot Job-Fit Preview (Adjusts Skills, Summary & Projects to Target JD)

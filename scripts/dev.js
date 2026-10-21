@@ -180,29 +180,43 @@ console.log(C_SYS + "  WEBSITE APPLICATION: \x1b[1m\x1b[32mhttp://localhost:3000
 console.log(C_SYS + "  BACKEND API SERVICE: \x1b[36mhttp://localhost:8000\x1b[0m");
 console.log(C_SYS + "  SWAGGER API DOCS:    \x1b[36mhttp://localhost:8000/docs\x1b[0m");
 console.log(C_SYS + "==========================================================");
-console.log(C_SYS + "Press Ctrl+C to terminate both servers cleanly.\n");
+console.log(C_SYS + "Services running. Press Ctrl+C to terminate cleanly.\n");
+
+// Keep event loop active and monitor services
+const monitorInterval = setInterval(() => {}, 2000);
 
 // Clean shutdown on Ctrl+C / kill signals
+let isShuttingDown = false;
 function shutdown() {
-  console.log("\n" + C_SYS + "Shutting down servers...");
-  for (const child of children) {
-    try {
-      if (child && !child.killed) {
-        if (process.platform === "win32") {
-          spawn("taskkill", ["/pid", child.pid, "/f", "/t"]);
-        } else {
-          process.kill(-child.pid, "SIGTERM");
-        }
-      }
-    } catch (e) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  clearInterval(monitorInterval);
+
+  if (children.length > 0) {
+    console.log("\n" + C_SYS + "Shutting down development servers...");
+    for (const child of children) {
       try {
-        child.kill("SIGTERM");
-      } catch {}
+        if (child && !child.killed) {
+          if (process.platform === "win32") {
+            spawn("taskkill", ["/pid", child.pid, "/f", "/t"]);
+          } else {
+            process.kill(-child.pid, "SIGTERM");
+          }
+        }
+      } catch (e) {
+        try {
+          child.kill("SIGTERM");
+        } catch {}
+      }
     }
+    setTimeout(() => process.exit(0), 400);
+  } else {
+    console.log("\n" + C_SYS + "Exiting development monitor. (Background services continue at http://localhost:3000)");
+    process.exit(0);
   }
-  setTimeout(() => process.exit(0), 500);
 }
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-process.on("exit", shutdown);
+process.on("SIGHUP", shutdown);
+

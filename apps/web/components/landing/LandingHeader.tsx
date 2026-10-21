@@ -20,7 +20,7 @@ function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
 const NAV_LINKS = [
   { href: "/#app-demos", label: "Watch Demos", pulse: true },
   { href: "/#workforce-demo", label: "How It Works" },
-  { href: "/resume", label: "APA Resume" },
+  { href: "/apa-resume", label: "APA Resume" },
   { href: "/#principles", label: "Why itsLARP" },
   { href: "/#architecture", label: "4 Easy Steps" },
   { href: "/download#benchmarks", label: "Hardware Benchmarks" },
@@ -80,7 +80,7 @@ export function LandingHeader() {
             How It Works
           </Link>
           <Link
-            href="/resume"
+            href="/apa-resume"
             className="hover:text-ink transition-colors font-medium flex items-center gap-1"
           >
             APA Resume
@@ -159,25 +159,20 @@ export function LandingHeader() {
             href="https://github.com/darknecrocities/itsLARP"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium flex items-center gap-1.5 border border-line hover:border-black hover:bg-neutral-100 transition-colors"
+            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium !hidden sm:!flex items-center gap-1.5 border border-line hover:border-black hover:bg-neutral-100 transition-colors"
             title="View itsLARP on GitHub (Open Source)"
           >
             <GithubIcon className="w-3.5 h-3.5 text-ink" />
-            <span className="hidden sm:inline">GitHub</span>
+            <span>GitHub</span>
           </a>
 
           {/* Download Desktop */}
           <Link
             href="/download"
-            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium hidden sm:inline-flex items-center gap-1.5 border border-line hover:border-black transition-colors"
+            className="btn text-xs py-1.5 px-2.5 sm:px-3 font-medium !hidden sm:!inline-flex items-center gap-1.5 border border-line hover:border-black transition-colors"
           >
             <Download className="w-3.5 h-3.5 text-ink" />
             <span>Download</span>
-          </Link>
-
-          {/* Sign In (Desktop) */}
-          <Link href="/login" className="btn text-xs py-1.5 px-3 hidden md:inline-flex">
-            Sign In
           </Link>
 
           {/* Primary CTA */}
@@ -231,7 +226,7 @@ export function LandingHeader() {
                     )}
                     {link.label}
                   </span>
-                  {link.href === "/resume" && (
+                  {link.href === "/apa-resume" && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 bg-neutral-200 text-neutral-800 rounded">
                       Standalone CV
                     </span>
@@ -261,20 +256,14 @@ export function LandingHeader() {
                   <span>Download Desktop (macOS / Windows)</span>
                 </Link>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="btn text-xs py-2 text-center"
-                  >
-                    Sign In
-                  </Link>
+                <div className="pt-1">
                   <Link
                     href="/onboarding"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="btn btn-primary text-xs py-2 text-center font-semibold"
+                    className="btn btn-primary text-xs py-2.5 text-center font-semibold w-full flex items-center justify-center gap-1.5"
                   >
-                    Auto-Apply →
+                    <span>Auto-Apply</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>

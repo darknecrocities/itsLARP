@@ -2,133 +2,108 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { HeroBackground } from "@/components/HeroBackground";
-import { HeroAgentMiniHUD } from "@/components/HeroAgentMiniHUD";
-import { MascotInteractive } from "@/components/mascot";
+import { HeroPeekingMascot } from "@/components/mascot";
 import {
   FadeIn,
-  StaggerContainer,
-  StaggerItem,
-  CardMotion,
   AnimatedCounter,
   AnimatedLoopText,
-  KineticTextStagger,
-  AnimatedSparkBar,
 } from "@/components/motion";
 import { ArrowRight } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section id="hero-section" className="relative border-b border-line pt-20 pb-20 overflow-hidden">
-      {/* Interactive Ambient Dot Grid & Mouse Spotlight */}
+    <section id="hero-section" className="relative border-b border-line pt-14 sm:pt-20 pb-14 sm:pb-20 overflow-hidden bg-bg min-h-[560px] lg:min-h-[660px]">
+      {/* Interactive Ambient Dot Grid, Vertical Columns & Mouse Spotlight */}
       <HeroBackground />
 
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-          <div className="lg:col-span-7">
-            {/* Interactive Mascot Introduction Pill */}
-            <FadeIn delay={0.1} distance={15} className="mb-4">
-              <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-white border border-neutral-300 shadow-xs hover:border-black transition-all cursor-pointer">
-                <MascotInteractive size="sm" mood="idle" interactive={true} />
-                <div className="text-xs font-mono text-neutral-800 pr-1">
-                  Meet <strong>Scuttle</strong> · Your 2D Career Automation Bot
-                </div>
-              </div>
-            </FadeIn>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.04]">
-              <KineticTextStagger text="No Need to Manually Apply to" />{" "}
-              <AnimatedLoopText
-                words={[
-                  "Jobs Ever Again.",
-                  "Tech Startups.",
-                  "Remote AI Roles.",
-                  "LinkedIn Openings.",
-                  "Top Companies.",
-                ]}
-                className="underline decoration-neutral-300 underline-offset-8 inline-block"
-              />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          {/* Left Column: Bold Grotesque Headline, Subtitle, Dual CTAs & Minimalist Stats */}
+          <div className="lg:col-span-7 xl:col-span-7">
+            <h1 className="text-[28px] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-neutral-950 break-words max-w-xl">
+              No need to <br className="hidden sm:inline" />
+              manually apply <br className="hidden sm:inline" />
+              to{" "}
+              <span className="underline decoration-neutral-300 underline-offset-8 inline-block">
+                <AnimatedLoopText
+                  words={[
+                    "jobs ever again.",
+                    "tech startups.",
+                    "remote AI roles.",
+                    "LinkedIn openings.",
+                    "top companies.",
+                  ]}
+                />
+              </span>
             </h1>
 
-            <FadeIn delay={0.2} distance={20}>
-              <p className="text-dmuted text-base sm:text-lg md:text-xl mt-6 leading-relaxed">
-                Upload your resume or LinkedIn once. Your personal team of AI assistants searches for jobs you love across LinkedIn, JobStreet, Indeed, and Carousell, customizes your resume for each opening, and applies for you—automatically.
-              </p>
-            </FadeIn>
+            <p className="text-neutral-600 text-sm sm:text-lg md:text-xl mt-5 sm:mt-6 max-w-xl leading-relaxed font-normal">
+              Upload your resume or LinkedIn once. Your personal team of AI assistants searches for jobs you love across LinkedIn, JobStreet, Indeed, and Carousell, customizes your resume for each opening, and applies for you—automatically.
+            </p>
 
-            <FadeIn delay={0.3} distance={20} className="mt-8 flex flex-wrap gap-3">
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/onboarding" className="btn btn-primary text-base py-3 px-6 font-semibold shadow-sm inline-flex items-center gap-2">
+            {/* Dual Action CTAs (Solid Primary + Clean Outline Secondary) */}
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3.5 sm:gap-4">
+              <motion.div className="w-full sm:w-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  href="/onboarding"
+                  className="w-full sm:w-auto px-6 sm:px-7 py-3.5 bg-black text-white text-sm sm:text-base font-semibold rounded hover:bg-neutral-800 transition-all shadow-xs inline-flex items-center justify-center gap-2.5"
+                >
                   <span>Start Auto-Applying Now</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <a href="#app-demos" className="btn text-base py-3 px-6 inline-flex items-center gap-2">
+              <motion.div className="w-full sm:w-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <a
+                  href="#app-demos"
+                  className="w-full sm:w-auto px-5 sm:px-6 py-3.5 bg-transparent border border-neutral-900 text-neutral-900 text-sm sm:text-base font-semibold rounded hover:bg-black/5 transition-all inline-flex items-center justify-center gap-2"
+                >
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Watch 3 Live Demos</span>
                 </a>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/resume" className="btn text-base py-3 px-6">
-                  View Sample Resume
-                </Link>
-              </motion.div>
-            </FadeIn>
-          </div>
+            </div>
 
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <HeroAgentMiniHUD />
+            {/* Minimalist Metrics Strip (Mascota Studio Clean Architecture) */}
+            <div className="mt-8 sm:mt-16 pt-6 sm:pt-8 border-t border-neutral-300/80">
+              <div className="grid grid-cols-3 max-w-lg divide-x divide-neutral-200">
+                <div className="pr-1.5 sm:pr-6">
+                  <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
+                    <AnimatedCounter to={1000} />
+                  </div>
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                    AI Assistants Active
+                  </div>
+                </div>
+                <div className="px-1.5 sm:px-6">
+                  <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
+                    300+
+                  </div>
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                    Platforms Monitored
+                  </div>
+                </div>
+                <div className="pl-1.5 sm:pl-6">
+                  <div className="text-xl sm:text-3xl font-black text-neutral-950 font-display">
+                    0%
+                  </div>
+                  <div className="text-[8.5px] xs:text-[9.5px] sm:text-[11px] font-bold text-neutral-500 tracking-wider uppercase mt-1 leading-tight">
+                    Hallucinations
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile / Tablet Mascot Stage positioned below metrics strip */}
+            <div className="lg:hidden w-full mt-6 sm:mt-10 overflow-visible">
+              <HeroPeekingMascot isMobile={true} />
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Highlights Metrics Bar with Cascading Stagger, Animated Counters and Sparkbars */}
-        <StaggerContainer
-          delay={0.4}
-          stagger={0.09}
-          className="mt-14 pt-8 border-t border-line grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs"
-        >
-          <StaggerItem>
-            <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="text-xs font-semibold text-muted uppercase">300 Job Finders</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={300} suffix=" Assistants" />
-              </div>
-              <div className="text-xs text-muted mt-0.5">LinkedIn, JobStreet, Indeed & Carousell</div>
-              <AnimatedSparkBar percentage={75} delay={0.45} />
-            </CardMotion>
-          </StaggerItem>
-
-          <StaggerItem>
-            <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="text-xs font-semibold text-muted uppercase">300 Resume Tailors</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={300} suffix=" Assistants" />
-              </div>
-              <div className="text-xs text-muted mt-0.5">Custom resumes tailored for every opening</div>
-              <AnimatedSparkBar percentage={85} delay={0.55} />
-            </CardMotion>
-          </StaggerItem>
-
-          <StaggerItem>
-            <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="text-xs font-semibold text-muted uppercase">400 Application Fillers</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">
-                <AnimatedCounter to={400} suffix=" Assistants" />
-              </div>
-              <div className="text-xs text-muted mt-0.5">Fills forms and prepares submissions</div>
-              <AnimatedSparkBar percentage={95} delay={0.65} />
-            </CardMotion>
-          </StaggerItem>
-
-          <StaggerItem>
-            <CardMotion hoverLift={-3} className="p-3.5 bg-bg2/50 border border-neutral-200 rounded">
-              <div className="text-xs font-semibold text-muted uppercase">Notion Tracking</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold mt-1 text-ink">1 Click</div>
-              <div className="text-xs text-muted mt-0.5">Saves every job & interview on your board</div>
-              <AnimatedSparkBar percentage={100} delay={0.75} />
-            </CardMotion>
-          </StaggerItem>
-        </StaggerContainer>
+      {/* Desktop Mascot: Anchored Directly Flush to Right Viewport Edge & Vertically Centered */}
+      <div className="hidden lg:flex items-center justify-end absolute right-0 top-0 bottom-0 z-20 pointer-events-auto">
+        <HeroPeekingMascot />
       </div>
     </section>
   );

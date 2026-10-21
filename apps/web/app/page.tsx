@@ -13,7 +13,7 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg text-ink selection:bg-black selection:text-white relative">
+    <div className="min-h-screen bg-bg text-ink selection:bg-black selection:text-white relative overflow-x-hidden">
       <ScrollProgressBar />
       {/* Top Navigation Header */}
       <LandingHeader />
