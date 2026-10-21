@@ -125,6 +125,15 @@ async def notion_connect(b: NotionConnectIn):
     else:
         db_id = db_id.replace("-", "").strip()
         db_url = f"https://notion.so/{db_id}"
+        try:
+            dbs = await notion.search_databases(b.token)
+            for d in dbs:
+                if d.get("id", "").replace("-", "").strip() == db_id:
+                    db_name = d.get("title") or db_name
+                    db_url = d.get("url") or db_url
+                    break
+        except Exception:
+            pass
 
     db = SessionLocal()
     try:
@@ -141,8 +150,12 @@ async def notion_connect(b: NotionConnectIn):
         rec.last_synced_at = datetime.utcnow()
         db.commit()
 
-        # Run initial bidirectional sync
-        sync_result = await notion.bidirectional_sync(b.token, db_id, db)
+        # Run initial bidirectional sync safely so initial sync hiccups do not fail database linking
+        try:
+            sync_result = await notion.bidirectional_sync(b.token, db_id, db)
+        except Exception as sync_err:
+            sync_result = {"ok": False, "error": str(sync_err), "pull": {}, "push": {}}
+
         return {
             "ok": True,
             "database_id": db_id,
