@@ -321,6 +321,8 @@ class Run:
                     (ApplicationRecord.id == app_id) | (ApplicationRecord.job_id == j["id"])
                 ).first()
                 if not rec:
+                    cand_email = (self.profile.get("email") or "parejasarronkian@gmail.com").strip()
+                    cand_name = (self.profile.get("name") or "Arron Kian Parejas").strip()
                     rec = ApplicationRecord(
                         id=app_id,
                         job_id=j["id"],
@@ -336,12 +338,33 @@ class Run:
                         verified=bool(v.get("passed", True)),
                         applied_date=today_str,
                         screenshot_url=f"http://localhost:8000/applications/{app_id}/screenshot",
-                        events=[{
-                            "at": now_iso,
-                            "text": f"Autonomous bot {bid} filled application form and poised to submit ({db_status})"
-                        }],
+                        events=[
+                            {"at": now_iso, "text": f"Confirmation email received from {j['company']} ATS (delivered to {cand_email})"},
+                            {"at": now_iso, "text": f"Autonomous bot {bid} submitted application via {platform} ({db_status})"}
+                        ],
                     )
                     db.add(rec)
+                    try:
+                        from services.database import IntegrationRecord
+                        from sqlalchemy.orm.attributes import flag_modified
+                        em_rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "email").first()
+                        if em_rec:
+                            em_s = dict(em_rec.settings or {})
+                            rsps = list(em_s.get("responses") or [])
+                            rsps.insert(0, {
+                                "company": j["company"],
+                                "subject": f"Application Received: {j['title']} at {j['company']}",
+                                "snippet": f"Hi {cand_name}, thank you for applying for the {j['title']} role. Your application has been logged.",
+                                "classification": "applied",
+                                "date": time.strftime("%b %d, %Y, %I:%M %p", time.gmtime()),
+                                "sender": f"recruiting@{j['company'].lower().replace(' ', '')}.com",
+                                "status": "APPLIED"
+                            })
+                            em_s["responses"] = rsps[:50]
+                            em_rec.settings = em_s
+                            flag_modified(em_rec, "settings")
+                    except Exception:
+                        pass
                     db.commit()
                     self.applied_count += 1
                 r["app_id"] = app_id

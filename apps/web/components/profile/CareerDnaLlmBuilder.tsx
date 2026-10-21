@@ -57,6 +57,9 @@ export function CareerDnaLlmBuilder() {
           skills: Array.isArray(p.skills) && p.skills.length > 0 ? p.skills : profile.skills,
           experience: Array.isArray(p.experience) && p.experience.length > 0 ? p.experience : profile.experience,
           projects: Array.isArray(p.projects) && p.projects.length > 0 ? p.projects : profile.projects,
+          certifications: Array.isArray(p.certifications) && p.certifications.length > 0 ? p.certifications : profile.certifications,
+          licenses: Array.isArray(p.licenses) && p.licenses.length > 0 ? p.licenses : profile.licenses,
+          github_metrics: p.github_metrics || profile.github_metrics,
           links: {
             github: p.links?.github || githubUrl || profile.links?.github,
             linkedin: p.links?.linkedin || linkedinUrl || profile.links?.linkedin,

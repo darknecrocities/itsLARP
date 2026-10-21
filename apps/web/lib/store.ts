@@ -26,6 +26,29 @@ export type Evidence = {
   text: string;
 };
 
+export type CertificationItem = {
+  name: string;
+  issuer: string;
+  date?: string;
+  url?: string;
+};
+
+export type LicenseItem = {
+  name: string;
+  authority: string;
+  number?: string;
+  date?: string;
+};
+
+export type GitHubMetrics = {
+  username?: string;
+  public_repos?: number;
+  followers?: number;
+  total_stars?: number;
+  contributions_note?: string;
+  top_languages?: string[];
+};
+
 export type Profile = {
   name: string;
   headline: string;
@@ -41,6 +64,9 @@ export type Profile = {
   skills: string[];
   experience: ExperienceItem[];
   projects: ProjectItem[];
+  certifications?: CertificationItem[];
+  licenses?: LicenseItem[];
+  github_metrics?: GitHubMetrics;
   links: { github?: string; linkedin?: string; portfolio?: string };
   evidence: Evidence[];
 };
@@ -60,6 +86,16 @@ export const EMPTY: Profile = {
   skills: [],
   experience: [],
   projects: [],
+  certifications: [],
+  licenses: [],
+  github_metrics: {
+    username: "",
+    public_repos: 0,
+    followers: 0,
+    total_stars: 0,
+    contributions_note: "",
+    top_languages: [],
+  },
   links: {},
   evidence: [],
 };

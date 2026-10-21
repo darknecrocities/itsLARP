@@ -144,6 +144,9 @@ def profile_apa_resume_download(format: str = "html", style: str = "apa_7th"):
             "skills": (rec.skills or []) if rec else [],
             "experience": (rec.experience or []) if rec else [],
             "projects": (rec.projects or []) if rec else [],
+            "certifications": (getattr(rec, "certifications", []) or []) if rec else [],
+            "licenses": (getattr(rec, "licenses", []) or []) if rec else [],
+            "github_metrics": (getattr(rec, "github_metrics", {}) or {}) if rec else {},
             "links": (rec.links or {}) if rec else {},
             "evidence": (rec.evidence or []) if rec else [],
         }
@@ -186,6 +189,9 @@ def profile_save(b: ProfileIn):
         rec.skills = p.get("skills", [])
         rec.experience = p.get("experience", [])
         rec.projects = p.get("projects", [])
+        rec.certifications = p.get("certifications", [])
+        rec.licenses = p.get("licenses", [])
+        rec.github_metrics = p.get("github_metrics", {})
         rec.links = p.get("links", {})
         rec.evidence = p.get("evidence", [])
         db.commit()
@@ -218,6 +224,9 @@ def profile_get():
                 "skills": rec.skills or [],
                 "experience": rec.experience or [],
                 "projects": rec.projects or [],
+                "certifications": getattr(rec, "certifications", []) or [],
+                "licenses": getattr(rec, "licenses", []) or [],
+                "github_metrics": getattr(rec, "github_metrics", {}) or {},
                 "links": rec.links or {},
                 "evidence": rec.evidence or [],
             }

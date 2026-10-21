@@ -8,6 +8,7 @@ import { CareerDnaLlmBuilder } from "@/components/profile/CareerDnaLlmBuilder";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 import { ResumeDesignPreview } from "@/components/resume/ResumeDesignPreview";
 import { CollapsibleSection } from "@/components/profile/CollapsibleSection";
+import { CertificationsAndGitHubSection } from "@/components/profile/CertificationsAndGitHubSection";
 import {
   User,
   Briefcase,
@@ -148,26 +149,18 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-2">
               <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Dashboard</span>
+                <span>Dashboard</span>
               </Link>
               <button
                 type="button"
                 data-tour="profile-save-btn"
                 className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
-                onClick={() => {
-                  if (window.confirm("Reset your career profile? This will clear local entries.")) {
-                    clearProfile();
-                  }
-                }}
+                onClick={() => { if (window.confirm("Reset profile?")) clearProfile(); }}
               >
                 Reset Profile
               </button>
-              <Link href="/resume" className="btn text-xs">
-                Resume Studio
-              </Link>
-              <Link href="/onboarding" className="btn text-xs">
-                Upload PDF
-              </Link>
+              <Link href="/resume" className="btn text-xs">Resume Studio</Link>
+              <Link href="/onboarding" className="btn text-xs">Upload PDF</Link>
             </div>
           }
         />
@@ -409,8 +402,13 @@ export default function ProfilePage() {
         </CollapsibleSection>
       </Reveal>
 
-      {/* Verified Evidence Details */}
+      {/* Verified Licenses, Certifications & GitHub Metrics */}
       <Reveal i={4}>
+        <CertificationsAndGitHubSection />
+      </Reveal>
+
+      {/* Verified Evidence Details */}
+      <Reveal i={5}>
         <CollapsibleSection
           dataTour="profile-proof-section"
           title={`Verified Career Details & Proof (${p.evidence.length})`}
