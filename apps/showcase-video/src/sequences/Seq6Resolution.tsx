@@ -1,17 +1,17 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from "remotion";
 import { THEME } from "../theme";
-import { MaskedSlideText } from "../components/MaskedSlideText";
+import { TypewriterText } from "../components/TypewriterText";
 import { DeviceFanOut } from "../components/DeviceFanOut";
+import { ScuttleMascot } from "../components/ScuttleMascot";
 
 export const Seq6Resolution: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Sequence breakdown across 450 frames:
-  // 0 - 210: Transitions #35 & #36 3D Multi-Device Fan-Out & Prismatic Convergence
-  // 210 - 450: Transitions #37 & #38 Final Master Lockup Assembly & Exponential Harmonic Resolve
-
+  // Screen split at local frame 210:
+  // 0 - 210: Feature 9 (Cross-Platform Clients 3D Fan-out)
+  // 210 - 450: Feature 10 (Final Master Lockup Assembly & Harmonic Resolve)
   const isFinalLockup = frame >= 210;
 
   // Master Lockup Spring Entrance (frame 210)
@@ -37,7 +37,7 @@ export const Seq6Resolution: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // Transition #38: Clean Exponential Harmonic Resolve on very last 30 frames (420 - 450)
+  // Clean Exponential Harmonic Resolve on very last 30 frames (420 - 450)
   const resolveFade = interpolate(frame, [420, 449], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -58,8 +58,9 @@ export const Seq6Resolution: React.FC = () => {
       />
 
       {!isFinalLockup ? (
-        /* Part A: Transitions #35 & #36 3D Multi-Device Fan-Out & Convergence */
+        /* Part A: Feature 9 Cross-Platform Clients 3D Fan-Out & Convergence */
         <div style={{ position: "absolute", inset: 0 }}>
+          {/* Header HUD with Live Typewriter */}
           <div
             style={{
               position: "absolute",
@@ -68,27 +69,47 @@ export const Seq6Resolution: React.FC = () => {
               zIndex: 35,
               display: "flex",
               flexDirection: "column",
-              gap: 6,
+              gap: 8,
             }}
           >
-            <MaskedSlideText
-              text="06 / CROSS-PLATFORM CLIENTS"
-              direction="left"
-              delay={5}
-              fontSize={15}
-              tracking={4}
-              fontWeight={700}
-              color={THEME.colors.accentEmerald}
-              fontFamily={THEME.fonts.mono}
+            <div
+              style={{
+                fontFamily: THEME.fonts.mono,
+                fontSize: 13,
+                fontWeight: 700,
+                color: THEME.colors.accentEmerald,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+              }}
+            >
+              09 / CROSS-PLATFORM CLIENTS
+            </div>
+            <div
+              style={{
+                fontFamily: THEME.fonts.display,
+                fontSize: 42,
+                fontWeight: 800,
+                color: THEME.colors.ink,
+                letterSpacing: -1,
+              }}
+            >
+              BUILT FOR EVERY WORKSTATION
+            </div>
+            <TypewriterText
+              text="Runs natively on macOS, Windows, and the Web."
+              startFrame={5}
+              charsPerSecond={26}
+              fontSize={18}
+              color={THEME.colors.inkMuted}
             />
-            <MaskedSlideText
-              text="BUILT FOR EVERY WORKSTATION"
-              direction="up"
-              delay={20}
-              fontSize={40}
-              tracking={-1}
-              fontWeight={800}
-              color={THEME.colors.ink}
+          </div>
+
+          {/* Scuttle Mascot perched on Top Left Window Header */}
+          <div style={{ position: "absolute", top: 50, right: 90, zIndex: 40 }}>
+            <ScuttleMascot
+              dialogue="Native Mac & Windows."
+              scale={0.65}
+              disableEntrance
             />
           </div>
 
@@ -102,7 +123,7 @@ export const Seq6Resolution: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Part B: Transitions #37 & #38 Final Master Lockup & Harmonic Resolve */
+        /* Part B: Feature 10 Final Master Lockup & Harmonic Resolve */
         <AbsoluteFill
           style={{
             display: "flex",
@@ -124,7 +145,7 @@ export const Seq6Resolution: React.FC = () => {
               border: `1px solid ${THEME.colors.borderLight}`,
               boxShadow: "0 40px 100px rgba(0, 0, 0, 0.9), 0 0 50px rgba(255, 255, 255, 0.06)",
               overflow: "hidden",
-              marginBottom: 28,
+              marginBottom: 24,
             }}
           >
             <Img
@@ -152,19 +173,37 @@ export const Seq6Resolution: React.FC = () => {
             />
           </div>
 
-          {/* Expanding Crosshair Ruler Lines */}
-          <div style={{ position: "relative", width: lineLength * 2, height: 1, backgroundColor: "rgba(255, 255, 255, 0.2)", marginBottom: 28 }} />
+          {/* Expanding Crosshair Ruler Line */}
+          <div
+            style={{
+              width: lineLength * 2,
+              height: 1,
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              marginBottom: 24,
+            }}
+          />
 
           {/* Brand Tagline: "Lets Larp" */}
-          <MaskedSlideText
-            text="Lets Larp"
-            direction="up"
-            delay={230}
-            fontSize={96}
-            tracking={-2}
-            fontWeight={900}
-            color={THEME.colors.ink}
-            fontFamily={THEME.fonts.display}
+          <div
+            style={{
+              fontFamily: THEME.fonts.display,
+              fontSize: 96,
+              fontWeight: 900,
+              color: THEME.colors.ink,
+              letterSpacing: -2,
+            }}
+          >
+            Lets Larp
+          </div>
+
+          {/* Live Typewriter Final Signoff */}
+          <TypewriterText
+            text="Stop applying manually. Lets Larp."
+            startFrame={250}
+            charsPerSecond={24}
+            fontSize={20}
+            color={THEME.colors.inkMuted}
+            style={{ marginTop: 12 }}
           />
 
           {/* Domain CTA Pill */}
@@ -192,21 +231,14 @@ export const Seq6Resolution: React.FC = () => {
             </span>
           </div>
 
-          <div
-            style={{
-              fontFamily: THEME.fonts.mono,
-              fontSize: 12,
-              color: THEME.colors.inkSubtle,
-              letterSpacing: 3,
-              marginTop: 18,
-            }}
-          >
-            MACOS · WINDOWS · WEB · AUTONOMOUS AGENT PROTOCOL
+          {/* Scuttle Mascot Standing Beside Logo */}
+          <div style={{ position: "absolute", bottom: 60, right: 120, zIndex: 50 }}>
+            <ScuttleMascot dialogue="Lets Larp." scale={0.7} disableEntrance />
           </div>
         </AbsoluteFill>
       )}
 
-      {/* Transition #38: Clean Outro Fade to Black */}
+      {/* Clean Outro Fade to Black */}
       {resolveFade > 0.01 && (
         <div
           style={{

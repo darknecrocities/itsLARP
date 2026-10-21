@@ -2,8 +2,9 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { THEME } from "../theme";
 import { ApertureIntro } from "../components/ApertureIntro";
-import { MaskedSlideText } from "../components/MaskedSlideText";
+import { TypewriterText } from "../components/TypewriterText";
 import { ShutterBladeWipe } from "../components/ShutterBladeWipe";
+import { ScuttleMascot } from "../components/ScuttleMascot";
 
 export const Seq1Genesis: React.FC = () => {
   const frame = useCurrentFrame();
@@ -34,52 +35,65 @@ export const Seq1Genesis: React.FC = () => {
           {/* Transitions #1 & #2: Aperture Iris & 3D Logo Perspective Lock */}
           <ApertureIntro />
 
-          {/* Transition #3: Masked Opposing Line Slide (Typographic Reveals) */}
+          {/* Omnipresent Scuttle Mascot: Feature 0 (Hook) peeking top-right */}
+          {frame >= 30 && (
+            <div style={{ position: "absolute", top: 40, right: 80, zIndex: 40 }}>
+              <ScuttleMascot
+                dialogue="Systems armed."
+                scale={0.55}
+                disableEntrance
+                snapBeats={[60, 120, 180]}
+              />
+            </div>
+          )}
+
+          {/* Transition #3: Typewriter Tagline & Category Reveal */}
           <div
             style={{
               position: "absolute",
-              bottom: 120,
+              bottom: 110,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 16,
+              gap: 14,
               zIndex: 30,
             }}
           >
-            {/* Top kicker sliding from right */}
-            <MaskedSlideText
-              text="AUTONOMOUS CAREER OPERATING SYSTEM"
-              direction="left"
-              delay={160}
-              fontSize={14}
-              tracking={6}
-              fontWeight={700}
-              color={THEME.colors.inkSubtle}
-              fontFamily={THEME.fonts.mono}
-            />
+            {/* Top kicker */}
+            <div
+              style={{
+                fontFamily: THEME.fonts.mono,
+                fontSize: 14,
+                fontWeight: 700,
+                color: THEME.colors.inkSubtle,
+                letterSpacing: 6,
+                textTransform: "uppercase",
+              }}
+            >
+              AUTONOMOUS CAREER OPERATING SYSTEM
+            </div>
 
-            {/* Hero Tagline: "Lets Larp" sliding up */}
-            <MaskedSlideText
-              text="Lets Larp"
-              direction="up"
-              delay={195}
-              fontSize={108}
-              tracking={-2}
-              fontWeight={900}
-              color={THEME.colors.ink}
-              fontFamily={THEME.fonts.display}
-            />
+            {/* Hero Tagline: "Lets Larp" */}
+            <div
+              style={{
+                fontFamily: THEME.fonts.display,
+                fontSize: 108,
+                fontWeight: 900,
+                color: THEME.colors.ink,
+                letterSpacing: -2,
+                lineHeight: 1.0,
+              }}
+            >
+              Lets Larp
+            </div>
 
-            {/* Subtitle sliding from bottom */}
-            <MaskedSlideText
-              text="Stop applying manually. Let 1,000 autonomous bots fight for your interviews."
-              direction="up"
-              delay={230}
-              fontSize={20}
-              tracking={0.2}
-              fontWeight={400}
+            {/* Live Typewriter Hook */}
+            <TypewriterText
+              text="Let's be real. Job hunting is completely broken."
+              startFrame={30}
+              charsPerSecond={24}
+              fontSize={18}
               color={THEME.colors.inkMuted}
-              fontFamily={THEME.fonts.sans}
             />
           </div>
         </AbsoluteFill>

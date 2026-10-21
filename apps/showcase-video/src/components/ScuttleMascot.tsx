@@ -6,28 +6,34 @@ interface ScuttleMascotProps {
   style?: React.CSSProperties;
   dialogue?: string;
   snapBeats?: number[]; // frames where claw snaps
+  scale?: number;
+  flip?: boolean;
+  disableEntrance?: boolean;
 }
 
 export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
   style,
   dialogue = "Snip through the noise.",
   snapBeats = [30, 73, 117, 160],
+  scale = 1.0,
+  flip = false,
+  disableEntrance = false,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entrance slide-in from bottom right
+  // Entrance slide-in from bottom right (optional)
   const entrance = spring({
     frame,
     fps,
     config: THEME.springs.snappy,
   });
 
-  const translateX = interpolate(entrance, [0, 1], [180, 0]);
-  const translateY = interpolate(entrance, [0, 1], [140, 0]);
+  const translateX = disableEntrance ? 0 : interpolate(entrance, [0, 1], [180, 0]);
+  const translateY = disableEntrance ? 0 : interpolate(entrance, [0, 1], [140, 0]);
 
   // Breathing / gentle float
-  const floatY = Math.sin(frame / 15) * 6;
+  const floatY = Math.sin(frame / 15) * 5;
 
   // Snapping logic based on snapBeats
   let clawAngle = 0;
@@ -61,8 +67,9 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
     <div
       style={{
         position: "relative",
-        transform: `translate(${translateX}px, ${translateY + floatY}px)`,
+        transform: `translate(${translateX}px, ${translateY + floatY}px) scale(${scale}) scaleX(${flip ? -1 : 1})`,
         display: "inline-block",
+        transformOrigin: "center center",
         ...style,
       }}
     >
