@@ -346,6 +346,7 @@ class Run:
                     db.add(rec)
                     try:
                         from services.database import IntegrationRecord
+                        from services.email_monitor import record_device_notification
                         from sqlalchemy.orm.attributes import flag_modified
                         em_rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "email").first()
                         if em_rec:
@@ -363,6 +364,14 @@ class Run:
                             em_s["responses"] = rsps[:50]
                             em_rec.settings = em_s
                             flag_modified(em_rec, "settings")
+                        if db_status == "APPLIED":
+                            record_device_notification(
+                                db=db, event_type="swarm_applied",
+                                title=f"🚀 Swarm Applied: {j['company']}",
+                                message=f"Autonomous bot applied for {j['title']} via {platform}.",
+                                recipient=cand_email, priority="high", link_url="/applications",
+                                tag=f"swarm_applied:{j['company']}:{j['id']}",
+                            )
                     except Exception:
                         pass
                     db.commit()

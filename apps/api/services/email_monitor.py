@@ -105,6 +105,48 @@ async def process_recruiter_response(
             except Exception:
                 notion_updated = False
 
+    # Dispatch high-value desktop/OS notification for important recruiter updates
+    if classification == "interview":
+        record_device_notification(
+            db=db,
+            event_type="recruiter_interview",
+            title=f"🎉 Interview Invitation: {company}",
+            message=f"{subject} — Check your application details and schedule.",
+            priority="urgent",
+            link_url="/applications",
+            tag=f"recruiter_interview:{company}:{subject[:30]}",
+        )
+    elif classification == "offer":
+        record_device_notification(
+            db=db,
+            event_type="recruiter_offer",
+            title=f"🏆 Job Offer: {company}!",
+            message=f"{subject} — Congratulations on your formal offer!",
+            priority="urgent",
+            link_url="/applications",
+            tag=f"recruiter_offer:{company}:{subject[:30]}",
+        )
+    elif classification == "inquiry":
+        record_device_notification(
+            db=db,
+            event_type="recruiter_inquiry",
+            title=f"📝 Assessment / Inquiry: {company}",
+            message=f"{subject} — Action requested by hiring team.",
+            priority="high",
+            link_url="/applications",
+            tag=f"recruiter_inquiry:{company}:{subject[:30]}",
+        )
+    elif classification == "rejected":
+        record_device_notification(
+            db=db,
+            event_type="recruiter_rejected",
+            title=f"Application Update: {company}",
+            message=f"{subject}",
+            priority="normal",
+            link_url="/applications",
+            tag=f"recruiter_rejected:{company}:{subject[:30]}",
+        )
+
     db.commit()
 
     return {
@@ -186,6 +228,18 @@ def parse_and_execute_email_command(
     rec.last_synced_at = datetime.now(timezone.utc)
     db.commit()
 
+    # Dispatch desktop notification for remote command confirmation
+    record_device_notification(
+        db=db,
+        event_type="remote_command",
+        title=f"🎮 Swarm Remote: [{cmd}]",
+        message=response_msg,
+        recipient=sender,
+        priority="high",
+        link_url="/integrations",
+        tag=f"remote_cmd:{cmd}:{now_iso[:16]}",
+    )
+
     return {
         "ok": True,
         "command": cmd,
@@ -204,6 +258,9 @@ def record_device_notification(
     title: str,
     message: str,
     recipient: str = DEFAULT_CANDIDATE_EMAIL,
+    priority: str = "high",  # "urgent", "high", "normal", "low"
+    link_url: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Records an alert for desktop/mobile notifications and email monitoring."""
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -214,17 +271,27 @@ def record_device_notification(
 
     settings = dict(rec.settings or {})
     notifs = list(settings.get("device_notifications", []))
+
+    # Anti-spam deduplication: check if same tag or title was emitted recently
+    tag_key = tag or f"{event_type}:{title}"
+    for existing in notifs[:5]:
+        if existing.get("tag") == tag_key:
+            return existing
+
     item = {
         "id": f"notif-{int(datetime.now(timezone.utc).timestamp() * 1000)}",
         "event_type": event_type,
         "title": title,
         "message": message,
         "recipient": recipient,
+        "priority": priority,
+        "link_url": link_url,
+        "tag": tag_key,
         "timestamp": now_iso,
         "read": False,
     }
     notifs.insert(0, item)
-    settings["device_notifications"] = notifs[:30]
+    settings["device_notifications"] = notifs[:40]
     rec.settings = settings
     flag_modified(rec, "settings")
     db.commit()
