@@ -11,7 +11,6 @@ export interface MetricItem {
 }
 
 export interface MascotPlacement {
-  position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "on-card" | "top-bezel";
   dialogue?: string;
   scale?: number;
   flip?: boolean;
@@ -43,19 +42,19 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entrance spring for editorial card
-  const cardSpring = spring({
+  // Entrance spring for pure typography
+  const textSpring = spring({
     frame: Math.max(0, frame - startFrame),
     fps,
     config: { damping: 24, stiffness: 200, mass: 0.9 },
   });
 
-  const cardTranslateX = interpolate(
-    cardSpring,
+  const textTranslateX = interpolate(
+    textSpring,
     [0, 1],
-    [side === "left" ? -80 : 80, 0]
+    [side === "left" ? -70 : 70, 0]
   );
-  const cardOpacity = interpolate(cardSpring, [0, 0.4], [0, 1]);
+  const textOpacity = interpolate(textSpring, [0, 0.35], [0, 1]);
 
   return (
     <div
@@ -66,41 +65,42 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
         flexDirection: side === "left" ? "row" : "row-reverse",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 60px",
+        padding: "0 70px",
         overflow: "hidden",
       }}
     >
-      {/* 1. Editorial Text Card (Width: ~540px) */}
+      {/* 1. Pure Floating Typography (NO CARDS / NO BOXES) */}
       <div
         style={{
           width: 540,
           display: "flex",
           flexDirection: "column",
           gap: 20,
-          zIndex: 30,
-          transform: `translateX(${cardTranslateX}px)`,
-          opacity: cardOpacity,
+          zIndex: 35,
+          transform: `translateX(${textTranslateX}px)`,
+          opacity: textOpacity,
           position: "relative",
+          pointerEvents: "none",
         }}
       >
-        {/* Category Badge */}
+        {/* Category Kicker */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span
             style={{
-              width: 8,
-              height: 8,
+              width: 9,
+              height: 9,
               borderRadius: "50%",
               backgroundColor: badgeColor,
-              boxShadow: `0 0 10px ${badgeColor}`,
+              boxShadow: `0 0 12px ${badgeColor}`,
             }}
           />
           <span
             style={{
               fontFamily: THEME.fonts.mono,
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 800,
               color: badgeColor,
-              letterSpacing: 2.5,
+              letterSpacing: 3,
               textTransform: "uppercase",
             }}
           >
@@ -108,77 +108,60 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
           </span>
         </div>
 
-        {/* Feature Title */}
+        {/* Ultra-Bold Feature Title (fontWeight: 900) */}
         <div
           style={{
             fontFamily: THEME.fonts.display,
-            fontSize: 44,
-            fontWeight: 800,
-            color: THEME.colors.ink,
-            letterSpacing: -1.2,
-            lineHeight: 1.08,
+            fontSize: 52,
+            fontWeight: 900,
+            color: "#ffffff",
+            letterSpacing: -1.6,
+            lineHeight: 1.05,
+            textShadow: "0 4px 25px rgba(0, 0, 0, 0.95)",
           }}
         >
           {title}
         </div>
 
-        {/* Live Typewriter Description */}
-        <div
-          style={{
-            backgroundColor: "rgba(15, 15, 19, 0.85)",
-            border: `1px solid ${THEME.colors.borderLight}`,
-            borderRadius: 14,
-            padding: "20px 24px",
-            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(16px)",
-            position: "relative",
-          }}
-        >
+        {/* Pure Floating Bold Typewriter Description (NO BOX) */}
+        <div style={{ position: "relative", marginTop: 4 }}>
           <TypewriterText
             text={description}
             startFrame={startFrame + 10}
             charsPerSecond={28}
             cursorColor={badgeColor}
-            fontSize={16}
-            lineHeight={1.5}
-            color={THEME.colors.ink}
+            fontSize={18}
+            fontWeight={700}
+            lineHeight={1.55}
+            color="#ffffff"
           />
-
-          {/* Optional Mascot on top of Card */}
-          {mascotConfig?.position === "on-card" && (
-            <div style={{ position: "absolute", top: -85, right: 20, zIndex: 40 }}>
-              <ScuttleMascot
-                dialogue={mascotConfig.dialogue}
-                scale={mascotConfig.scale ?? 0.55}
-                flip={mascotConfig.flip ?? false}
-                disableEntrance
-              />
-            </div>
-          )}
         </div>
 
-        {/* Live Telemetry Metric Badges */}
+        {/* Inline Floating Telemetry Badges */}
         {metrics && metrics.length > 0 && (
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 6 }}>
             {metrics.map((m, idx) => (
               <div
                 key={idx}
                 style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                  backgroundColor: "rgba(0, 0, 0, 0.75)",
                   border: `1px solid ${THEME.colors.borderLight}`,
-                  borderRadius: 10,
-                  padding: "8px 16px",
+                  borderRadius: 100,
+                  padding: "8px 18px",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
+                  alignItems: "center",
+                  gap: 10,
+                  backdropFilter: "blur(12px)",
+                  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.6)",
                 }}
               >
                 <span
                   style={{
                     fontFamily: THEME.fonts.mono,
-                    fontSize: 10,
+                    fontSize: 11,
                     color: THEME.colors.inkSubtle,
                     letterSpacing: 1,
+                    fontWeight: 700,
                   }}
                 >
                   {m.label}
@@ -186,9 +169,9 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
                 <span
                   style={{
                     fontFamily: THEME.fonts.mono,
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: 800,
-                    color: m.color ?? THEME.colors.ink,
+                    color: m.color ?? "#ffffff",
                   }}
                 >
                   {m.value}
@@ -199,10 +182,10 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
         )}
       </div>
 
-      {/* 2. Main Media Stage (Width: ~1240px) */}
+      {/* 2. Main Media Stage (Width: ~1200px) */}
       <div
         style={{
-          width: 1220,
+          width: 1200,
           height: "100%",
           display: "flex",
           alignItems: "center",
@@ -212,29 +195,29 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
         }}
       >
         {children}
-
-        {/* Optional Mascot on top bezel or around media frame */}
-        {mascotConfig && mascotConfig.position !== "on-card" && (
-          <div
-            style={{
-              position: "absolute",
-              zIndex: 50,
-              ...(mascotConfig.position === "top-right" && { top: 70, right: 30 }),
-              ...(mascotConfig.position === "top-left" && { top: 70, left: 30 }),
-              ...(mascotConfig.position === "bottom-right" && { bottom: 50, right: 20 }),
-              ...(mascotConfig.position === "bottom-left" && { bottom: 50, left: 20 }),
-              ...(mascotConfig.position === "top-bezel" && { top: 60, left: "50%", transform: "translateX(-50%)" }),
-            }}
-          >
-            <ScuttleMascot
-              dialogue={mascotConfig.dialogue}
-              scale={mascotConfig.scale ?? 0.65}
-              flip={mascotConfig.flip ?? false}
-              disableEntrance
-            />
-          </div>
-        )}
       </div>
+
+      {/* 3. Scuttle Mascot (Strictly on OPPOSITE screen corner from text to guarantee ZERO occlusion) */}
+      {mascotConfig && (
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 60,
+            // If text is on LEFT (left: 70px), mascot is anchored to FAR RIGHT
+            // If text is on RIGHT (right: 70px), mascot is anchored to FAR LEFT
+            ...(side === "left"
+              ? { bottom: 35, right: 60 }
+              : { bottom: 35, left: 60 }),
+          }}
+        >
+          <ScuttleMascot
+            dialogue={mascotConfig.dialogue}
+            scale={mascotConfig.scale ?? 0.65}
+            flip={side === "right"} // Face towards the center
+            disableEntrance
+          />
+        </div>
+      )}
     </div>
   );
 };

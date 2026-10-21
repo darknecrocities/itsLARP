@@ -22,6 +22,13 @@ export const Seq2Command: React.FC = () => {
   });
   const blindsAngle = interpolate(blindsProgress, [0, 1], [0, 90]);
 
+  // Transition: Diagonal Laser Split Wipe between Feature 1 and Feature 2 (Frames 235 - 255)
+  const isTransition1to2 = frame >= 235 && frame <= 255;
+  const diagProgress = interpolate(frame, [235, 255], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
   return (
     <AbsoluteFill style={{ backgroundColor: THEME.colors.bg, overflow: "hidden" }}>
       {/* Background blueprint grid */}
@@ -51,7 +58,6 @@ export const Seq2Command: React.FC = () => {
             { label: "PIPELINE HEALTH", value: "OPTIMAL", color: THEME.colors.accentEmerald },
           ]}
           mascotConfig={{
-            position: "top-right",
             dialogue: "Telemetry nominal.",
             scale: 0.65,
           }}
@@ -101,9 +107,8 @@ export const Seq2Command: React.FC = () => {
             { label: "COMPETENCY TIERS", value: "STAFF LEVEL", color: THEME.colors.ink },
           ]}
           mascotConfig={{
-            position: "on-card",
             dialogue: "Extracting superpowers.",
-            scale: 0.55,
+            scale: 0.65,
           }}
         >
           <CameraZoomShift
@@ -136,6 +141,44 @@ export const Seq2Command: React.FC = () => {
             </CinematicFrame>
           </CameraZoomShift>
         </EditorialSplitStage>
+      )}
+
+      {/* Transition: Feature 1 -> Feature 2 Diagonal Laser Split Wipe (Frames 235 - 255) */}
+      {isTransition1to2 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 70,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
+        >
+          {/* Laser Wipe Beam Sweep */}
+          <div
+            style={{
+              position: "absolute",
+              top: -200,
+              bottom: -200,
+              width: 5,
+              backgroundColor: "#ffffff",
+              boxShadow: `0 0 35px 12px ${THEME.colors.accentAmber}, 0 0 90px 25px #ffffff`,
+              left: `${diagProgress * 120 - 10}%`,
+              transform: "skewX(-20deg)",
+            }}
+          />
+          {/* Specular Flash at midpoint */}
+          {frame >= 243 && frame <= 247 && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundColor: "#ffffff",
+                opacity: 0.3,
+              }}
+            />
+          )}
+        </div>
       )}
 
       {/* Transition #10: Venetian Blinds Transition Slat Overlay (Frames 460 - 504) */}

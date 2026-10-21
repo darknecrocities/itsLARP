@@ -64,8 +64,8 @@ export const Seq1Genesis: React.FC = () => {
               style={{
                 fontFamily: THEME.fonts.mono,
                 fontSize: 14,
-                fontWeight: 700,
-                color: THEME.colors.inkSubtle,
+                fontWeight: 800,
+                color: THEME.colors.accentEmerald,
                 letterSpacing: 6,
                 textTransform: "uppercase",
               }}
@@ -79,21 +79,23 @@ export const Seq1Genesis: React.FC = () => {
                 fontFamily: THEME.fonts.display,
                 fontSize: 108,
                 fontWeight: 900,
-                color: THEME.colors.ink,
+                color: "#ffffff",
                 letterSpacing: -2,
                 lineHeight: 1.0,
+                textShadow: "0 6px 30px rgba(0, 0, 0, 0.9)",
               }}
             >
               Lets Larp
             </div>
 
-            {/* Live Typewriter Hook */}
+            {/* Live Typewriter Hook (Pure Bold High-Contrast Text) */}
             <TypewriterText
               text="Let's be real. Job hunting is completely broken."
               startFrame={30}
               charsPerSecond={24}
-              fontSize={18}
-              color={THEME.colors.inkMuted}
+              fontSize={20}
+              fontWeight={700}
+              color="#ffffff"
             />
           </div>
         </AbsoluteFill>

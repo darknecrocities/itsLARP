@@ -64,7 +64,6 @@ export const Seq4TheDrop: React.FC = () => {
             { label: "LATENCY PER SUBMISSION", value: "1.2s", color: THEME.colors.accentAmber },
           ]}
           mascotConfig={{
-            position: "top-right",
             dialogue: "1,000 bots deployed. Go!",
             scale: 0.65,
           }}
@@ -137,9 +136,8 @@ export const Seq4TheDrop: React.FC = () => {
             { label: "ACCOUNT SAFETY", value: "100% COMPLIANT", color: THEME.colors.ink },
           ]}
           mascotConfig={{
-            position: "top-bezel",
             dialogue: "50 apps/day limit enforced.",
-            scale: 0.55,
+            scale: 0.65,
           }}
         >
           <CameraZoomShift
@@ -202,6 +200,40 @@ export const Seq4TheDrop: React.FC = () => {
             </CinematicFrame>
           </CameraZoomShift>
         </EditorialSplitStage>
+      )}
+
+      {/* Transition: Feature 6 -> Feature 7 Vertical Alternating Slat Wipe Outro (Frames 915 - 944) */}
+      {frame >= 915 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            zIndex: 70,
+            pointerEvents: "none",
+          }}
+        >
+          {Array.from({ length: 10 }).map((_, idx) => {
+            const slatProg = interpolate(frame, [915, 944], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            const isEven = idx % 2 === 0;
+            const shiftY = interpolate(slatProg, [0, 1], [isEven ? -100 : 100, 0]);
+            return (
+              <div
+                key={idx}
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  backgroundColor: "#000000",
+                  transform: `translateY(${shiftY}%)`,
+                  borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              />
+            );
+          })}
+        </div>
       )}
     </AbsoluteFill>
   );

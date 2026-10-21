@@ -24,11 +24,11 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
   cursorColor = THEME.colors.accentEmerald,
   showCursor = true,
   fontFamily = THEME.fonts.mono,
-  fontSize = 16,
-  color = THEME.colors.inkMuted,
-  lineHeight = 1.5,
-  fontWeight = 500,
-  letterSpacing = 0.2,
+  fontSize = 18,
+  color = "#ffffff", // Pure high-contrast white
+  lineHeight = 1.55,
+  fontWeight = 700, // Bold
+  letterSpacing = 0.3,
   style,
 }) => {
   const frame = useCurrentFrame();
@@ -53,6 +53,7 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
         letterSpacing,
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
+        textShadow: "0 2px 12px rgba(0, 0, 0, 0.8)",
         ...style,
       }}
     >
@@ -61,13 +62,13 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
         <span
           style={{
             display: "inline-block",
-            width: 8,
-            height: fontSize * 0.9,
+            width: 10,
+            height: fontSize * 0.95,
             backgroundColor: isBlinkVisible ? cursorColor : "transparent",
-            marginLeft: 3,
+            marginLeft: 4,
             verticalAlign: "middle",
-            boxShadow: isBlinkVisible ? `0 0 8px ${cursorColor}` : "none",
-            borderRadius: 1,
+            boxShadow: isBlinkVisible ? `0 0 12px ${cursorColor}` : "none",
+            borderRadius: 2,
           }}
         />
       )}

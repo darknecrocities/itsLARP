@@ -67,19 +67,19 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
     <div
       style={{
         position: "relative",
-        transform: `translate(${translateX}px, ${translateY + floatY}px) scale(${scale}) scaleX(${flip ? -1 : 1})`,
+        transform: `translate(${translateX}px, ${translateY + floatY}px) scale(${scale})`,
         display: "inline-block",
         transformOrigin: "center center",
         ...style,
       }}
     >
-      {/* Dialogue Bubble */}
+      {/* Dialogue Bubble (Never mirrored so text remains 100% readable) */}
       {dialogue && (
         <div
           style={{
             position: "absolute",
             top: -70,
-            right: 140,
+            ...(flip ? { left: 140 } : { right: 140 }),
             backgroundColor: "#ffffff",
             color: "#000000",
             padding: "10px 18px",
@@ -92,7 +92,7 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
             border: "2px solid #000000",
             opacity: dialogueEntrance,
             transform: `scale(${dialogueEntrance}) translateY(${interpolate(dialogueEntrance, [0, 1], [15, 0])}px)`,
-            transformOrigin: "bottom right",
+            transformOrigin: flip ? "bottom left" : "bottom right",
             zIndex: 10,
           }}
         >
@@ -102,7 +102,7 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
             style={{
               position: "absolute",
               bottom: -8,
-              right: 28,
+              ...(flip ? { left: 28 } : { right: 28 }),
               width: 0,
               height: 0,
               borderLeft: "8px solid transparent",
@@ -113,7 +113,7 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
         </div>
       )}
 
-      {/* Scuttle 2D Mascot SVG */}
+      {/* Scuttle 2D Mascot SVG (Flipped cleanly when facing center) */}
       <svg
         viewBox="0 0 280 320"
         fill="none"
@@ -123,6 +123,8 @@ export const ScuttleMascot: React.FC<ScuttleMascotProps> = ({
           height: 360,
           overflow: "visible",
           filter: "drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7))",
+          transform: flip ? "scaleX(-1)" : "none",
+          transformOrigin: "center center",
         }}
       >
         {/* Lower Left Crawling Legs */}

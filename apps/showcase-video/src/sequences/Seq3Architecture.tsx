@@ -74,7 +74,6 @@ export const Seq3Architecture: React.FC = () => {
             { label: "ATS PARSE YIELD", value: "99.4%", color: THEME.colors.ink },
           ]}
           mascotConfig={{
-            position: "bottom-right",
             dialogue: "100% ATS score. Zero typos.",
             scale: 0.65,
           }}
@@ -154,10 +153,8 @@ export const Seq3Architecture: React.FC = () => {
             { label: "DOM CRAWLER", value: "ACTIVE", color: THEME.colors.accentAmber },
           ]}
           mascotConfig={{
-            position: "bottom-left",
             dialogue: "5 boards scanned.",
             scale: 0.65,
-            flip: true,
           }}
         >
           <CameraZoomShift
@@ -216,6 +213,58 @@ export const Seq3Architecture: React.FC = () => {
         </EditorialSplitStage>
       )}
 
+      {/* Transition: Feature 3 -> Feature 4 Dual Curtain Push & Laser Blade Wipe (Frames 438 - 458) */}
+      {frame >= 438 && frame <= 458 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 70,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
+        >
+          {/* Dual Curtain Slats sliding inwards */}
+          {(() => {
+            const curProg = interpolate(frame, [438, 458], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            const slatOffset = interpolate(curProg, [0, 0.5, 1], [100, 0, -100]);
+            return (
+              <>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    width: "50%",
+                    backgroundColor: "#000000",
+                    transform: `translateY(${slatOffset}%)`,
+                    borderRight: `2px solid ${THEME.colors.accentEmerald}`,
+                    boxShadow: `0 0 30px ${THEME.colors.accentEmerald}`,
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: "50%",
+                    backgroundColor: "#000000",
+                    transform: `translateY(${-slatOffset}%)`,
+                    borderLeft: `2px solid ${THEME.colors.accentEmerald}`,
+                    boxShadow: `0 0 30px ${THEME.colors.accentEmerald}`,
+                  }}
+                />
+              </>
+            );
+          })()}
+        </div>
+      )}
+
       {/* Pre-Drop Tension & Countdown (Frames 750 - 874) */}
       {isPreDrop && (
         <AbsoluteFill
@@ -234,7 +283,7 @@ export const Seq3Architecture: React.FC = () => {
               style={{
                 fontFamily: THEME.fonts.mono,
                 fontSize: 16,
-                fontWeight: 700,
+                fontWeight: 800,
                 color: THEME.colors.accentEmerald,
                 letterSpacing: 8,
               }}
@@ -246,8 +295,9 @@ export const Seq3Architecture: React.FC = () => {
                 fontFamily: THEME.fonts.display,
                 fontSize: 96,
                 fontWeight: 900,
-                color: THEME.colors.ink,
+                color: "#ffffff",
                 letterSpacing: -2,
+                textShadow: "0 6px 40px rgba(0, 0, 0, 0.95)",
               }}
             >
               UNLEASH THE SWARM
@@ -257,7 +307,8 @@ export const Seq3Architecture: React.FC = () => {
               startFrame={755}
               charsPerSecond={22}
               fontSize={22}
-              color={THEME.colors.inkMuted}
+              fontWeight={700}
+              color="#ffffff"
             />
           </div>
 

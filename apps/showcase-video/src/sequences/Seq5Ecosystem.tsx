@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, Video, Img, staticFile } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, Video, Img, staticFile } from "remotion";
 import { THEME } from "../theme";
 import { CinematicFrame } from "../components/CinematicFrame";
 import { CameraZoomShift } from "../components/CameraZoomShift";
@@ -43,7 +43,6 @@ export const Seq5Ecosystem: React.FC = () => {
             { label: "INTERVIEWS", value: "18 SCHEDULED", color: THEME.colors.accentEmerald },
           ]}
           mascotConfig={{
-            position: "top-right",
             dialogue: "Interview unlocked!",
             scale: 0.65,
           }}
@@ -86,9 +85,8 @@ export const Seq5Ecosystem: React.FC = () => {
             { label: "DATABASE PROPERTIES", value: "100% MAPPED", color: THEME.colors.ink },
           ]}
           mascotConfig={{
-            position: "on-card",
             dialogue: "Synced in < 12ms.",
-            scale: 0.55,
+            scale: 0.65,
           }}
         >
           <CameraZoomShift
@@ -142,6 +140,68 @@ export const Seq5Ecosystem: React.FC = () => {
             </CinematicFrame>
           </CameraZoomShift>
         </EditorialSplitStage>
+      )}
+
+      {/* Transition: Feature 7 -> Feature 8 High-Speed Scanline Laser Sweep (Frames 230 - 250) */}
+      {frame >= 230 && frame <= 250 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 70,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
+        >
+          {(() => {
+            const scanProg = interpolate(frame, [230, 250], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            return (
+              <>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: `${scanProg * 100}%`,
+                    height: 4,
+                    backgroundColor: "#ffffff",
+                    boxShadow: `0 0 30px 10px ${THEME.colors.accentPurple}, 0 0 60px 20px #ffffff`,
+                  }}
+                />
+                {frame >= 238 && frame <= 242 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backgroundColor: THEME.colors.accentPurple,
+                      opacity: 0.2,
+                    }}
+                  />
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* Transition: Feature 8 -> Feature 9 Optical Flash & Shutter Outro (Frames 455 - 480) */}
+      {frame >= 455 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "#000000",
+            opacity: interpolate(frame, [455, 480], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            }),
+            zIndex: 75,
+            pointerEvents: "none",
+          }}
+        />
       )}
     </AbsoluteFill>
   );

@@ -76,7 +76,7 @@ export const Seq6Resolution: React.FC = () => {
               style={{
                 fontFamily: THEME.fonts.mono,
                 fontSize: 13,
-                fontWeight: 700,
+                fontWeight: 800,
                 color: THEME.colors.accentEmerald,
                 letterSpacing: 3,
                 textTransform: "uppercase",
@@ -87,10 +87,11 @@ export const Seq6Resolution: React.FC = () => {
             <div
               style={{
                 fontFamily: THEME.fonts.display,
-                fontSize: 42,
-                fontWeight: 800,
-                color: THEME.colors.ink,
-                letterSpacing: -1,
+                fontSize: 48,
+                fontWeight: 900,
+                color: "#ffffff",
+                letterSpacing: -1.2,
+                textShadow: "0 4px 25px rgba(0, 0, 0, 0.95)",
               }}
             >
               BUILT FOR EVERY WORKSTATION
@@ -99,8 +100,9 @@ export const Seq6Resolution: React.FC = () => {
               text="Runs natively on macOS, Windows, and the Web."
               startFrame={5}
               charsPerSecond={26}
-              fontSize={18}
-              color={THEME.colors.inkMuted}
+              fontSize={20}
+              fontWeight={700}
+              color="#ffffff"
             />
           </div>
 
@@ -187,10 +189,11 @@ export const Seq6Resolution: React.FC = () => {
           <div
             style={{
               fontFamily: THEME.fonts.display,
-              fontSize: 96,
+              fontSize: 104,
               fontWeight: 900,
-              color: THEME.colors.ink,
+              color: "#ffffff",
               letterSpacing: -2,
+              textShadow: "0 6px 40px rgba(0, 0, 0, 0.95)",
             }}
           >
             Lets Larp
@@ -201,8 +204,9 @@ export const Seq6Resolution: React.FC = () => {
             text="Stop applying manually. Lets Larp."
             startFrame={250}
             charsPerSecond={24}
-            fontSize={20}
-            color={THEME.colors.inkMuted}
+            fontSize={22}
+            fontWeight={700}
+            color="#ffffff"
             style={{ marginTop: 12 }}
           />
 
@@ -210,7 +214,7 @@ export const Seq6Resolution: React.FC = () => {
           <div
             style={{
               marginTop: 24,
-              padding: "14px 36px",
+              padding: "14px 40px",
               borderRadius: 100,
               backgroundColor: "rgba(255, 255, 255, 0.08)",
               border: `1px solid ${THEME.colors.borderLight}`,
@@ -221,8 +225,8 @@ export const Seq6Resolution: React.FC = () => {
             <span
               style={{
                 fontFamily: THEME.fonts.mono,
-                fontSize: 20,
-                fontWeight: 700,
+                fontSize: 22,
+                fontWeight: 800,
                 color: THEME.colors.ink,
                 letterSpacing: 3,
               }}
