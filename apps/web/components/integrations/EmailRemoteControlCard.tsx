@@ -79,8 +79,10 @@ export function EmailRemoteControlCard() {
         sendDesktopNotification({
           title: "Job Search Complete",
           body: "Swarm discovered 10 verified engineering roles matching your profile.",
+          priority: "high",
+          bypassAntiSpam: true,
         });
-        setStatusMsg("Alert dispatched to device and logged for " + emailInput);
+        setStatusMsg("Alert dispatched to your computer and logged for " + emailInput);
         await fetchStatus();
       }
     } catch (e: any) {

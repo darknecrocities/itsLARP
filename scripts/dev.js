@@ -115,6 +115,32 @@ function checkPortInUse(port) {
   });
 }
 
+function freePort(port) {
+  try {
+    if (process.platform === "win32") {
+      const out = execSync(`netstat -ano | findstr :${port}`, { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] });
+      const lines = out.trim().split("\n");
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        const pid = parts[parts.length - 1];
+        if (pid && !isNaN(pid) && pid !== "0") {
+          execSync(`taskkill /PID ${pid} /F /T`, { stdio: "ignore" });
+        }
+      }
+    } else {
+      const pids = execSync(`lsof -ti :${port}`, { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }).trim();
+      if (pids) {
+        for (const pid of pids.split("\n")) {
+          const num = Number(pid);
+          if (num && num !== process.pid) {
+            try { process.kill(num, "SIGKILL"); } catch {}
+          }
+        }
+      }
+    }
+  } catch {}
+}
+
 async function bootServices() {
   // 3. Spawn FastAPI Backend (port 8000)
   const isApiActive = await checkPortInUse(8000);
@@ -147,10 +173,17 @@ async function bootServices() {
   }
 
   // 4. Spawn Next.js Frontend (port 3000)
+  // Ensure stale zombie next-server instances from previous builds are cleared
   const isWebActive = await checkPortInUse(3000);
-  if (isWebActive) {
+  if (isWebActive && process.env.REUSE_PORT === "1") {
     console.log(C_WEB + "\x1b[32m[OK]\x1b[0m Next.js web app already running on port 3000.");
   } else {
+    if (isWebActive) {
+      console.log(C_SYS + "Clearing stale process on port 3000 to ensure fresh Turbopack dev instance...");
+      freePort(3000);
+      await new Promise((r) => setTimeout(r, 600));
+    }
+
     const nextCmd = process.platform === "win32" ? "npx.cmd" : "npx";
     const webProcess = spawn(nextCmd, ["next", "dev", "-p", "3000"], {
       cwd: WEB_DIR,

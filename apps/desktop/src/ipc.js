@@ -244,6 +244,11 @@ function setupIpcHandlers(ctx) {
   // 9. Cross-Platform Native Notification Dispatcher (Windows Action Center & macOS Notification Center)
   ipcMain.handle("notification:show", async (_event, payload) => {
     try {
+      let dispatched = false;
+      const title = (payload?.title || "itsLARP Update").replace(/["\\]/g, "\\$&");
+      const body = (payload?.body || "").replace(/["\\]/g, "\\$&");
+
+      // 1. Electron Native Notification API
       if (Notification.isSupported()) {
         const iconPath = getAppIconPath();
         const notif = new Notification({
@@ -265,9 +270,39 @@ function setupIpcHandlers(ctx) {
           }
         });
         notif.show();
-        return { ok: true };
+        dispatched = true;
       }
-      return { ok: false, error: "Notifications not supported on host platform" };
+
+      // 2. Direct macOS Notification Center bridge via osascript
+      if (process.platform === "darwin") {
+        exec(
+          `osascript -e 'display notification "${body}" with title "${title}" sound name "default"'`,
+          (err) => {
+            if (err) console.error("[Desktop Notification] macOS osascript error:", err.message);
+          }
+        );
+        dispatched = true;
+      }
+
+      // 3. Direct Windows Action Center toast bridge via PowerShell
+      if (process.platform === "win32") {
+        const winTitle = (payload?.title || "itsLARP Update").replace(/["`$]/g, "");
+        const winBody = (payload?.body || "").replace(/["`$]/g, "");
+        const psScript = `
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+        $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+        $nodes = $template.GetElementsByTagName('text')
+        $nodes.Item(0).AppendChild($template.CreateTextNode('${winTitle}')) | Out-Null
+        $nodes.Item(1).AppendChild($template.CreateTextNode('${winBody}')) | Out-Null
+        $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('itsLARP').Show($toast)
+        `.replace(/\n/g, " ");
+
+        exec(`powershell -NoProfile -NonInteractive -Command "${psScript}"`, () => {});
+        dispatched = true;
+      }
+
+      return { ok: dispatched };
     } catch (err) {
       return { ok: false, error: err.message };
     }
