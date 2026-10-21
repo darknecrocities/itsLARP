@@ -132,13 +132,13 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Cartoon Cloud Dialogue Bubble */}
+      {/* Cartoon Cloud Dialogue Bubble positioned safely to upper-left of Scuttle */}
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
             text={HERO_QUOTES[quoteIndex]}
             onClose={() => setSpeechVisible(false)}
-            className="-top-32 right-10 sm:-top-36 sm:right-16 md:-top-40 md:right-24"
+            className="absolute top-2 -left-64 sm:top-4 sm:-left-72 lg:top-4 lg:-left-80 z-30"
           />
         )}
       </AnimatePresence>
@@ -157,7 +157,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
           isSnapping={isSnapping}
           leftClawOpen={leftClawOpen}
           rightClawOpen={rightClawOpen}
-          className="w-[280px] sm:w-[360px] md:w-[440px] lg:w-[540px] xl:w-[640px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+          className="w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] xl:w-[520px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </motion.div>
     </div>

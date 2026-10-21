@@ -12,7 +12,7 @@ import { ArrowRight } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section id="hero-section" className="relative border-b border-line pt-16 sm:pt-20 pb-16 sm:pb-20 overflow-hidden bg-bg">
+    <section id="hero-section" className="relative border-b border-line pt-16 sm:pt-20 pb-16 sm:pb-20 overflow-hidden bg-bg min-h-[580px] lg:min-h-[640px]">
       {/* Interactive Ambient Dot Grid, Vertical Columns & Mouse Spotlight */}
       <HeroBackground />
 
@@ -102,8 +102,8 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Desktop Mascot: Anchored Directly Flush to Right Viewport Edge */}
-      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+      {/* Desktop Mascot: Anchored Directly Flush to Right Viewport Edge & Vertically Centered */}
+      <div className="hidden lg:flex items-center justify-end absolute right-0 top-0 bottom-0 z-20 pointer-events-auto">
         <HeroPeekingMascot />
       </div>
     </section>

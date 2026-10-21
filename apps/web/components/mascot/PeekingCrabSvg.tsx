@@ -192,34 +192,51 @@ export function PeekingCrabSvg({
           )}
         </g>
 
-        {/* Left Arm & Claw (Resting / Gripping the Border - Stable Arm, Pinching Blade) */}
+        {/* Left Arm & Claw (Authentic 2D Crab Pincers) */}
         <g>
           {/* Arm Segment */}
           <path
-            d="M 115 160 C 85 150, 60 140, 48 115"
+            d="M 115 160 C 88 150, 68 140, 56 125"
             stroke="#000000"
             strokeWidth="4"
             strokeLinecap="round"
             fill="none"
           />
 
-          {/* Lower Claw Fixed Bulb */}
-          <path
-            d="M 48 115 C 38 105, 20 102, 12 118 C 4 134, 20 152, 45 138 Z"
+          {/* Claw Wrist Socket */}
+          <ellipse
+            cx="56"
+            cy="125"
+            rx="9"
+            ry="8"
             fill="#FFFFFF"
             stroke="#000000"
-            strokeWidth="3.6"
-            strokeLinejoin="round"
+            strokeWidth="3.5"
           />
 
-          {/* Upper Claw Pincer Blade (Pinching Motion Only) */}
+          {/* Upper Curved Pincer Jaw (Clamps Down on Pinch) */}
           <motion.g
-            animate={{ rotate: leftClawOpen ? -24 : 0 }}
-            style={{ transformOrigin: "38px 110px" }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
+            animate={{ rotate: leftClawOpen ? 18 : 0 }}
+            style={{ transformOrigin: "54px 120px" }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
           >
             <path
-              d="M 38 110 C 32 90, 16 78, 6 82 C -4 86, 4 106, 22 118 Z"
+              d="M 54 120 C 44 94, 34 88, 22 108 C 36 102, 44 110, 50 122 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.4"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+
+          {/* Lower Curved Pincer Jaw (Clamps Up on Pinch) */}
+          <motion.g
+            animate={{ rotate: leftClawOpen ? -18 : 0 }}
+            style={{ transformOrigin: "56px 128px" }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 56 128 C 46 148, 36 148, 22 118 C 36 122, 44 122, 52 126 Z"
               fill="#FFFFFF"
               stroke="#000000"
               strokeWidth="3.4"
@@ -228,34 +245,51 @@ export function PeekingCrabSvg({
           </motion.g>
         </g>
 
-        {/* Right Arm & Raised Claw (Stable Arm, Pinching Blade) */}
+        {/* Right Arm & Raised Claw (Authentic 2D Crab Pincers) */}
         <g>
           {/* Raised Arm Armature */}
           <path
-            d="M 215 115 C 235 90, 245 65, 235 35"
+            d="M 210 130 C 228 105, 238 80, 236 60"
             stroke="#000000"
             strokeWidth="4"
             strokeLinecap="round"
             fill="none"
           />
 
-          {/* Right Fixed Claw Bulb */}
-          <path
-            d="M 235 35 C 248 24, 266 22, 272 38 C 278 54, 260 70, 238 56 Z"
+          {/* Claw Wrist Socket */}
+          <ellipse
+            cx="236"
+            cy="60"
+            rx="9"
+            ry="8"
             fill="#FFFFFF"
             stroke="#000000"
-            strokeWidth="3.6"
-            strokeLinejoin="round"
+            strokeWidth="3.5"
           />
 
-          {/* Right Articulated Pincer Blade (Pinching Motion Only) */}
+          {/* Upper Curved Pincer Jaw (Clamps Down on Pinch) */}
           <motion.g
-            animate={{ rotate: rightClawOpen ? 28 : 0 }}
-            style={{ transformOrigin: "242px 30px" }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
+            animate={{ rotate: rightClawOpen ? 18 : 0 }}
+            style={{ transformOrigin: "232px 54px" }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
           >
             <path
-              d="M 242 30 C 248 10, 266 -2, 276 2 C 286 6, 278 26, 260 38 Z"
+              d="M 232 54 C 224 24, 212 18, 196 34 C 210 26, 222 36, 228 56 Z"
+              fill="#FFFFFF"
+              stroke="#000000"
+              strokeWidth="3.4"
+              strokeLinejoin="round"
+            />
+          </motion.g>
+
+          {/* Lower Curved Pincer Jaw (Clamps Up on Pinch) */}
+          <motion.g
+            animate={{ rotate: rightClawOpen ? -18 : 0 }}
+            style={{ transformOrigin: "236px 64px" }}
+            transition={{ duration: 0.11, ease: "easeInOut" }}
+          >
+            <path
+              d="M 236 64 C 226 84, 214 84, 196 46 C 210 52, 222 56, 230 62 Z"
               fill="#FFFFFF"
               stroke="#000000"
               strokeWidth="3.4"
