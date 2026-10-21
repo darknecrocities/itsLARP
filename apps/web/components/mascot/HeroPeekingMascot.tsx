@@ -32,7 +32,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
   const springPupilX = useSpring(rawPupilX, { damping: 26, stiffness: 220 });
   const springPupilY = useSpring(rawPupilY, { damping: 26, stiffness: 220 });
 
-  // Spring for subtle body parallax tilt
+  // Spring for subtle body parallax tilt (tilt toward cursor, no jumping)
   const rawTiltZ = useMotionValue(0);
   const springTiltZ = useSpring(rawTiltZ, { damping: 30, stiffness: 120 });
 
@@ -69,12 +69,12 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
     return () => clearTimeout(timeout);
   }, []);
 
-  // Global mousemove handler for eye tracking and parallax tilt
+  // Global mousemove handler for eye tracking and subtle parallax tilt
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const eyeCenterX = rect.left + rect.width * 0.45;
+      const eyeCenterX = rect.left + rect.width * 0.55;
       const eyeCenterY = rect.top + rect.height * 0.28;
 
       const dx = e.clientX - eyeCenterX;
@@ -90,7 +90,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       rawPupilY.set(Math.sin(angle) * offsetDistance);
 
       // Parallax body tilt: tilt slightly toward the cursor
-      const tilt = Math.max(-4, Math.min(4, (e.clientX - (window.innerWidth / 2)) / 140));
+      const tilt = Math.max(-3.5, Math.min(3.5, (e.clientX - (window.innerWidth / 2)) / 160));
       rawTiltZ.set(tilt);
     };
 
@@ -100,6 +100,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
 
   // Snip animation (pincers only, no body jumping)
   const triggerDoubleSnip = useCallback(() => {
+    if (isSnapping) return;
     setIsSnapping(true);
     setRightClawOpen(true);
     setTimeout(() => {
@@ -119,7 +120,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
         }, 80);
       }, 100);
     }, 110);
-  }, []);
+  }, [isSnapping]);
 
   const handleClick = () => {
     triggerDoubleSnip();
@@ -132,13 +133,13 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
       ref={containerRef}
       className={`relative select-none flex items-center justify-end ${className}`}
     >
-      {/* Cartoon Cloud Dialogue Bubble positioned safely to upper-left of Scuttle */}
+      {/* Cartoon Cloud Thought Bubble hovering right above Scuttle's head */}
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
             text={HERO_QUOTES[quoteIndex]}
             onClose={() => setSpeechVisible(false)}
-            className="absolute top-2 -left-64 sm:top-4 sm:-left-72 lg:top-4 lg:-left-80 z-30"
+            className="-top-24 sm:-top-28 right-8 sm:right-16 z-30"
           />
         )}
       </AnimatePresence>
@@ -157,7 +158,7 @@ export function HeroPeekingMascot({ className = "" }: HeroPeekingMascotProps) {
           isSnapping={isSnapping}
           leftClawOpen={leftClawOpen}
           rightClawOpen={rightClawOpen}
-          className="w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] xl:w-[520px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+          className="w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] xl:w-[500px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </motion.div>
     </div>
