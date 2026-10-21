@@ -5,6 +5,7 @@ import { api, apiGet } from "@/lib/api";
 import { Badge, PageHeader, ErrorBox } from "@/components/ui";
 import { OllamaManager } from "@/components/OllamaManager";
 import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
+import { WalkthroughSettingsCard } from "@/components/walkthrough";
 
 type AIStatusResponse = {
   provider: string;
@@ -70,19 +71,25 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Settings & AI Gateway"
-        sub="Local AI first. Ollama is a first-class provider. Multi-provider abstraction enables seamless switching without application rewrites."
-        action={
-          <button className="btn" onClick={() => refetch()}>
-            Re-check Status
-          </button>
-        }
-      />
+      <div data-tour="settings-header">
+        <PageHeader
+          title="Settings & AI Gateway"
+          sub="Local AI first. Ollama is a first-class provider. Multi-provider abstraction enables seamless switching without application rewrites."
+          action={
+            <button
+              data-tour="settings-status-btn"
+              className="btn"
+              onClick={() => refetch()}
+            >
+              Re-check Status
+            </button>
+          }
+        />
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-8 max-w-4xl">
         {/* Provider Status Table */}
-        <section className="card p-6">
+        <section data-tour="settings-provider-table" className="card p-6">
           <h2 className="text-lg font-semibold mb-3">AI Providers Overview</h2>
           <table className="w-full text-left text-sm">
             <thead className="label-xs border-b border-line">
@@ -138,6 +145,7 @@ export default function SettingsPage() {
               <label className="label-xs" htmlFor="pv">AI Provider</label>
               <select
                 id="pv"
+                data-tour="settings-provider-select"
                 className="input mt-1"
                 value={selectedProvider}
                 onChange={(e) => {
@@ -157,6 +165,7 @@ export default function SettingsPage() {
                 <label className="label-xs" htmlFor="om">Installed Ollama Model</label>
                 <select
                   id="om"
+                  data-tour="settings-model-select"
                   className="input mt-1 font-mono text-xs"
                   value={selectedModel || data?.model || ""}
                   onChange={(e) => setSelectedModel(e.target.value)}
@@ -176,6 +185,7 @@ export default function SettingsPage() {
                 <label className="label-xs" htmlFor="cm">Model Name</label>
                 <input
                   id="cm"
+                  data-tour="settings-model-select"
                   className="input mt-1"
                   placeholder={
                     selectedProvider === "google"
@@ -210,7 +220,12 @@ export default function SettingsPage() {
             {saveMsg && <p className="text-xs text-ok">{saveMsg}</p>}
             {saveErr && <ErrorBox msg={saveErr} />}
 
-            <button type="submit" className="btn btn-primary w-full py-2" disabled={saving}>
+            <button
+              type="submit"
+              data-tour="settings-save-btn"
+              className="btn btn-primary w-full py-2"
+              disabled={saving}
+            >
               {saving ? "Saving..." : "Save AI Gateway Configuration"}
             </button>
           </form>
@@ -218,12 +233,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Local Ollama Engine & Model Hub */}
-      <section className="mt-10 max-w-4xl">
+      <section data-tour="settings-ollama-hub" className="mt-10 max-w-4xl">
         <OllamaManager />
       </section>
 
+      {/* Interactive App Walkthrough & Feature Spotlight Tour */}
+      <WalkthroughSettingsCard />
+
       {/* Software Updates & Production Changelog */}
-      <section className="mt-8 max-w-4xl card p-6 border border-line bg-card">
+      <section
+        data-tour="settings-changelog-card"
+        className="mt-8 max-w-4xl card p-6 border border-line bg-card"
+      >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -241,6 +262,7 @@ export default function SettingsPage() {
           </div>
           <button
             type="button"
+            data-tour="settings-changelog-btn"
             onClick={() => setShowUpdatesModal(true)}
             className="btn btn-primary text-xs flex items-center gap-1.5"
           >

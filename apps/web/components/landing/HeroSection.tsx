@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { HeroBackground } from "@/components/HeroBackground";
 import { HeroAgentMiniHUD } from "@/components/HeroAgentMiniHUD";
+import { MascotInteractive } from "@/components/mascot";
 import {
   FadeIn,
   StaggerContainer,
@@ -24,6 +25,16 @@ export function HeroSection() {
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-7">
+            {/* Interactive Mascot Introduction Pill */}
+            <FadeIn delay={0.1} distance={15} className="mb-4">
+              <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-white border border-neutral-300 shadow-xs hover:border-black transition-all cursor-pointer">
+                <MascotInteractive size="sm" mood="idle" interactive={true} />
+                <div className="text-xs font-mono text-neutral-800 pr-1">
+                  Meet <strong>Scuttle</strong> · Your 2D Career Automation Bot
+                </div>
+              </div>
+            </FadeIn>
+
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.04]">
               <KineticTextStagger text="No Need to Manually Apply to" />{" "}
               <AnimatedLoopText

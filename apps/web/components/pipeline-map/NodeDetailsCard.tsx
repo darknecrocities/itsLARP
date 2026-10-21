@@ -19,12 +19,13 @@ export function NodeDetailsCard({ selectedNode, onFilterPool }: NodeDetailsCardP
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        data-tour="agents-synapse-inspector"
         className="mt-4 p-4 sm:p-5 bg-neutral-100 border border-neutral-300 rounded font-sans"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-300 pb-3 mb-3 font-mono">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded">
-              STEP {selectedNode.id}
+              NODE {selectedNode.id}
             </span>
             <h4 className="text-base font-bold text-black font-sans">{selectedNode.title}</h4>
             <span className="text-xs text-neutral-600 font-sans hidden sm:inline">
@@ -37,7 +38,7 @@ export function NodeDetailsCard({ selectedNode, onFilterPool }: NodeDetailsCardP
               className="btn text-xs py-1 px-2.5 bg-white border border-neutral-300 text-black hover:border-black font-mono inline-flex items-center gap-1"
               onClick={() => onFilterPool(selectedNode.poolKey)}
             >
-              <span>View Subtree Agents</span>
+              <span>View Node Agents</span>
               <ArrowDown className="w-3 h-3" />
             </button>
           </div>

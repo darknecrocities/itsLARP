@@ -44,7 +44,7 @@ export function HorizontalPipelineMap({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Node Network Architecture Card */}
-      <div className="card p-3 sm:p-5 bg-white text-black border border-neutral-300 shadow-sm font-mono">
+      <div data-tour="agents-neural-map" className="card p-3 sm:p-5 bg-white text-black border border-neutral-300 shadow-sm font-mono">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-3 mb-3 sm:mb-4 gap-2">
           <div>

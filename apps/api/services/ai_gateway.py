@@ -9,7 +9,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 class AIGateway:
     def __init__(self):
         self.provider: str = os.getenv("AI_PROVIDER", "ollama")
-        self.model: str = os.getenv("AI_MODEL", "qwen2.5-coder:7b")
+        self.model: str = os.getenv("AI_MODEL", "qwen2.5:0.5b")
         self.api_key: Optional[str] = os.getenv("AI_API_KEY", None)
 
     async def get_status(self) -> Dict[str, Any]:
@@ -25,10 +25,9 @@ class AIGateway:
         except Exception:
             ollama_ok = False
 
-        # Pick default available model if current model isn't installed
+        # Pick fastest available model if current model isn't installed
         if ollama_models and self.model not in ollama_models:
-            # Prefer coding/general models
-            for preferred in ["qwen2.5-coder:7b", "llama3.2:latest", "gemma3:4b", "qwen2.5:0.5b"]:
+            for preferred in ["qwen2.5:0.5b", "llama3.2:latest", "gemma2:2b", "gemma3:4b", "qwen2.5-coder:7b"]:
                 if preferred in ollama_models:
                     self.model = preferred
                     break
@@ -64,7 +63,7 @@ class AIGateway:
 
     async def _call_ollama(self, prompt: str, system: str, max_tokens: int, temperature: float) -> Optional[str]:
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=5.0) as client:
                 body = {
                     "model": self.model,
                     "prompt": prompt,

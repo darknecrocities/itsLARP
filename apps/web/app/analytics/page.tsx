@@ -27,12 +27,14 @@ export default function AnalyticsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Career Intelligence Analytics"
-        sub="Conversion metrics and performance signals calculated from your actual applications."
-      />
+      <div data-tour="analytics-header">
+        <PageHeader
+          title="Career Intelligence Analytics"
+          sub="Conversion metrics and performance signals calculated from your actual applications."
+        />
+      </div>
 
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+      <section data-tour="analytics-funnel-card" className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
         <Stat label="Submitted Applications" value={total} />
         <Stat label="Response Rate" value={data?.response_rate ?? 0} suffix="%" i={1} />
         <Stat label="Interview Rate" value={data?.interview_rate ?? 0} suffix="%" i={2} />

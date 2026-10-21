@@ -68,6 +68,7 @@ export function JobFiltersBar({
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none z-10" />
             <input
               id="job-query"
+              data-tour="jobs-search-input"
               className="input !pl-10 py-1.5 text-xs w-full"
               style={{ paddingLeft: "2.5rem" }}
               placeholder="Search any role (e.g. Project Manager, Flight Attendant, AI Engineer)"
@@ -142,7 +143,10 @@ export function JobFiltersBar({
         </select>
 
         {/* Remote Checkbox */}
-        <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer select-none font-mono ml-1">
+        <label
+          data-tour="jobs-location-input"
+          className="flex items-center gap-1.5 text-xs text-muted cursor-pointer select-none font-mono ml-1"
+        >
           <input
             type="checkbox"
             checked={remote}

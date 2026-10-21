@@ -8,7 +8,9 @@ import { HorizontalPipelineMap } from "@/components/HorizontalPipelineMap";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
 import { WorkforceFleetCard } from "@/components/agents/WorkforceFleetCard";
 import { PreSubmissionModal } from "@/components/agents/PreSubmissionModal";
-import { Key, Zap, X, SlidersHorizontal, Eye, ArrowLeft } from "lucide-react";
+import { PlatformGuardrailsModal } from "@/components/agents/PlatformGuardrailsModal";
+import { MascotCompanionCard } from "@/components/mascot";
+import { Key, Zap, X, SlidersHorizontal, Eye, ArrowLeft, ShieldCheck } from "lucide-react";
 
 
 const STAGE_LABELS: Record<Stage, string> = {
@@ -47,9 +49,6 @@ export default function AgentsPage() {
 
   // Platform Login Credentials Modal
   const [showCreds, setShowCreds] = useState(false);
-  const [linkedInUser, setLinkedInUser] = useState("");
-  const [jobstreetUser, setJobstreetUser] = useState("");
-  const [indeedUser, setIndeedUser] = useState("");
 
   // Notion database modal
   const [showNotionModal, setShowNotionModal] = useState(false);
@@ -62,53 +61,66 @@ export default function AgentsPage() {
   const handleStart = async (num: number) => {
     setSelectedWorkers(num);
     const queries = targetQuery.split(",").map((s) => s.trim()).filter(Boolean);
-    const creds: Record<string, string> = {};
-    if (linkedInUser) creds["linkedin"] = linkedInUser;
-    if (jobstreetUser) creds["jobstreet"] = jobstreetUser;
-    if (indeedUser) creds["indeed"] = indeedUser;
+    const creds: Record<string, string> = { mode: "guardrails_active" };
 
     await start(num, queries.length ? queries : ["AI Engineer"], creds, targetJobsGoal);
   };
 
   return (
     <>
-      <PageHeader
-        title="Your Auto-Apply Agents"
-        sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="btn text-xs flex items-center gap-1.5 hover:border-black"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
-            </Link>
-            <Link
-              href="/resume"
-              className="btn text-xs flex items-center gap-1.5 hover:border-black"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Resume & Apply Configs</span>
-            </Link>
+      <div data-tour="agents-header">
+        <PageHeader
+          title="Your Auto-Apply Agents"
+          sub="Parallel dynamic workforce scaling up to 50,000 agents: live discovery, per-job multi-format resume construction, parallel application submission, and Notion synchronization."
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard"
+                data-tour="agents-back-btn"
+                className="btn text-xs flex items-center gap-1.5 hover:border-black"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
+              </Link>
+              <Link
+                href="/resume"
+                className="btn text-xs flex items-center gap-1.5 hover:border-black"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Resume & Apply Configs</span>
+              </Link>
 
-            <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
-              <Key className="w-3.5 h-3.5" />
-              <span>Logins</span>
-            </button>
-            <button
-              className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
-              onClick={() => setShowNotionModal(true)}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              <span>Notion Sync</span>
-            </button>
-          </div>
-        }
-      />
+              <button className="btn text-xs flex items-center gap-1.5" onClick={() => setShowCreds(true)}>
+                <Key className="w-3.5 h-3.5" />
+                <span>Logins</span>
+              </button>
+              <button
+                className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5"
+                onClick={() => setShowNotionModal(true)}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Notion Sync</span>
+              </button>
+            </div>
+          }
+        />
+      </div>
+
+      {/* Scuttle Mascot Swarm Commander */}
+      <div className="mb-4">
+        <MascotCompanionCard
+          title="Scuttle · Swarm Fleet Commander"
+          statusLabel={running ? `Deploying ${selectedWorkers} Bots` : "Swarm Idle & Ready"}
+          customQuote={
+            running
+              ? `Parallel swarm is active! Disagreeable form-filling in progress across 5 platforms. Targeting ${targetJobsGoal} jobs.`
+              : "Fleet standing by. Adjust your worker concurrency and target job count, then hit Deploy Bots!"
+          }
+        />
+      </div>
 
       {/* Workforce Fleet Scaler */}
-      <div className="mb-4">
+      <div data-tour="agents-fleet-card" className="mb-4">
         <WorkforceFleetCard
           workers={selectedWorkers}
           onWorkersChange={setSelectedWorkers}
@@ -137,63 +149,9 @@ export default function AgentsPage() {
       )}
 
 
-      {/* Platform Login Credentials Modal */}
+      {/* Platform Login Credentials & Guardrails Modal */}
       {showCreds && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="card max-w-md w-full p-6 bg-bg border border-line shadow-2xl rise">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-bold">Platform Accounts & 2FA Setup</h3>
-              <button className="text-muted hover:text-ink text-sm p-1 rounded" onClick={() => setShowCreds(false)} aria-label="Close">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-muted mb-4 font-sans">
-              Provide your session or username for job platforms so the 300 crawler Agents can browse your preferences. If an Agent encounters a 2FA challenge, it will notify you on the node diagram.
-            </p>
-            <div className="space-y-3 font-mono text-xs">
-              <div>
-                <label className="label-xs block mb-1">LinkedIn Username / Session Email</label>
-                <input
-                  className="input text-xs"
-                  placeholder="linkedin.user@example.com"
-                  value={linkedInUser}
-                  onChange={(e) => setLinkedInUser(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="label-xs block mb-1">JobStreet Account Email</label>
-                <input
-                  className="input text-xs"
-                  placeholder="jobstreet.user@example.com"
-                  value={jobstreetUser}
-                  onChange={(e) => setJobstreetUser(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="label-xs block mb-1">Indeed Account Email</label>
-                <input
-                  className="input text-xs"
-                  placeholder="indeed.user@example.com"
-                  value={indeedUser}
-                  onChange={(e) => setIndeedUser(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-5">
-              <button className="btn text-xs" onClick={() => setShowCreds(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary text-xs"
-                onClick={() => {
-                  setShowCreds(false);
-                }}
-              >
-                Save Credentials
-              </button>
-            </div>
-          </div>
-        </div>
+        <PlatformGuardrailsModal onClose={() => setShowCreds(false)} />
       )}
 
       {/* Notion Database Link & Sync Modal */}

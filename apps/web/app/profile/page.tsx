@@ -7,7 +7,20 @@ import { TargetingPreferences } from "@/components/TargetingPreferences";
 import { CareerDnaLlmBuilder } from "@/components/profile/CareerDnaLlmBuilder";
 import { ApplicationConfigPanel } from "@/components/apply/ApplicationConfigPanel";
 import { ResumeDesignPreview } from "@/components/resume/ResumeDesignPreview";
-import { X, Trash2, ArrowLeft } from "lucide-react";
+import { CollapsibleSection } from "@/components/profile/CollapsibleSection";
+import {
+  User,
+  Briefcase,
+  Code,
+  FolderGit2,
+  CheckCircle2,
+  Sliders,
+  FileText,
+  X,
+  Trash2,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const { profile: p, setProfile, addEvidence, clearProfile } = useStore();
@@ -127,109 +140,104 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHeader
-        title="Career DNA Studio"
-        sub="The verified single source of truth for your professional background. Crawl GitHub, LinkedIn, and Portfolio links with LLM assistance or edit every field directly."
-        action={
-          <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
-            </Link>
-            <button
-              type="button"
-              className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
-              onClick={() => {
-                if (window.confirm("Reset your Career DNA profile? This will clear local entries.")) {
-                  clearProfile();
-                }
-              }}
-            >
-              Reset Profile
-            </button>
-            <Link href="/resume" className="btn text-xs">
-              Resume Studio (5 Formats)
-            </Link>
-            <Link href="/onboarding" className="btn text-xs">
-              Upload PDF / Sources
-            </Link>
-            <button className="btn btn-primary text-xs" onClick={() => setShowAddEvidence(!showAddEvidence)}>
-              + Add Evidence
-            </button>
-          </div>
-        }
-      />
+      <div data-tour="profile-header">
+        <PageHeader
+          title="Career Profile & Resume Studio"
+          sub="The verified source of truth for your background. Import from GitHub, LinkedIn, or personal website, or customize each section below."
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Link href="/dashboard" className="btn text-xs inline-flex items-center gap-1.5">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
+              </Link>
+              <button
+                type="button"
+                data-tour="profile-save-btn"
+                className="btn text-xs text-red-600 hover:text-red-700 hover:border-red-300"
+                onClick={() => {
+                  if (window.confirm("Reset your career profile? This will clear local entries.")) {
+                    clearProfile();
+                  }
+                }}
+              >
+                Reset Profile
+              </button>
+              <Link href="/resume" className="btn text-xs">
+                Resume Studio
+              </Link>
+              <Link href="/onboarding" className="btn text-xs">
+                Upload PDF
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
-      {/* Live Web Crawler & LLM Career DNA Constructor */}
-      <section className="mb-6">
+      {/* Online Importer */}
+      <section data-tour="profile-crawler-section" className="mb-5">
         <CareerDnaLlmBuilder />
       </section>
 
-      {/* 20-Feature Application & Resume Format Configuration */}
-      <section className="mb-6">
-        <ApplicationConfigPanel compact />
-      </section>
-
-      {/* Live Resume Design Preview & Architecture Inspector */}
-      <section className="mb-6">
+      {/* Live Resume Design Preview */}
+      <CollapsibleSection
+        dataTour="profile-resume-preview-section"
+        title="Live Resume Preview & Export"
+        subtitle="Inspect and download your tailored resume in APA 7th, Compact, or Modern styles"
+        icon={<FileText className="w-4 h-4" />}
+        defaultOpen={true}
+      >
         <ResumeDesignPreview />
-      </section>
+      </CollapsibleSection>
 
-      {/* Manual Evidence Modal */}
-      {showAddEvidence && (
-        <div className="card p-5 mb-6 border-2 border-black bg-bg2/50 rise">
-          <h3 className="text-base font-semibold mb-2">Record Verified Career Evidence</h3>
-          <form onSubmit={handleAddEvidence} className="space-y-3">
-            <div>
-              <label className="label-xs" htmlFor="esrc">Evidence Source</label>
-              <input
-                id="esrc"
-                className="input mt-1"
-                placeholder="AWS Certified Solutions Architect, GitHub Repo, Project Docs"
-                value={newEvidenceSource}
-                onChange={(e) => setNewEvidenceSource(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label-xs" htmlFor="etxt">Factual Details / Text</label>
-              <textarea
-                id="etxt"
-                rows={3}
-                className="input mt-1"
-                placeholder="Passed certification demonstrating distributed system architecture..."
-                value={newEvidenceText}
-                onChange={(e) => setNewEvidenceText(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" className="btn text-xs" onClick={() => setShowAddEvidence(false)}>
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary text-xs">
-                Save Evidence Record
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Application Preferences */}
+      <CollapsibleSection
+        title="Application Preferences & Tailoring Settings"
+        subtitle="Configure tailoring thresholds, cover letter style, and layout density"
+        icon={<Sliders className="w-4 h-4" />}
+        defaultOpen={false}
+      >
+        <ApplicationConfigPanel compact />
+      </CollapsibleSection>
 
-      {/* Targeting & Preferences Component */}
-      <section className="mb-6">
+      {/* Job Search Targeting */}
+      <CollapsibleSection
+        title="Job Search Targeting & Salary Goals"
+        subtitle="Desired titles, target locations, work arrangements, and compensation expectations"
+        icon={<Sparkles className="w-4 h-4" />}
+        defaultOpen={false}
+      >
         <TargetingPreferences />
-      </section>
+      </CollapsibleSection>
 
-      {/* Candidate Identity & Summary */}
+      {/* Personal Info & Executive Summary */}
       <Reveal>
-        <section className="card p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Candidate Identity & Summary</h2>
+        <CollapsibleSection
+          dataTour="profile-personal-info-section"
+          title="Personal Information & Executive Summary"
+          subtitle="Your contact details, headline, and bio"
+          icon={<User className="w-4 h-4" />}
+          defaultOpen={true}
+        >
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <label className="label-xs" htmlFor="pname">Full Name</label>
-              <input id="pname" className="input mt-1" value={p.name} onChange={(e) => setProfile({ name: e.target.value })} />
+              <input
+                id="pname"
+                data-tour="profile-name-input"
+                className="input mt-1"
+                value={p.name}
+                onChange={(e) => setProfile({ name: e.target.value })}
+              />
             </div>
             <div>
               <label className="label-xs" htmlFor="phline">Professional Headline</label>
-              <input id="phline" className="input mt-1" value={p.headline} onChange={(e) => setProfile({ headline: e.target.value })} />
+              <input
+                id="phline"
+                data-tour="profile-headline-input"
+                className="input mt-1"
+                value={p.headline}
+                onChange={(e) => setProfile({ headline: e.target.value })}
+              />
             </div>
             <div>
               <label className="label-xs" htmlFor="pemail">Email Address</label>
@@ -248,37 +256,38 @@ export default function ProfilePage() {
               <input id="pyears" type="number" min={0} max={50} className="input mt-1" value={p.years || 0} onChange={(e) => setProfile({ years: Number(e.target.value) || 0 })} />
             </div>
             <div className="md:col-span-3">
-              <label className="label-xs" htmlFor="pedu">Education & Academic Credentials</label>
+              <label className="label-xs" htmlFor="pedu">Education & Academic Background</label>
               <input id="pedu" className="input mt-1" value={p.education} onChange={(e) => setProfile({ education: e.target.value })} />
             </div>
             <div className="md:col-span-3">
-              <label className="label-xs" htmlFor="psummary">Professional Abstract / Summary Statement</label>
+              <label className="label-xs" htmlFor="psummary">Executive Summary</label>
               <textarea
                 id="psummary"
                 rows={3}
                 className="input mt-1 text-xs"
-                placeholder="Empirical technical practitioner with experience building scalable software..."
+                placeholder="Software engineer experienced in building scalable applications..."
                 value={p.summary || ""}
                 onChange={(e) => setProfile({ summary: e.target.value })}
               />
             </div>
           </div>
-        </section>
+        </CollapsibleSection>
       </Reveal>
 
       {/* Employment History */}
       <Reveal i={1}>
-        <section className="card p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-lg font-semibold">Employment History & Roles ({(p.experience || []).length})</h2>
-              <p className="text-xs text-muted">Past positions with verified achievements and impact metrics.</p>
-            </div>
+        <CollapsibleSection
+          dataTour="profile-experience-section"
+          title={`Work Experience (${(p.experience || []).length})`}
+          subtitle="Past positions with verified achievements and impact"
+          icon={<Briefcase className="w-4 h-4" />}
+          defaultOpen={true}
+          action={
             <button className="btn text-xs" onClick={() => setShowAddExp(!showAddExp)}>
               + Add Position
             </button>
-          </div>
-
+          }
+        >
           {showAddExp && (
             <form onSubmit={handleAddExperience} className="p-4 bg-bg2 rounded border border-line mb-4 space-y-3">
               <div className="grid md:grid-cols-2 gap-3">
@@ -297,7 +306,7 @@ export default function ProfilePage() {
           )}
 
           {(!p.experience || p.experience.length === 0) ? (
-            <p className="text-muted text-sm py-2">No positions added yet. Click "+ Add Position" or crawl your LinkedIn/Resume above.</p>
+            <p className="text-muted text-sm py-2">No positions added yet. Click "+ Add Position" or import from online links above.</p>
           ) : (
             <div className="space-y-3">
               {p.experience.map((exp, idx) => (
@@ -316,14 +325,18 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
-        </section>
+        </CollapsibleSection>
       </Reveal>
 
-      {/* Verified Skills */}
+      {/* Technical Skills */}
       <Reveal i={2}>
-        <section className="card p-6 mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">Technical Skills ({p.skills.length})</h2>
+        <CollapsibleSection
+          dataTour="profile-skills-section"
+          title={`Technical Skills (${p.skills.length})`}
+          subtitle="Verified engineering competencies used for job matching"
+          icon={<Code className="w-4 h-4" />}
+          defaultOpen={true}
+          action={
             <form onSubmit={handleAddSkill} className="flex gap-2">
               <input
                 className="input text-xs py-1 max-w-[180px]"
@@ -333,7 +346,8 @@ export default function ProfilePage() {
               />
               <button type="submit" className="btn text-xs py-1">+ Add</button>
             </form>
-          </div>
+          }
+        >
           <div className="flex flex-wrap gap-2">
             {p.skills.map((s) => (
               <span key={s} className="px-2.5 py-1 bg-bg2 rounded text-xs font-mono border border-line flex items-center gap-1.5">
@@ -344,23 +358,28 @@ export default function ProfilePage() {
               </span>
             ))}
           </div>
-        </section>
+        </CollapsibleSection>
       </Reveal>
 
       {/* Featured Projects */}
       <Reveal i={3}>
-        <section className="card p-6 mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">Featured Projects & Repositories ({(p.projects || []).length})</h2>
+        <CollapsibleSection
+          dataTour="profile-projects-section"
+          title={`Projects & Portfolios (${(p.projects || []).length})`}
+          subtitle="Key engineering repositories and applications"
+          icon={<FolderGit2 className="w-4 h-4" />}
+          defaultOpen={true}
+          action={
             <button className="btn text-xs" onClick={() => setShowAddProj(!showAddProj)}>+ Add Project</button>
-          </div>
+          }
+        >
           {showAddProj && (
             <form onSubmit={handleAddProject} className="p-4 bg-bg2 rounded border border-line mb-4 space-y-3">
               <div className="grid md:grid-cols-2 gap-3">
-                <input className="input text-xs" placeholder="Project / Repository Name" value={projName} onChange={(e) => setProjName(e.target.value)} />
-                <input className="input text-xs" placeholder="Technologies (comma-separated: Python, FastAPI, Docker)" value={projTech} onChange={(e) => setProjTech(e.target.value)} />
+                <input className="input text-xs" placeholder="Project Name" value={projName} onChange={(e) => setProjName(e.target.value)} />
+                <input className="input text-xs" placeholder="Tech Stack (comma-separated: React, Python, Docker)" value={projTech} onChange={(e) => setProjTech(e.target.value)} />
               </div>
-              <textarea rows={2} className="input text-xs" placeholder="Architecture & engineering impact description..." value={projText} onChange={(e) => setProjText(e.target.value)} />
+              <textarea rows={2} className="input text-xs" placeholder="Project description and key achievements..." value={projText} onChange={(e) => setProjText(e.target.value)} />
               <div className="flex justify-end gap-2">
                 <button type="button" className="btn text-xs" onClick={() => setShowAddProj(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary text-xs">Save Project</button>
@@ -368,7 +387,7 @@ export default function ProfilePage() {
             </form>
           )}
           {p.projects.length === 0 ? (
-            <p className="text-muted text-sm">Crawl your GitHub or Portfolio above, or click "+ Add Project".</p>
+            <p className="text-muted text-sm">Import your GitHub above or click "+ Add Project".</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
               {p.projects.map((x, idx) => (
@@ -387,36 +406,76 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
-        </section>
+        </CollapsibleSection>
       </Reveal>
 
-      {/* Verifiable Evidence Corpus */}
+      {/* Verified Evidence Details */}
       <Reveal i={4}>
-        <section className="card p-6">
-          <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-            <div>
-              <h2 className="text-lg font-semibold">Evidence Corpus ({p.evidence.length} Records)</h2>
-              <p className="text-xs text-muted">Every claim proposed by the AI workforce is validated against this evidence list.</p>
+        <CollapsibleSection
+          dataTour="profile-proof-section"
+          title={`Verified Career Details & Proof (${p.evidence.length})`}
+          subtitle="All claims in your resumes are verified against these recorded evidence items"
+          icon={<CheckCircle2 className="w-4 h-4" />}
+          defaultOpen={false}
+          action={
+            <div className="flex gap-2">
+              <input
+                className="input max-w-xs text-xs py-1"
+                placeholder="Search details..."
+                value={evidenceFilter}
+                onChange={(e) => setEvidenceFilter(e.target.value)}
+              />
+              <button className="btn btn-primary text-xs" onClick={() => setShowAddEvidence(!showAddEvidence)}>
+                + Add Record
+              </button>
             </div>
-            <input
-              className="input max-w-xs text-xs py-1"
-              placeholder="Search evidence..."
-              value={evidenceFilter}
-              onChange={(e) => setEvidenceFilter(e.target.value)}
-            />
-          </div>
-          <div className="max-h-96 overflow-y-auto space-y-2.5 pr-2">
+          }
+        >
+          {showAddEvidence && (
+            <div className="card p-5 mb-4 border border-black bg-bg2/50">
+              <h3 className="text-sm font-semibold mb-2">Record Verified Career Evidence</h3>
+              <form onSubmit={handleAddEvidence} className="space-y-3">
+                <div>
+                  <label className="label-xs" htmlFor="esrc">Source</label>
+                  <input
+                    id="esrc"
+                    className="input mt-1"
+                    placeholder="e.g. AWS Certification, GitHub Repo, Project Docs"
+                    value={newEvidenceSource}
+                    onChange={(e) => setNewEvidenceSource(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label-xs" htmlFor="etxt">Factual Proof / Details</label>
+                  <textarea
+                    id="etxt"
+                    rows={3}
+                    className="input mt-1"
+                    placeholder="Details demonstrating verified experience or results..."
+                    value={newEvidenceText}
+                    onChange={(e) => setNewEvidenceText(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button type="button" className="btn text-xs" onClick={() => setShowAddEvidence(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary text-xs">Save Record</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="max-h-80 overflow-y-auto space-y-2.5 pr-2">
             {filteredEvidence.length === 0 ? (
-              <p className="text-muted text-sm py-4 text-center">No evidence matching search.</p>
+              <p className="text-muted text-sm py-4 text-center">No matching evidence records.</p>
             ) : (
               filteredEvidence.map((ev, i) => (
-                <div key={i} className="p-3 bg-bg2 rounded border border-line text-xs font-mono flex justify-between items-start gap-2">
+                <div key={i} className="p-3 bg-bg2 rounded border border-line text-xs flex justify-between items-start gap-2">
                   <div className="flex-1">
                     <div className="flex justify-between items-center text-muted mb-1 text-[11px]">
                       <span className="font-semibold text-fg">Source: {ev.source}</span>
                       <span>#{i + 1}</span>
                     </div>
-                    <p className="text-dmuted font-sans leading-relaxed">{ev.text}</p>
+                    <p className="text-dmuted leading-relaxed">{ev.text}</p>
                   </div>
                   <button type="button" onClick={() => handleRemoveEvidence(i)} className="text-muted hover:text-ink text-xs p-1">
                     <X className="w-3.5 h-3.5" />
@@ -425,7 +484,7 @@ export default function ProfilePage() {
               ))
             )}
           </div>
-        </section>
+        </CollapsibleSection>
       </Reveal>
     </>
   );

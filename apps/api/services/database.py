@@ -111,6 +111,24 @@ class IntegrationRecord(Base):
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
+class PlatformCredentialRecord(Base):
+    __tablename__ = "platform_credentials"
+    id = Column(String(64), primary_key=True)  # "linkedin", "indeed", "glassdoor"
+    platform = Column(String(64), nullable=False)
+    username = Column(String(255), default="")
+    auth_token = Column(String(1024), default="")
+    connected = Column(Boolean, default=False)
+    max_daily_applications = Column(Integer, default=15)
+    applications_today = Column(Integer, default=0)
+    min_delay_seconds = Column(Integer, default=60)
+    max_delay_seconds = Column(Integer, default=180)
+    allowed_actions = Column(JSON, default=lambda: ["easy_apply", "save_job"])
+    active_schedule = Column(JSON, default=lambda: {"start": "09:00", "end": "17:00", "timezone": "local"})
+    last_applied_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     # Safe SQLite column migration for existing tables

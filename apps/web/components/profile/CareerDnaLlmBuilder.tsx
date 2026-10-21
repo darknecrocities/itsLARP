@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useStore } from "../../lib/store";
 import { api } from "../../lib/api";
+import { ChevronDown, ChevronUp, Sparkles, Globe } from "lucide-react";
 
 export function CareerDnaLlmBuilder() {
   const { profile, setProfile } = useStore();
@@ -20,6 +21,7 @@ export function CareerDnaLlmBuilder() {
     engine?: string;
   } | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   async function handleCrawlAndConstruct() {
     if (!githubUrl.trim() && !linkedinUrl.trim() && !portfolioUrl.trim() && !linkedinText.trim()) {
@@ -101,24 +103,49 @@ export function CareerDnaLlmBuilder() {
   }
 
   return (
-    <div className="border border-neutral-300 bg-white p-5 rounded-lg space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-3">
-        <div>
-          <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500">
-            LIVE WEB CRAWLER & LLM CAREER DNA CONSTRUCTOR
+    <div className="border border-neutral-300 bg-white rounded-lg overflow-hidden transition-all">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-4 bg-neutral-50/70 border-b border-neutral-200">
+        <div className="flex items-center gap-2.5 cursor-pointer select-none" onClick={() => setIsExpanded(!isExpanded)}>
+          <div className="p-1.5 rounded bg-black text-white">
+            <Globe className="w-4 h-4" />
           </div>
-          <h3 className="text-sm font-semibold text-black mt-0.5">
-            Discover & Construct Career DNA from GitHub, LinkedIn, and Portfolio Links
-          </h3>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-black">
+                Import Background from Online Links
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700 font-medium">
+                Auto-fill
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500">
+              Extract verified achievements from GitHub, LinkedIn, and personal portfolio.
+            </p>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setEditMode(!editMode)}
-          className="px-3 py-1.5 text-xs font-medium border border-black bg-white text-black hover:bg-neutral-100 rounded transition"
-        >
-          {editMode ? "Hide Full Field Editor" : "Edit All Career DNA Fields"}
-        </button>
+        <div className="flex items-center gap-2">
+          {isExpanded && (
+            <button
+              type="button"
+              onClick={() => setEditMode(!editMode)}
+              className="px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white text-black hover:bg-neutral-100 rounded transition"
+            >
+              {editMode ? "Hide Full Field Editor" : "Edit All Career Fields"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-200 rounded transition"
+            aria-label={isExpanded ? "Collapse section" : "Expand section"}
+          >
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
+
+      {isExpanded && (
+        <div className="p-5 space-y-4">
 
       {/* Source URLs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -127,6 +154,7 @@ export function CareerDnaLlmBuilder() {
             GitHub Profile URL or Username
           </label>
           <input
+            data-tour="profile-crawler-input"
             value={githubUrl}
             onChange={(e) => setGithubUrl(e.target.value)}
             placeholder="https://github.com/torvalds or username"
@@ -188,6 +216,7 @@ export function CareerDnaLlmBuilder() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            data-tour="profile-crawler-btn"
             disabled={crawling}
             onClick={handleCrawlAndConstruct}
             className="px-4 py-2 text-xs font-semibold bg-black text-white hover:bg-neutral-800 rounded disabled:opacity-50 transition"
@@ -303,6 +332,8 @@ export function CareerDnaLlmBuilder() {
           </div>
         </div>
       )}
+      </div>
+    )}
     </div>
   );
 }

@@ -164,7 +164,7 @@ export default function ResumeStudio() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-6xl" data-tour="resume-header">
       <PageHeader
         title="APA Resume & 20 Apply Configurations"
         sub="Configure 20 autonomous application parameters, select resume design architecture, and inspect real-time dynamic bot tailoring for target job descriptions."
@@ -191,6 +191,7 @@ export default function ResumeStudio() {
               <span>Download (.txt)</span>
             </button>
             <button
+              data-tour="resume-export-btn"
               className="btn text-xs bg-bg2 border border-line flex items-center gap-1.5 hover:border-black"
               onClick={openPrintWindow}
             >
@@ -218,13 +219,13 @@ export default function ResumeStudio() {
       )}
 
       {/* Section 1: 20 Apply Configurations */}
-      <section className="space-y-2">
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted">
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Section 1: 20 Apply Configurations for Autonomous Swarm</span>
-            </div>
-            <ApplicationConfigPanel onApplyToAgents={handleApplyToAgents} />
-          </section>
+      <section data-tour="resume-config-selector" className="space-y-2">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted">
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>Section 1: 20 Apply Configurations for Autonomous Swarm</span>
+        </div>
+        <ApplicationConfigPanel onApplyToAgents={handleApplyToAgents} />
+      </section>
 
       {/* Section 2: Resume Design Format & Live Preview */}
       <section className="card p-5 bg-white border border-neutral-300 rounded-lg space-y-4 text-black">
@@ -337,7 +338,7 @@ export default function ResumeStudio() {
             </div>
 
             {/* Live Rendered Display Box */}
-            <div className="border border-neutral-300 rounded-lg p-4 bg-neutral-50 text-black">
+            <div data-tour="resume-preview-document" className="border border-neutral-300 rounded-lg p-4 bg-neutral-50 text-black">
               <div className="flex flex-wrap justify-between items-center gap-2 pb-3 mb-3 border-b border-neutral-200 text-xs font-mono">
                 <span className="text-neutral-700">
                   {loadingRender

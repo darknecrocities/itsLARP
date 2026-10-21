@@ -5,6 +5,7 @@ import { useStore, type App } from "@/lib/store";
 import { api, apiGet } from "@/lib/api";
 import { Badge, Empty, PageHeader, Stat } from "@/components/ui";
 import { NotionSyncModal } from "@/components/NotionSyncModal";
+import { ApplicationsTable } from "@/components/applications/ApplicationsTable";
 import { RefreshCw, ExternalLink, Zap, RotateCcw, CheckCircle, Database, Search } from "lucide-react";
 
 const STATUSES = ["SAVED", "ANALYZING", "PREPARING", "READY", "APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN"];
@@ -165,6 +166,7 @@ export default function ApplicationsPage() {
 
   return (
     <>
+    <div data-tour="apps-header">
       <PageHeader
         title="Application Tracker"
         sub="Track every job application, interview, and offer in real time. Directly linked to your Notion database."
@@ -180,6 +182,7 @@ export default function ApplicationsPage() {
               </button>
             )}
             <button
+              data-tour="apps-notion-sync-btn"
               className="btn text-xs bg-white border border-neutral-300 hover:border-black flex items-center gap-1.5"
               onClick={() => setShowNotionModal(true)}
             >
@@ -192,6 +195,7 @@ export default function ApplicationsPage() {
           </div>
         }
       />
+    </div>
 
       {/* Notion Connection & Sync Bar */}
       <div className="card p-3 mb-6 bg-neutral-50 border border-neutral-300 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
@@ -287,6 +291,20 @@ export default function ApplicationsPage() {
         </div>
       )}
 
+      {/* Deduplication Safeguard Banner */}
+      <div
+        data-tour="apps-dedup-banner"
+        className="card p-3 mb-6 bg-white border border-neutral-300 font-mono text-xs flex items-center justify-between"
+      >
+        <div className="flex items-center gap-2 text-neutral-800">
+          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            <strong>Deduplication Engine Active:</strong> Re-applications to previously applied companies and positions are quarantined.
+          </span>
+        </div>
+        <span className="text-[11px] text-neutral-500 font-sans">{apps.length} records verified</span>
+      </div>
+
       {/* Summary Pipeline Stats */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Stat label="Total Tracked" value={apps.length} />
@@ -315,8 +333,8 @@ export default function ApplicationsPage() {
         </Empty>
       ) : (
         <>
-          <div className="flex flex-wrap gap-3 mb-6 font-mono text-xs">
-            <div className="relative max-w-xs w-full">
+          <div data-tour="apps-tabs" className="flex flex-wrap gap-3 mb-6 font-mono text-xs">
+            <div data-tour="apps-search-input" className="relative max-w-xs w-full">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none z-10" />
               <input
                 id="aq"
@@ -346,126 +364,12 @@ export default function ApplicationsPage() {
             </select>
           </div>
 
-          <div className="overflow-x-auto border border-line rounded">
-            <table className="w-full text-left font-sans text-xs">
-              <thead className="label-xs border-b border-line bg-neutral-100 font-mono">
-                <tr>
-                  <th scope="col" className="py-2.5 px-3">Role</th>
-                  <th scope="col" className="px-3">Company</th>
-                  <th scope="col" className="px-3">Platform</th>
-                  <th scope="col" className="px-3">Match</th>
-                  <th scope="col" className="px-3">Application Status</th>
-                  <th scope="col" className="px-3">Last Activity</th>
-                  <th scope="col" className="px-3">Notion</th>
-                  <th scope="col" className="text-right px-3">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {rows.map((a) => {
-                  const isRejected = a.status === "REJECTED" || a.status === "WITHDRAWN";
-                  const isOngoing =
-                    a.status === "APPLIED" ||
-                    a.status === "SCREENING" ||
-                    a.status === "INTERVIEW" ||
-                    a.status === "OFFER";
-
-                  return (
-                    <tr
-                      key={a.id}
-                      className={`hover:bg-neutral-50 transition-colors ${
-                        isRejected ? "bg-neutral-50/50" : ""
-                      }`}
-                    >
-                      <td className="py-3 px-3 font-semibold">
-                        <Link href={`/apply/${a.jobId}`} className="hover:underline">
-                          {a.role}
-                        </Link>
-                        {isRejected && (
-                          <div className="text-[10px] text-neutral-500 font-mono">
-                            Previous attempt ended ({a.status})
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3 text-neutral-700 font-medium">{a.company}</td>
-                      <td className="px-3 font-mono text-[11px] text-neutral-500">
-                        {a.platform || "Direct"}
-                      </td>
-                      <td className="px-3">
-                        <Badge tone={a.match >= 80 ? "ok" : a.match >= 60 ? "n" : "warn"}>
-                          {a.match}%
-                        </Badge>
-                      </td>
-                      <td className="px-3">
-                        <select
-                          className="input !w-auto text-xs py-1 font-mono"
-                          value={a.status}
-                          onChange={(e) => handleStatusChange(a, e.target.value)}
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-3 text-neutral-500 text-[11px] max-w-xs">
-                        <div className="truncate">{a.events?.[0]?.text || "Recorded"}</div>
-                        {a.events?.[0]?.at && (
-                          <div className="text-[10px] text-neutral-400 font-mono">
-                            {new Date(a.events[0].at).toLocaleDateString()}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3">
-                        {a.notionPageId ? (
-                          <a
-                            href={`https://notion.so/${a.notionPageId.replace(/-/g, "")}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-mono text-neutral-600 hover:text-black underline"
-                          >
-                            <span>Synced</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                          </a>
-                        ) : (
-                          <span className="text-neutral-400 font-mono text-[11px]">—</span>
-                        )}
-                      </td>
-                      <td className="text-right px-3 py-3">
-                        <div className="inline-flex items-center gap-1.5">
-                          {isRejected && (
-                            <button
-                              className="btn text-xs py-1 px-2.5 bg-black text-white hover:bg-neutral-800 flex items-center gap-1 font-mono"
-                              onClick={() => handleReapply(a)}
-                            >
-                              <RotateCcw className="w-3 h-3" />
-                              <span>Re-Apply</span>
-                            </button>
-                          )}
-                          <a
-                            href={a.screenshotUrl || `http://localhost:8000/applications/${a.id}/screenshot`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn text-xs py-1 px-2 border border-neutral-300 hover:border-black font-mono text-neutral-600 hover:text-black"
-                            title="View Pre-Submission Filled Form Proof"
-                          >
-                            Proof
-                          </a>
-                          <Link
-                            href={`/apply/${a.jobId}`}
-                            className="btn text-xs py-1 px-2.5 border border-neutral-300 hover:border-black font-mono"
-                          >
-                            Studio
-                          </Link>
-                        </div>
-                      </td>
-
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ApplicationsTable
+            rows={rows}
+            statuses={STATUSES}
+            onStatusChange={handleStatusChange}
+            onReapply={handleReapply}
+          />
 
           {rows.length === 0 && (
             <p className="text-neutral-500 py-8 text-center text-xs font-mono">

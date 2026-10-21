@@ -12,7 +12,7 @@ import httpx
 from . import resume_parser
 from .ai_gateway import ai_gateway
 
-HTTP_TIMEOUT = httpx.Timeout(10.0, connect=3.0)
+HTTP_TIMEOUT = httpx.Timeout(4.5, connect=2.0)
 USER_AGENT = "Mozilla/5.0 (compatible; HowToLarpedCareerDNA/2.0)"
 
 
