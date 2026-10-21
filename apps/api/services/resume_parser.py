@@ -40,6 +40,10 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
     email_match = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text)
     email = email_match.group(0) if email_match else ""
 
+    # Phone
+    phone_match = re.search(r"(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b", text)
+    phone = phone_match.group(0).strip() if phone_match else ""
+
     # Name extraction heuristic: find actual personal name, skipping section titles and comma lists
     name = ""
     for line in clean_lines[:10]:
@@ -168,6 +172,34 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
             {"name": "Full Stack Platform", "tech": [s for s in skills_found if s in ["typescript", "react", "next.js", "postgresql", "node"]], "text": "Responsive modern web applications with realtime updates."}
         ]
 
+    # Summary / Executive Summary extraction heuristic
+    summary = ""
+    sum_section = False
+    sum_lines = []
+    for line in clean_lines:
+        lower_l = line.lower().strip()
+        if any(lower_l == h or lower_l.startswith(h + ":") for h in [
+            "summary", "professional summary", "executive summary", "career summary",
+            "profile", "personal profile", "about me", "about", "career objective", "objective"
+        ]) and len(line) < 40:
+            sum_section = True
+            continue
+        if sum_section:
+            if any(lower_l == h or lower_l.startswith(h + ":") for h in [
+                "experience", "work experience", "employment history", "professional experience",
+                "education", "academic background", "projects", "skills", "technical skills",
+                "certifications", "licenses", "awards", "publications", "languages"
+            ]) and len(line) < 40 and not line.startswith("•") and not line.startswith("-"):
+                break
+            if len(line) > 5 and not line.startswith("•") and not line.startswith("-"):
+                sum_lines.append(line)
+            elif line.startswith("•") or line.startswith("-"):
+                sum_lines.append(line.lstrip("•- ").strip())
+            if len(" ".join(sum_lines)) > 600:
+                break
+    if sum_lines:
+        summary = " ".join(sum_lines).strip()
+
     # Chunk text into evidence items
     evidence = []
     paragraphs = re.split(r"\n\s*\n", text)
@@ -180,9 +212,11 @@ def parse_resume_content(text: str, filename: str = "Resume") -> Dict[str, Any]:
         "name": name,
         "headline": headline,
         "email": email,
+        "phone": phone,
         "location": location or "Remote",
         "years": years,
         "education": education,
+        "summary": summary,
         "skills": list(dict.fromkeys(skills_found)),
         "experience": experience[:6],
         "projects": projects[:6],

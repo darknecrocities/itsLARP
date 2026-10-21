@@ -128,6 +128,41 @@ def test_crawl_and_construct_dna_and_refine():
     assert len(ref.json()["refined_text"]) > 10
 
 
+def test_personal_info_and_summary_source_isolation():
+    r = client.post("/profile/crawl-and-construct", json={
+        "github_url": "https://github.com/octocat",
+        "portfolio_url": "https://example.com",
+        "resume_text": """Jane Doe
+Senior Distributed Systems Architect
+jane.doe@example.com
+(555) 019-2834
+San Francisco, CA
+
+Professional Summary:
+Accomplished distributed systems engineer with 10 years of experience designing fault-tolerant systems.
+
+Experience:
+Principal Systems Engineer | MegaScale Inc | 2020 - Present
+• Designed distributed streaming engine handling 5M events/sec.
+
+Education:
+B.S. in Computer Science, Stanford University
+""",
+        "custom_instructions": "Build profile from resume."
+    })
+    assert r.status_code == 200
+    data = r.json()
+    profile = data["profile"]
+    assert profile["name"] == "Jane Doe"
+    assert "Senior Distributed Systems Architect" in profile["headline"]
+    assert profile["email"] == "jane.doe@example.com"
+    assert "555" in profile["phone"]
+    assert "San Francisco" in profile["location"]
+    assert "Accomplished distributed systems engineer" in profile["summary"]
+    # Ensure GitHub handle "octocat" was NOT assigned as name
+    assert profile["name"].lower() != "octocat"
+
+
 def test_20_configs_in_prepare_application():
     jobs_res = client.get("/jobs?q=Engineer")
     assert jobs_res.status_code == 200

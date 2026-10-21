@@ -47,18 +47,46 @@ def parse_linkedin_text_content(raw_text: str) -> Dict[str, Any]:
     skills: List[str] = []
     education = ""
     headline = ""
+    extracted_name = ""
+    extracted_location = ""
 
-    # 1. Headline detection: looks for professional title in early lines
+    DISQUALIFIED_NAME_WORDS = [
+        "experience", "activity", "about", "connect", "message", "followers", "connections",
+        "linkedin", "contact", "info", "highlights", "open to", "view profile", "profile",
+        "show credential", "skills", "education", "licenses", "certifications", "analytics"
+    ]
+
+    # 1. Name & Headline detection
+    for line in lines[:5]:
+        clean_l = line.strip()
+        lower_l = clean_l.lower()
+        if re.search(r"[@/\\:|0-9]", clean_l) or clean_l.count(",") > 0:
+            continue
+        if 2 < len(clean_l) < 40 and not any(k in lower_l for k in DISQUALIFIED_NAME_WORDS):
+            words = clean_l.split()
+            if 1 <= len(words) <= 4:
+                extracted_name = clean_l
+                break
+
     for i, line in enumerate(lines[:6]):
         if any(sep in line for sep in ["|", "·", "•", "at ", "—", "@"]) and 10 < len(line) < 140:
             if not any(k in line.lower() for k in ["experience", "activity", "about", "connect", "message", "followers"]):
                 headline = line
                 break
 
+    for line in lines[:10]:
+        clean_l = line.strip()
+        lower_l = clean_l.lower()
+        if any(c in lower_l for c in ["remote", "philippines", "united states", "canada", "singapore", "united kingdom", "australia", "germany", "japan", "area", "metro", "city"]) and len(clean_l) < 60:
+            if not any(k in lower_l for k in ["experience", "company", "worked", "university", "school", "engineer", "developer", "skills"]):
+                extracted_location = clean_l.split("·")[0].strip()
+                break
+
     # 2. Section Chunking by Headings
     current_section = "general"
     section_lines: Dict[str, List[str]] = {
         "general": [],
+        "about": [],
         "experience": [],
         "certifications": [],
         "education": [],
@@ -66,6 +94,7 @@ def parse_linkedin_text_content(raw_text: str) -> Dict[str, Any]:
     }
 
     sec_patterns = {
+        "about": r"^(?:about|summary|professional summary|about me)$",
         "experience": r"^(?:experience|work experience|professional experience)$",
         "certifications": r"^(?:licenses\s*(?:&|and)\s*certifications|certifications|licenses)$",
         "education": r"^(?:education|academic background)$",
@@ -217,8 +246,20 @@ def parse_linkedin_text_content(raw_text: str) -> Dict[str, Any]:
     if edu_lines:
         education = " · ".join(edu_lines[:3])
 
+    # 6. Parse About / Executive Summary
+    summary = ""
+    if section_lines["about"]:
+        clean_about = [
+            l for l in section_lines["about"]
+            if not any(ign in l.lower() for ign in ["see more", "...more", "show all", "about", "activity", "see less"])
+        ]
+        summary = " ".join(clean_about).strip()
+
     return {
+        "name": extracted_name,
         "headline": headline,
+        "location": extracted_location,
+        "summary": summary,
         "experience": experience,
         "certifications": certifications,
         "licenses": licenses,
@@ -237,9 +278,10 @@ async def crawl_linkedin_profile(url_or_handle: str, raw_text: str = "") -> Dict
     # If raw clipboard / active-tab text is provided, parse directly
     parsed_text = parse_linkedin_text_content(raw_text) if raw_text.strip() else {}
 
-    extracted_name = ""
+    extracted_name = parsed_text.get("name", "")
     extracted_headline = parsed_text.get("headline", "")
-    extracted_location = ""
+    extracted_location = parsed_text.get("location", "")
+    extracted_summary = parsed_text.get("summary", "")
     og_found = False
 
     # Attempt public OpenGraph fetch if handle is present
@@ -259,7 +301,7 @@ async def crawl_linkedin_profile(url_or_handle: str, raw_text: str = "") -> Dict
                     if og_title_m:
                         og_title = html.unescape(og_title_m.group(1))
                         parts = og_title.split(" - ")
-                        if len(parts) >= 1:
+                        if len(parts) >= 1 and not extracted_name:
                             extracted_name = parts[0].strip()
                         if len(parts) >= 2 and not extracted_headline:
                             extracted_headline = parts[1].replace(" | LinkedIn", "").strip()
@@ -306,8 +348,10 @@ async def crawl_linkedin_profile(url_or_handle: str, raw_text: str = "") -> Dict
         "ok": bool(handle or raw_text.strip() or og_found),
         "handle": handle,
         "linkedin_url": clean_url,
-        "name": extracted_name,
+        "name": extracted_name or parsed_text.get("name", ""),
         "headline": extracted_headline or parsed_text.get("headline", ""),
+        "location": extracted_location or parsed_text.get("location", ""),
+        "summary": extracted_summary or parsed_text.get("summary", ""),
         "experience": parsed_text.get("experience", []),
         "certifications": parsed_text.get("certifications", []),
         "licenses": parsed_text.get("licenses", []),

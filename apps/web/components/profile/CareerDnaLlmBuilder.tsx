@@ -50,6 +50,8 @@ export function CareerDnaLlmBuilder() {
         handle: string;
         name: string;
         headline: string;
+        location?: string;
+        summary?: string;
         experience: any[];
         certifications: any[];
         licenses: any[];
@@ -91,6 +93,8 @@ export function CareerDnaLlmBuilder() {
         setProfile({
           name: res.name || profile.name,
           headline: res.headline || profile.headline,
+          location: res.location || profile.location,
+          summary: res.summary || profile.summary,
           experience: nextExp,
           certifications: nextCerts,
           licenses: nextLics,
