@@ -17,7 +17,7 @@ export function LandingFooter() {
             <Link href="/download" className="hover:text-ink transition-colors font-semibold text-ink">Download</Link>
             <Link href="/dashboard" className="hover:text-ink transition-colors">Dashboard</Link>
             <Link href="/profile" className="hover:text-ink transition-colors">Profile</Link>
-            <Link href="/resume" className="hover:text-ink transition-colors">APA Resume</Link>
+            <Link href="/apa-resume" className="hover:text-ink transition-colors">APA Resume</Link>
             <Link href="/agents" className="hover:text-ink transition-colors">1,000 Agents</Link>
             <Link href="/applications" className="hover:text-ink transition-colors">Applications</Link>
             <Link href="/integrations" className="hover:text-ink transition-colors">Notion</Link>

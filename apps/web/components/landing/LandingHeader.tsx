@@ -20,7 +20,7 @@ function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
 const NAV_LINKS = [
   { href: "/#app-demos", label: "Watch Demos", pulse: true },
   { href: "/#workforce-demo", label: "How It Works" },
-  { href: "/resume", label: "APA Resume" },
+  { href: "/apa-resume", label: "APA Resume" },
   { href: "/#principles", label: "Why itsLARP" },
   { href: "/#architecture", label: "4 Easy Steps" },
   { href: "/download#benchmarks", label: "Hardware Benchmarks" },
@@ -80,7 +80,7 @@ export function LandingHeader() {
             How It Works
           </Link>
           <Link
-            href="/resume"
+            href="/apa-resume"
             className="hover:text-ink transition-colors font-medium flex items-center gap-1"
           >
             APA Resume
@@ -231,7 +231,7 @@ export function LandingHeader() {
                     )}
                     {link.label}
                   </span>
-                  {link.href === "/resume" && (
+                  {link.href === "/apa-resume" && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 bg-neutral-200 text-neutral-800 rounded">
                       Standalone CV
                     </span>
