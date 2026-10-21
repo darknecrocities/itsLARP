@@ -1,35 +1,16 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { THEME } from "../theme";
-import { KineticText } from "../components/KineticText";
+import { ApertureIntro } from "../components/ApertureIntro";
+import { MaskedSlideText } from "../components/MaskedSlideText";
+import { ShutterBladeWipe } from "../components/ShutterBladeWipe";
 
 export const Seq1Genesis: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Logo entrance
-  const logoSpring = spring({
-    frame: Math.max(0, frame - 10),
-    fps,
-    config: THEME.springs.snappy,
-  });
-
-  const logoScale = interpolate(logoSpring, [0, 1], [0.5, 1.0]);
-  const logoOpacity = interpolate(frame, [10, 35], [0, 1], {
-    extrapolateRight: "clamp",
-  });
-
-  // Background subtle radial glow pulsing
-  const pulseGlow = Math.sin(frame / 20) * 0.04 + 0.08;
-
-  // Flash / impact right before frame 348 (beat hit)
-  const exitFlash = interpolate(frame, [325, 347], [0, 0.95], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  const exitScale = interpolate(frame, [310, 348], [1.0, 1.15], {
-    extrapolateLeft: "clamp",
+  // Subtle camera drift backward during intro (no pulse, pure dimensional drift)
+  const driftScale = interpolate(frame, [0, 348], [1.04, 1.0], {
     extrapolateRight: "clamp",
   });
 
@@ -37,126 +18,72 @@ export const Seq1Genesis: React.FC = () => {
     <AbsoluteFill
       style={{
         backgroundColor: THEME.colors.bg,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        transform: `scale(${exitScale})`,
         overflow: "hidden",
+        transform: `scale(${driftScale})`,
       }}
     >
-      {/* Ambient background glow */}
-      <div
-        style={{
-          position: "absolute",
-          width: 900,
-          height: 900,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(255, 255, 255, ${pulseGlow}) 0%, rgba(0, 0, 0, 0) 70%)`,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Grid overlay */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Brand content container */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 28,
-          zIndex: 5,
-        }}
-      >
-        {/* Official App Logo */}
-        <div
+      <ShutterBladeWipe slatCount={8} triggerFrame={290} durationInFrames={58} direction="horizontal">
+        <AbsoluteFill
           style={{
-            transform: `scale(${logoScale})`,
-            opacity: logoOpacity,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
+          {/* Transitions #1 & #2: Aperture Iris & 3D Logo Perspective Lock */}
+          <ApertureIntro />
+
+          {/* Transition #3: Masked Opposing Line Slide (Typographic Reveals) */}
           <div
             style={{
-              padding: 16,
-              borderRadius: 24,
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              border: `1px solid ${THEME.colors.borderLight}`,
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.8)",
+              position: "absolute",
+              bottom: 120,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+              zIndex: 30,
             }}
           >
-            <Img
-              src={staticFile("images/applogo.png")}
-              style={{
-                width: 120,
-                height: 120,
-                objectFit: "contain",
-                filter: "drop-shadow(0 0 20px rgba(255, 255, 255, 0.3))",
-              }}
+            {/* Top kicker sliding from right */}
+            <MaskedSlideText
+              text="AUTONOMOUS CAREER OPERATING SYSTEM"
+              direction="left"
+              delay={160}
+              fontSize={14}
+              tracking={6}
+              fontWeight={700}
+              color={THEME.colors.inkSubtle}
+              fontFamily={THEME.fonts.mono}
+            />
+
+            {/* Hero Tagline: "Lets Larp" sliding up */}
+            <MaskedSlideText
+              text="Lets Larp"
+              direction="up"
+              delay={195}
+              fontSize={108}
+              tracking={-2}
+              fontWeight={900}
+              color={THEME.colors.ink}
+              fontFamily={THEME.fonts.display}
+            />
+
+            {/* Subtitle sliding from bottom */}
+            <MaskedSlideText
+              text="Stop applying manually. Let 1,000 autonomous bots fight for your interviews."
+              direction="up"
+              delay={230}
+              fontSize={20}
+              tracking={0.2}
+              fontWeight={400}
+              color={THEME.colors.inkMuted}
+              fontFamily={THEME.fonts.sans}
             />
           </div>
-        </div>
-
-        {/* Category kicker */}
-        <KineticText
-          text="AUTONOMOUS CAREER OPERATING SYSTEM"
-          delay={40}
-          fontSize={15}
-          tracking={6}
-          weight={600}
-          color={THEME.colors.inkSubtle}
-          fontFamily={THEME.fonts.mono}
-          mode="line"
-        />
-
-        {/* Hero Tagline: "Lets Larp" */}
-        <KineticText
-          text="Lets Larp"
-          delay={70}
-          fontSize={110}
-          tracking={-2}
-          weight={800}
-          color={THEME.colors.ink}
-          mode="word"
-        />
-
-        {/* Subtitle */}
-        <KineticText
-          text="Stop applying manually. Let 1,000 autonomous bots fight for your interviews."
-          delay={120}
-          fontSize={22}
-          tracking={0.5}
-          weight={400}
-          color={THEME.colors.inkMuted}
-          mode="line"
-        />
-      </div>
-
-      {/* Frame 348 Beat Flash */}
-      {exitFlash > 0.01 && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "#ffffff",
-            opacity: exitFlash,
-            zIndex: 99,
-          }}
-        />
-      )}
+        </AbsoluteFill>
+      </ShutterBladeWipe>
     </AbsoluteFill>
   );
 };

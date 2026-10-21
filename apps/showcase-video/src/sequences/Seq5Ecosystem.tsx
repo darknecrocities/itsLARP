@@ -2,177 +2,251 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Video, Img, staticFile } from "remotion";
 import { THEME } from "../theme";
 import { CinematicFrame } from "../components/CinematicFrame";
-import { KineticText } from "../components/KineticText";
-import { PerspectiveCard } from "../components/PerspectiveCard";
-import { ScuttleMascot } from "../components/ScuttleMascot";
-import { BeatPulse } from "../components/BeatPulse";
+import { MaskedSlideText } from "../components/MaskedSlideText";
+import { MascotMotionRail } from "../components/MascotMotionRail";
 
 export const Seq5Ecosystem: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Snapping beats aligned with musical accents (local frames at 60 FPS)
-  const snapBeats = [60, 147, 234, 321, 408];
+  // Sequence breakdown across 480 frames:
+  // 0 - 120: Transition #30 Kanban Column Cascade (application_track.png)
+  // 120 - 270: Transitions #31 & #32 Bi-Directional Drawer Slide & Notion Video (notion-pipeline-demo.mp4)
+  // 270 - 480: Transitions #33 & #34 Scuttle Mascot Rail Glide & Scissor Snip
 
-  // Screen shift at frame 240 (from Notion demo video to application Kanban track)
-  const isApplicationTrack = frame >= 240;
-  const swapProgress = spring({
-    frame: Math.max(0, frame - 240),
+  // Transition #30: Kanban Column Cascade (staggered vertical drop)
+  const colCascade1 = spring({
+    frame,
     fps,
-    config: THEME.springs.snappy,
+    config: { damping: 20, stiffness: 200, mass: 0.9 },
   });
+  const colCascade2 = spring({
+    frame: Math.max(0, frame - 25),
+    fps,
+    config: { damping: 20, stiffness: 200, mass: 0.9 },
+  });
+  const colCascade3 = spring({
+    frame: Math.max(0, frame - 50),
+    fps,
+    config: { damping: 20, stiffness: 200, mass: 0.9 },
+  });
+
+  // Transition #31: Bi-Directional Drawer Slide at frame 120
+  const drawerProgress = spring({
+    frame: Math.max(0, frame - 120),
+    fps,
+    config: { damping: 24, stiffness: 180, mass: 1 },
+  });
+  const drawerLeftX = interpolate(drawerProgress, [0, 1], [0, -100]);
+  const drawerRightX = interpolate(drawerProgress, [0, 1], [100, 0]);
+
+  // Section switcher
+  const isNotionSync = frame >= 120;
 
   return (
     <AbsoluteFill style={{ backgroundColor: THEME.colors.bg, overflow: "hidden" }}>
-      <BeatPulse hitFrames={snapBeats}>
-        {/* Header HUD */}
-        <div
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 80,
-            zIndex: 10,
-            display: "flex",
-            flexDirection: "column",
-            gap: 6,
-          }}
-        >
-          <KineticText
-            text="05 / LIVE PIPELINE & ECOSYSTEM"
-            fontSize={15}
-            tracking={4}
-            weight={700}
-            color={THEME.colors.accentPurple}
-            fontFamily={THEME.fonts.mono}
-            mode="line"
-          />
-          <KineticText
-            text={!isApplicationTrack ? "BI-DIRECTIONAL NOTION SYNC" : "REAL-TIME INTERVIEW PIPELINE"}
-            fontSize={40}
-            tracking={-1}
-            weight={800}
-            color={THEME.colors.ink}
-            mode="word"
-          />
-        </div>
+      {/* Blueprint Grid */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* 3D Viewport Hardware Stage */}
-        <PerspectiveCard
-          initialRotateX={4}
-          initialRotateY={-6}
-          targetRotateX={0}
-          targetRotateY={0}
-          initialScale={0.9}
-          targetScale={1.0}
-          duration={480}
-          style={{ marginTop: 50 }}
-        >
-          <CinematicFrame
-            width={1540}
-            height={840}
-            title={
-              !isApplicationTrack
-                ? "Notion Workspace — Live 2-Way Synchronized Database"
-                : "itslarp.app — Application Pipeline & Recruiter Conversion Tracking"
-            }
-          >
-            {/* View 1: Notion Demo Video */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: interpolate(swapProgress, [0, 0.4], [1, 0]),
-                transform: `scale(${interpolate(swapProgress, [0, 1], [1, 0.95])})`,
-              }}
+      {/* Header HUD */}
+      <div
+        style={{
+          position: "absolute",
+          top: 48,
+          left: 90,
+          zIndex: 35,
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+        }}
+      >
+        <MaskedSlideText
+          text={!isNotionSync ? "05 / KANBAN PIPELINE" : "05 / 2-WAY NOTION ECOSYSTEM"}
+          direction="left"
+          delay={10}
+          fontSize={15}
+          tracking={4}
+          fontWeight={700}
+          color={THEME.colors.accentPurple}
+          fontFamily={THEME.fonts.mono}
+        />
+        <MaskedSlideText
+          text={!isNotionSync ? "REAL-TIME APPLICATION TRACKING" : "BIDIRECTIONAL WORKSPACE SYNC"}
+          direction="up"
+          delay={25}
+          fontSize={40}
+          tracking={-1}
+          fontWeight={800}
+          color={THEME.colors.ink}
+        />
+      </div>
+
+      {/* Main Stage Viewport */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ marginTop: 55, position: "relative" }}>
+          {!isNotionSync ? (
+            /* Stage 1: Kanban Pipeline Cascade (Frames 0 - 120) */
+            <CinematicFrame
+              width={1540}
+              height={840}
+              title="itslarp.app — Application Pipeline & Conversion Analytics"
             >
-              <Video
-                src={staticFile("videos/notion-pipeline-demo.mp4")}
-                startFrom={0}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 24,
-                  left: 24,
-                  padding: "8px 16px",
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  border: `1px solid ${THEME.colors.border}`,
-                  borderRadius: 8,
-                  fontFamily: THEME.fonts.mono,
-                  fontSize: 12,
-                  color: THEME.colors.ink,
-                }}
-              >
-                ● 2-WAY NOTION SYNC · REAL-TIME STAGE UPDATES
+              <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
+                <Img
+                  src={staticFile("images/application_track.png")}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "top left",
+                  }}
+                />
+
+                {/* Staggered Column Cascade Indicator Overlays */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 20,
+                    right: 30,
+                    display: "flex",
+                    gap: 16,
+                    zIndex: 20,
+                  }}
+                >
+                  <div
+                    style={{
+                      transform: `translateY(${interpolate(colCascade1, [0, 1], [-40, 0])}px)`,
+                      opacity: interpolate(colCascade1, [0, 1], [0, 1]),
+                      backgroundColor: "rgba(0, 0, 0, 0.85)",
+                      border: `1px solid ${THEME.colors.borderLight}`,
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      fontFamily: THEME.fonts.mono,
+                      fontSize: 12,
+                      color: THEME.colors.ink,
+                    }}
+                  >
+                    Stage 1: APPLIED (428)
+                  </div>
+                  <div
+                    style={{
+                      transform: `translateY(${interpolate(colCascade2, [0, 1], [-40, 0])}px)`,
+                      opacity: interpolate(colCascade2, [0, 1], [0, 1]),
+                      backgroundColor: "rgba(0, 0, 0, 0.85)",
+                      border: `1px solid ${THEME.colors.borderLight}`,
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      fontFamily: THEME.fonts.mono,
+                      fontSize: 12,
+                      color: THEME.colors.accentAmber,
+                    }}
+                  >
+                    Stage 2: IN REVIEW (64)
+                  </div>
+                  <div
+                    style={{
+                      transform: `translateY(${interpolate(colCascade3, [0, 1], [-40, 0])}px)`,
+                      opacity: interpolate(colCascade3, [0, 1], [0, 1]),
+                      backgroundColor: "rgba(0, 0, 0, 0.85)",
+                      border: "1px solid rgba(16, 185, 129, 0.4)",
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      fontFamily: THEME.fonts.mono,
+                      fontSize: 12,
+                      color: THEME.colors.accentEmerald,
+                    }}
+                  >
+                    Stage 3: INTERVIEW (18)
+                  </div>
+                </div>
               </div>
+            </CinematicFrame>
+          ) : (
+            /* Stage 2: Notion Video Reveal (Frames 120 - 480) */
+            <div style={{ transform: `translateX(${drawerRightX}px)` }}>
+              <CinematicFrame
+                width={1540}
+                height={840}
+                title="Notion Workspace — Live 2-Way Synchronized Job Tracker"
+              >
+                <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                  <Video
+                    src={staticFile("videos/notion-pipeline-demo.mp4")}
+                    startFrom={0}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 24,
+                      left: 24,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      backgroundColor: "rgba(0, 0, 0, 0.85)",
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      border: `1px solid ${THEME.colors.borderLight}`,
+                      zIndex: 10,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: THEME.colors.accentPurple,
+                        boxShadow: `0 0 10px ${THEME.colors.accentPurple}`,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: THEME.fonts.mono,
+                        fontSize: 12,
+                        color: THEME.colors.ink,
+                      }}
+                    >
+                      NOTION API V2 · ZERO-LATENCY WEBHOOK SYNC
+                    </span>
+                  </div>
+                </div>
+              </CinematicFrame>
             </div>
-
-            {/* View 2: Application Track Kanban */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: interpolate(swapProgress, [0.3, 1], [0, 1]),
-                transform: `scale(${interpolate(swapProgress, [0, 1], [1.05, 1])})`,
-              }}
-            >
-              <Img
-                src={staticFile("images/application_track.png")}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "top left",
-                }}
-              />
-            </div>
-          </CinematicFrame>
-        </PerspectiveCard>
-
-        {/* Authentic 2D Scuttle Mascot Peeking in on the bottom-right */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            right: 40,
-            zIndex: 30,
-          }}
-        >
-          <ScuttleMascot
-            dialogue="Snip through the noise."
-            snapBeats={[80, 160, 240, 320, 400]}
-          />
+          )}
         </div>
+      </div>
 
-        {/* Bottom Feature Pill */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 30,
-            left: 80,
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              border: `1px solid ${THEME.colors.borderLight}`,
-              borderRadius: 30,
-              fontFamily: THEME.fonts.mono,
-              fontSize: 13,
-              color: THEME.colors.inkMuted,
-            }}
-          >
-            ● NATIVE OS ALERTS ON INTERVIEWS & OFFERS · ZERO SPAM
-          </div>
-        </div>
-      </BeatPulse>
+      {/* Transitions #33 & #34: Scuttle Mascot Kinetic Rail Glide & Scissor Snip (Frames 260 - 480) */}
+      {frame >= 260 && (
+        <MascotMotionRail
+          dialogue="Snip through the noise."
+          snapBeats={[20, 80, 140, 190]}
+          railFromX={500}
+          railToX={-30}
+          durationInFrames={220}
+        />
+      )}
     </AbsoluteFill>
   );
 };

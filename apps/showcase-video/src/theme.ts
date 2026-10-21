@@ -15,6 +15,7 @@ export const THEME = {
   },
   fonts: {
     display: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif',
+    sans: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
     mono: '"SF Mono", "JetBrains Mono", "Menlo", monospace',
   },
   springs: {
