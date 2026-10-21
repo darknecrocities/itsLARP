@@ -73,9 +73,17 @@ def generate_apa_text(profile: Dict[str, Any]) -> str:
         for exp in experience:
             company = exp.get("company", "Organization")
             title = exp.get("title", "Position")
-            desc = exp.get("text", "")
-            lines.append(f"{title} - {company}")
-            lines.append(f"  * {desc}")
+            dates = exp.get("dates") or "Recent"
+            lines.append(f"{title} - {company} ({dates})")
+            metrics = exp.get("metrics")
+            if metrics:
+                lines.append(f"  * Quantified Impact: {metrics}")
+            bullets = exp.get("bullets") or []
+            if bullets:
+                for b in bullets:
+                    lines.append(f"  * {b}")
+            elif exp.get("text"):
+                lines.append(f"  * {exp['text']}")
             lines.append("")
 
     # Section 5: Software Artifacts & Project Contributions (APA Citation Style)
@@ -155,15 +163,27 @@ def generate_apa_html(profile: Dict[str, Any]) -> str:
 
     exp_html = ""
     if experience:
-        exp_html = "".join(
-            f'''
-            <div class="apa-exp-block">
-              <h3 class="apa-level-2">{e.get("title", "Role")} — {e.get("company", "Organization")}</h3>
-              <p class="apa-body">{e.get("text", "")}</p>
+        blocks = []
+        for e in experience:
+            title = e.get("title", "Role")
+            company = e.get("company", "Organization")
+            dates = e.get("dates", "Recent")
+            metrics = e.get("metrics", "")
+            bullets = e.get("bullets") or []
+            text_desc = e.get("text", "")
+            if not bullets and text_desc:
+                bullets = [s.strip() for s in text_desc.split(". ") if len(s.strip()) > 15]
+
+            bullets_html = "".join(f'<li style="margin-bottom: 3pt;">{b.rstrip(".")}</li>' for b in bullets[:4])
+            metrics_html = f'<div style="font-size: 10.5pt; font-weight: 600; color: #047857; margin: 3pt 0 4pt 0.5in;">Impact: {metrics}</div>' if metrics else ""
+            blocks.append(f'''
+            <div class="apa-exp-block" style="margin-bottom: 14pt;">
+              <h3 class="apa-level-2" style="margin-bottom: 2pt;">{title} — {company} <span style="font-weight: normal; font-size: 11pt; color: #555;">({dates})</span></h3>
+              {f'<ul style="margin: 3pt 0 4pt 0.5in; padding-left: 0.2in; font-size: 11pt;">{bullets_html}</ul>' if bullets_html else f'<p class="apa-body">{text_desc}</p>'}
+              {metrics_html}
             </div>
-            '''
-            for e in experience
-        )
+            ''')
+        exp_html = "".join(blocks)
 
     certs_list = profile.get("certifications") or []
     lics_list = profile.get("licenses") or []

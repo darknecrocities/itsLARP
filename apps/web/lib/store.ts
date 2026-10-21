@@ -31,6 +31,7 @@ export type CertificationItem = {
   issuer: string;
   date?: string;
   url?: string;
+  credential_id?: string;
 };
 
 export type LicenseItem = {

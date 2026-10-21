@@ -241,6 +241,32 @@ export function generateClientFallback(
           .join("")
       : ""
   }
+  ${
+    p.certifications?.length
+      ? `<div class="section-title">Certifications & Honors</div>` +
+        p.certifications
+          .map(
+            (c) => `<div class="item">
+              <div class="item-header"><span>${c.name}</span><span>${c.date || "Verified"}</span></div>
+              <p style="font-size: 9pt; color: #555;">Issuer: ${c.issuer}${c.credential_id ? ` &bull; ID: ${c.credential_id}` : ""}</p>
+            </div>`
+          )
+          .join("")
+      : ""
+  }
+  ${
+    p.licenses?.length
+      ? `<div class="section-title">Licenses & Accreditations</div>` +
+        p.licenses
+          .map(
+            (l) => `<div class="item">
+              <div class="item-header"><span>${l.name}</span><span>${l.date || "Active"}</span></div>
+              <p style="font-size: 9pt; color: #555;">Authority: ${l.authority}${l.number ? ` &bull; #: ${l.number}` : ""}</p>
+            </div>`
+          )
+          .join("")
+      : ""
+  }
   <div class="section-title">Education</div>
   <p>${p.education || "Bachelor of Science in Computer Science"}</p>
 </body>

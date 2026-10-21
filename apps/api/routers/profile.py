@@ -55,6 +55,17 @@ class CrawlAndConstructIn(BaseModel):
     headline: str = ""
 
 
+class SyncLinkedInIn(BaseModel):
+    linkedin_url: str = ""
+    linkedin_text: str = ""
+
+
+@router.post("/sync-linkedin")
+async def profile_sync_linkedin(b: SyncLinkedInIn):
+    from services import linkedin_crawler
+    return await linkedin_crawler.crawl_linkedin_profile(b.linkedin_url, b.linkedin_text)
+
+
 @router.post("/crawl-and-construct")
 async def profile_crawl_and_construct(b: CrawlAndConstructIn):
     inst = (b.custom_instructions or b.notes or "").strip()

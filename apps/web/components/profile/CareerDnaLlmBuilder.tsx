@@ -23,6 +23,101 @@ export function CareerDnaLlmBuilder() {
   const [editMode, setEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
+  async function handlePasteClipboard() {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        if (text.trim()) {
+          setLinkedinText(text.trim());
+          setStatusMsg("Pasted profile text from clipboard. Click 'Sync LinkedIn Only' or 'Crawl All Links' to extract.");
+        }
+      }
+    } catch {
+      setStatusMsg("Clipboard permission unavailable. Please paste directly into the box below.");
+    }
+  }
+
+  async function handleSyncLinkedIn() {
+    if (!linkedinUrl.trim() && !linkedinText.trim()) {
+      setStatusMsg("Enter a LinkedIn Profile URL or paste profile text to extract.");
+      return;
+    }
+    setCrawling(true);
+    setStatusMsg("Extracting dynamic LinkedIn experience, licenses, and certifications...");
+    try {
+      const res = await api<{
+        ok: boolean;
+        handle: string;
+        name: string;
+        headline: string;
+        experience: any[];
+        certifications: any[];
+        licenses: any[];
+        skills: string[];
+        education: string;
+      }>("/profile/sync-linkedin", {
+        linkedin_url: linkedinUrl.trim(),
+        linkedin_text: linkedinText.trim(),
+      });
+      if (res) {
+        const nextExp = res.experience?.length
+          ? [
+              ...res.experience,
+              ...(profile.experience || []).filter(
+                (e) => !res.experience.some((re) => re.company.toLowerCase() === e.company.toLowerCase())
+              ),
+            ]
+          : profile.experience || [];
+        const nextCerts = res.certifications?.length
+          ? [
+              ...res.certifications,
+              ...(profile.certifications || []).filter(
+                (c) => !res.certifications.some((rc) => rc.name.toLowerCase() === c.name.toLowerCase())
+              ),
+            ]
+          : profile.certifications || [];
+        const nextLics = res.licenses?.length
+          ? [
+              ...res.licenses,
+              ...(profile.licenses || []).filter(
+                (l) => !res.licenses.some((rl) => rl.name.toLowerCase() === l.name.toLowerCase())
+              ),
+            ]
+          : profile.licenses || [];
+        const nextSkills = res.skills?.length
+          ? Array.from(new Set([...(profile.skills || []), ...res.skills]))
+          : profile.skills || [];
+
+        setProfile({
+          name: res.name || profile.name,
+          headline: res.headline || profile.headline,
+          experience: nextExp,
+          certifications: nextCerts,
+          licenses: nextLics,
+          skills: nextSkills,
+          education: res.education || profile.education,
+          links: {
+            ...profile.links,
+            linkedin: linkedinUrl.trim() || profile.links?.linkedin,
+          },
+        });
+        setCrawlMeta({
+          github_found: Boolean(crawlMeta?.github_found),
+          portfolio_found: Boolean(crawlMeta?.portfolio_found),
+          linkedin_found: true,
+          engine: "Dynamic Extractor",
+        });
+        setStatusMsg(
+          `Extracted ${res.experience?.length || 0} roles and ${res.certifications?.length || 0} certifications from LinkedIn.`
+        );
+      }
+    } catch (e: any) {
+      setStatusMsg(`LinkedIn extraction notice: ${e?.message || "Check link or paste profile text."}`);
+    } finally {
+      setCrawling(false);
+    }
+  }
+
   async function handleCrawlAndConstruct() {
     if (!githubUrl.trim() && !linkedinUrl.trim() && !portfolioUrl.trim() && !linkedinText.trim()) {
       setStatusMsg("Provide at least one source link (GitHub, LinkedIn, or Portfolio URL) or bio text.");
@@ -190,15 +285,24 @@ export function CareerDnaLlmBuilder() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] font-mono uppercase text-neutral-700 block mb-1">
-            Optional LinkedIn Bio / Experience Paste
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-mono uppercase text-neutral-700">
+              LinkedIn Profile Text / Active Tab Paste
+            </label>
+            <button
+              type="button"
+              onClick={handlePasteClipboard}
+              className="text-[10px] font-mono text-neutral-600 hover:text-black underline"
+            >
+              Paste from Clipboard
+            </button>
+          </div>
           <textarea
             value={linkedinText}
             onChange={(e) => setLinkedinText(e.target.value)}
             rows={2}
-            placeholder="Paste LinkedIn About/Experience text if profile is private..."
-            className="w-full px-3 py-2 text-xs border border-neutral-300 rounded bg-white text-black focus:outline-none focus:border-black"
+            placeholder="Paste LinkedIn About/Experience/Licenses text (or click Paste from Clipboard)..."
+            className="w-full px-3 py-2 text-xs border border-neutral-300 rounded bg-white text-black focus:outline-none focus:border-black font-mono"
           />
         </div>
         <div>
@@ -224,7 +328,15 @@ export function CareerDnaLlmBuilder() {
             onClick={handleCrawlAndConstruct}
             className="px-4 py-2 text-xs font-semibold bg-black text-white hover:bg-neutral-800 rounded disabled:opacity-50 transition"
           >
-            {crawling ? "Crawling Links & Synthesizing DNA..." : "Crawl Links & Construct Career DNA with LLM"}
+            {crawling ? "Crawling Links & Synthesizing DNA..." : "Crawl All Links & Construct Career DNA"}
+          </button>
+          <button
+            type="button"
+            disabled={crawling}
+            onClick={handleSyncLinkedIn}
+            className="px-3 py-2 text-xs font-medium border border-neutral-300 bg-white text-black hover:bg-neutral-100 rounded disabled:opacity-50 transition"
+          >
+            Sync LinkedIn Only
           </button>
           <button
             type="button"
