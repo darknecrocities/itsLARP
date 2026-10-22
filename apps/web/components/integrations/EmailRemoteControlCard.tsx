@@ -4,6 +4,7 @@ import { api, apiGet } from "@/lib/api";
 import { Mail, Bell, RefreshCw, Send, ShieldCheck, CheckCircle2, Play, Pause, Terminal } from "lucide-react";
 import { GmailIcon, OutlookIcon } from "@/components/BrandIcons";
 import { sendDesktopNotification } from "@/lib/notifications";
+import { useStore } from "@/lib/store";
 
 interface EmailIntegrationState {
   connected: boolean;
@@ -19,8 +20,9 @@ interface EmailIntegrationState {
 }
 
 export function EmailRemoteControlCard() {
+  const profile = useStore((s) => s.profile);
   const [data, setData] = useState<EmailIntegrationState | null>(null);
-  const [emailInput, setEmailInput] = useState("parejasarronkian@gmail.com");
+  const [emailInput, setEmailInput] = useState("");
   const [provider, setProvider] = useState<"gmail" | "outlook">("gmail");
   const [loading, setLoading] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -44,6 +46,12 @@ export function EmailRemoteControlCard() {
   useEffect(() => {
     fetchStatus();
   }, []);
+
+  useEffect(() => {
+    if (profile?.email && !emailInput) {
+      setEmailInput(profile.email);
+    }
+  }, [profile?.email]);
 
   const handleSaveEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,18 +77,29 @@ export function EmailRemoteControlCard() {
     setLoading(true);
     setStatusMsg(null);
     try {
-      const res = await api<{ ok: boolean; notification: any }>("/integrations/email/send-notification", {
+      const res = await api<{
+        ok: boolean;
+        notification: {
+          id: string;
+          title: string;
+          message: string;
+          priority: "urgent" | "high" | "normal" | "low";
+          link_url?: string;
+        };
+      }>("/notifications/test", {
         event_type: "job_search_complete",
-        title: "Job Search Complete",
-        message: "Swarm discovered 10 verified engineering roles matching your profile.",
-        recipient: emailInput.trim(),
       });
-      if (res?.ok) {
-        sendDesktopNotification({
-          title: "Job Search Complete",
-          body: "Swarm discovered 10 verified engineering roles matching your profile.",
+      const item = res?.notification;
+      if (item) {
+        await sendDesktopNotification({
+          id: item.id,
+          title: item.title,
+          body: item.message,
+          priority: item.priority || "high",
+          bypassAntiSpam: true,
+          url: item.link_url || `/notifications?id=${item.id}`,
         });
-        setStatusMsg("Alert dispatched to device and logged for " + emailInput);
+        setStatusMsg(`Dynamic alert "${item.title}" dispatched to your computer.`);
         await fetchStatus();
       }
     } catch (e: any) {
@@ -167,7 +186,7 @@ export function EmailRemoteControlCard() {
           <input
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
-            placeholder="parejasarronkian@gmail.com"
+            placeholder="candidate@example.com"
             className="input text-xs w-full font-mono"
           />
         </div>
@@ -221,7 +240,7 @@ export function EmailRemoteControlCard() {
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-neutral-800">
             <Terminal className="w-4 h-4 text-black" />
-            <span>Email Remote Control Console (parejasarronkian@gmail.com)</span>
+            <span>Email Remote Control Console{emailInput ? ` (${emailInput})` : ""}</span>
           </div>
           <span className="text-[11px] text-neutral-500">
             Swarm Status: <strong className={data?.swarm_paused ? "text-amber-600" : "text-emerald-600"}>
@@ -231,7 +250,7 @@ export function EmailRemoteControlCard() {
         </div>
 
         <p className="text-xs text-neutral-600 leading-relaxed">
-          Send an email from <strong>{emailInput}</strong> to your connected itsLARP address with subjects:
+          Send an email from <strong>{emailInput || "your email address"}</strong> to your connected itsLARP address with subjects:
           <code className="mx-1 px-1.5 py-0.5 rounded bg-neutral-200 text-black font-mono text-[11px]">STATUS</code>
           <code className="mx-1 px-1.5 py-0.5 rounded bg-neutral-200 text-black font-mono text-[11px]">PAUSE</code>
           <code className="mx-1 px-1.5 py-0.5 rounded bg-neutral-200 text-black font-mono text-[11px]">RESUME</code>

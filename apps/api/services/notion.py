@@ -334,9 +334,14 @@ async def pull_from_notion(token: str, database_id: str, db) -> dict:
 
     for item in notion_apps:
         page_id = item["notion_page_id"]
-        # Look for existing record by notion_page_id or by company+role match
+        if not page_id:
+            continue
+        clean_page_id = page_id.replace("-", "").strip()
+
+        # Look for existing record by notion_page_id, by clean primary key, or by company+role match
         existing = db.query(ApplicationRecord).filter(
             (ApplicationRecord.notion_page_id == page_id) |
+            (ApplicationRecord.id == f"notion_{clean_page_id}") |
             ((ApplicationRecord.company == item["company"]) & (ApplicationRecord.role == item["role"]))
         ).first()
 
@@ -351,17 +356,17 @@ async def pull_from_notion(token: str, database_id: str, db) -> dict:
             updated += 1
         else:
             new_app = ApplicationRecord(
-                id=f"notion_{page_id.replace('-', '')[:12]}",
-                job_id=f"job_{page_id.replace('-', '')[:8]}",
-                company=item["company"],
-                role=item["role"],
-                match=item["match"],
-                status=item["status"],
-                platform=item["platform"],
-                url=item["url"],
+                id=f"notion_{clean_page_id}",
+                job_id=f"job_{clean_page_id}",
+                company=item["company"] or "Target Company",
+                role=item["role"] or "Engineering Role",
+                match=item["match"] or 85,
+                status=item["status"] or "APPLIED",
+                platform=item["platform"] or "Direct",
+                url=item["url"] or "",
                 notion_page_id=page_id,
                 notion_database_id=database_id,
-                applied_date=item["applied_date"],
+                applied_date=item["applied_date"] or datetime.now().strftime("%Y-%m-%d"),
                 events=[{"at": datetime.utcnow().isoformat(), "text": f"Synced from Notion: {item['status']}"}],
                 verified=True
             )
@@ -374,7 +379,11 @@ async def pull_from_notion(token: str, database_id: str, db) -> dict:
         integ.last_synced_at = datetime.utcnow()
         integ.synced_count = db.query(ApplicationRecord).count()
         integ.connected = True
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
 
     return {
         "ok": True,

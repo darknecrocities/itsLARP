@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="4" width="40" height="40" rx="9" fill="#09090B" />
+  <rect x="2.5" y="4.5" width="39" height="39" rx="8.5" stroke="#27272A" stroke-width="1" />
+  <path d="M13 13 H18 V25 H31 V30 H13 V13 Z" fill="#FFFFFF" />
+  <path d="M23 21 L31 13 M31 13 H26 M31 13 V18" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="32" cy="12" r="2" fill="#10B981" />
+
+  <text x="52" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Space Grotesk', Inter, sans-serif" font-size="20" font-weight="700" letter-spacing="-0.03em" fill="#09090B">
+    its<tspan font-weight="800">LARP</tspan>
+  </text>
+  <rect x="144" y="14" width="46" height="18" rx="4" fill="#09090B" />
+  <text x="167" y="26.5" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.06em">
+    OS v1.0
+  </text>
+  <text x="52" y="38" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="500" letter-spacing="0.08em" fill="#71717A">
+    AI JOB-HUNTING WORKFORCE
+  </text>
+</svg>

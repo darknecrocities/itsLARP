@@ -92,8 +92,9 @@ def dismiss_question(question_id: str):
 @router.get("/feed")
 def get_notification_feed(
     unread_only: bool = False,
-    important_only: bool = True,
-    limit: int = 25
+    important_only: bool = False,
+    category: Optional[str] = None,
+    limit: int = 50
 ):
     """Returns recent device/desktop activity notifications with priority anti-spam filtering."""
     db = SessionLocal()
@@ -104,12 +105,20 @@ def get_notification_feed(
 
         notifs = list(rec.settings.get("device_notifications") or [])
 
-        # Priority filtering to prevent spamming
+        # Filter by priority if requested
         if important_only:
             notifs = [n for n in notifs if n.get("priority") in ("urgent", "high")]
 
         if unread_only:
             notifs = [n for n in notifs if not n.get("read", False)]
+
+        if category:
+            if category == "recruiter":
+                notifs = [n for n in notifs if "recruiter" in n.get("event_type", "")]
+            elif category == "swarm":
+                notifs = [n for n in notifs if "swarm" in n.get("event_type", "") or "application" in n.get("event_type", "")]
+            elif category == "remote":
+                notifs = [n for n in notifs if "remote" in n.get("event_type", "") or "command" in n.get("event_type", "")]
 
         unread_count = sum(1 for n in (rec.settings.get("device_notifications") or []) if not n.get("read", False))
 
@@ -163,27 +172,77 @@ def mark_all_notifications_read():
     return mark_notifications_read(None)
 
 
+@router.post("/clear")
+def clear_all_notifications():
+    """Clears device notifications history."""
+    db = SessionLocal()
+    try:
+        rec = db.query(IntegrationRecord).filter(IntegrationRecord.id == "email").first()
+        if rec and rec.settings:
+            settings = dict(rec.settings)
+            settings["device_notifications"] = []
+            rec.settings = settings
+            flag_modified(rec, "settings")
+            db.commit()
+        return {"ok": True, "message": "All notifications cleared"}
+    finally:
+        db.close()
+
+
 class TestNotificationIn(BaseModel):
-    title: Optional[str] = "🎉 Interview Request: Askable"
-    message: Optional[str] = "Recruiter invitation to technical round received for Senior Frontend Role."
-    priority: Optional[str] = "urgent"
-    event_type: Optional[str] = "recruiter_interview"
-    link_url: Optional[str] = "/applications"
+    title: Optional[str] = None
+    message: Optional[str] = None
+    priority: Optional[str] = None
+    event_type: Optional[str] = None
+    link_url: Optional[str] = None
 
 
 @router.post("/test")
 def emit_test_notification(b: Optional[TestNotificationIn] = None):
-    """Generates an immediate test notification to verify OS and desktop toast dispatch."""
+    """Generates a dynamic real-time notification from active profile and applications."""
+    import random
+    from services.database import ApplicationRecord
     body = b or TestNotificationIn()
     db = SessionLocal()
     try:
+        prof = db.query(ProfileRecord).filter(ProfileRecord.id == "default").first()
+        cand_name = prof.name if (prof and prof.name) else "Candidate"
+        cand_email = prof.email if (prof and prof.email) else email_monitor.DEFAULT_CANDIDATE_EMAIL
+
+        # Look up real application from database (Notion-synced or local)
+        apps = db.query(ApplicationRecord).order_by(ApplicationRecord.updated_at.desc()).limit(15).all()
+        selected_app = random.choice(apps) if apps else None
+
+        now_id = f"notif-{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+        default_link = f"/notifications?id={now_id}"
+
+        if selected_app:
+            co = selected_app.company
+            ro = selected_app.role
+            match_pct = selected_app.match or 92
+            event_type = body.event_type or "recruiter_interview"
+            title = body.title or f"🎉 Recruiter Interview: {co}"
+            message = body.message or f"{co} reviewed {cand_name}'s application for {ro} (Match: {match_pct}%) and requested an interview."
+            priority = body.priority or "urgent"
+            link_url = body.link_url or default_link
+        else:
+            target_role = (prof.target_roles[0] if (prof and prof.target_roles) else None) or "Lead AI Systems Engineer"
+            target_co = (prof.target_companies[0] if (prof and prof.target_companies and prof.target_companies[0] != "all") else None) or "Scale AI"
+            event_type = body.event_type or "swarm_applied"
+            title = body.title or f"🚀 Swarm Application: {target_co}"
+            message = body.message or f"Autonomous Bot applied for {target_role} at {target_co} with verified APA resume."
+            priority = body.priority or "high"
+            link_url = body.link_url or default_link
+
         item = email_monitor.record_device_notification(
             db=db,
-            event_type=body.event_type or "recruiter_interview",
-            title=body.title or "🎉 Interview Request: Askable",
-            message=body.message or "Invitation to technical screening received.",
-            priority=body.priority or "urgent",
-            link_url=body.link_url or "/applications",
+            event_type=event_type,
+            title=title,
+            message=message,
+            recipient=cand_email,
+            priority=priority,
+            link_url=link_url,
+            tag=f"{event_type}:{now_id}",
         )
         return {"ok": True, "notification": item}
     finally:

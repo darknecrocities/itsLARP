@@ -7,6 +7,8 @@ mirrors updates to local applications and Notion, and executes remote control co
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import re
+import sys
+import subprocess
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 from services.database import SessionLocal, ApplicationRecord, IntegrationRecord, PlatformCredentialRecord
@@ -252,6 +254,31 @@ def parse_and_execute_email_command(
     }
 
 
+def dispatch_host_os_notification(title: str, message: str) -> None:
+    """Dispatches a native OS desktop notification to macOS Notification Center or Windows toast."""
+    try:
+        if sys.platform == "darwin":
+            clean_title = title.replace('"', '\\"').replace("'", "\\'")
+            clean_msg = message.replace('"', '\\"').replace("'", "\\'")
+            cmd = f'display notification "{clean_msg}" with title "{clean_title}" sound name "default"'
+            subprocess.Popen(["osascript", "-e", cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif sys.platform == "win32":
+            clean_title = re.sub(r'["`$]', '', title)
+            clean_msg = re.sub(r'["`$]', '', message)
+            ps_script = (
+                "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; "
+                "$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); "
+                "$nodes = $template.GetElementsByTagName('text'); "
+                f"$nodes.Item(0).AppendChild($template.CreateTextNode('{clean_title}')) | Out-Null; "
+                f"$nodes.Item(1).AppendChild($template.CreateTextNode('{clean_msg}')) | Out-Null; "
+                "$toast = [Windows.UI.Notifications.ToastNotification]::new($template); "
+                "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('itsLARP').Show($toast);"
+            )
+            subprocess.Popen(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+
 def record_device_notification(
     db: Session,
     event_type: str,
@@ -295,5 +322,9 @@ def record_device_notification(
     rec.settings = settings
     flag_modified(rec, "settings")
     db.commit()
+
+    # Trigger host-level native OS notification for important alerts
+    if priority in ["urgent", "high"]:
+        dispatch_host_os_notification(title, message)
 
     return item

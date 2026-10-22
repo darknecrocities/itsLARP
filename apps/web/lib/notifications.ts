@@ -163,36 +163,56 @@ export async function sendDesktopNotification(payload: NotificationPayload): Pro
   }
 
   // B. Standard Web Notification API (Chrome, Edge, Safari, Firefox on macOS & Windows)
+  let webDispatched = false;
   if ("Notification" in window) {
     try {
+      const targetUrl = payload.url || "/notifications";
       if (Notification.permission === "granted") {
         const notif = new Notification(payload.title, {
           body: payload.body,
           icon: payload.icon || "/branding/icon-192.png",
           tag: payload.tag || dedupeKey,
         });
-        if (payload.url) {
-          notif.onclick = () => {
-            window.focus();
-            if (payload.url && payload.url.startsWith("/")) {
-              window.location.href = payload.url;
-            }
-          };
-        }
-        return true;
+        notif.onclick = () => {
+          window.focus();
+          window.location.href = targetUrl;
+        };
+        webDispatched = true;
       } else if (Notification.permission !== "denied" && payload.bypassAntiSpam) {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-          new Notification(payload.title, {
+          const notif = new Notification(payload.title, {
             body: payload.body,
             icon: payload.icon || "/branding/icon-192.png",
             tag: payload.tag || dedupeKey,
           });
-          return true;
+          notif.onclick = () => {
+            window.focus();
+            window.location.href = targetUrl;
+          };
+          webDispatched = true;
         }
       }
     } catch {}
   }
 
-  return false;
+  // C. Local Host OS Native Dispatch Fallback (macOS Notification Center / Windows Action Center via local API)
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    try {
+      fetch("/api/py/integrations/email/send-notification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: payload.title,
+          message: payload.body,
+          event_type: "desktop_alert",
+          priority: payload.priority || "high",
+          link_url: payload.url || "/notifications",
+        }),
+      }).catch(() => {});
+      webDispatched = true;
+    } catch {}
+  }
+
+  return webDispatched;
 }

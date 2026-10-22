@@ -6,6 +6,7 @@ import { Badge, PageHeader, ErrorBox } from "@/components/ui";
 import { OllamaManager } from "@/components/OllamaManager";
 import { UpdateNotificationModal } from "@/components/UpdateNotificationModal";
 import { WalkthroughSettingsCard } from "@/components/walkthrough";
+import { NotificationSettingsCard } from "@/components/notifications/NotificationSettingsCard";
 
 type AIStatusResponse = {
   provider: string;
@@ -239,6 +240,9 @@ export default function SettingsPage() {
 
       {/* Interactive App Walkthrough & Feature Spotlight Tour */}
       <WalkthroughSettingsCard />
+
+      {/* OS Desktop & System Notifications Preferences */}
+      <NotificationSettingsCard />
 
       {/* Software Updates & Production Changelog */}
       <section

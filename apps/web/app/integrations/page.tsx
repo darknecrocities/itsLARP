@@ -141,7 +141,7 @@ export default function Integrations() {
     <div className="space-y-6" data-tour="integrations-header">
       <PageHeader
         title="Integrations & Response Monitoring"
-        sub="Connect Notion to track applications, configure email remote control for parejasarronkian@gmail.com, and select target job platforms."
+        sub="Connect Notion to track applications, configure email remote control for your candidate email, and select target job platforms."
       />
 
       {msg && (

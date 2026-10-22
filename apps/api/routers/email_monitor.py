@@ -167,6 +167,12 @@ def send_device_notification(b: SendNotificationIn):
         db.close()
 
 
+@router.post("/test-notification")
+def test_device_notification(b: SendNotificationIn):
+    """Compatibility alias for sending/testing notifications."""
+    return send_device_notification(b)
+
+
 @router.post("/simulate-response")
 async def simulate_recruiter_email(b: SimulateResponseIn):
     """Test harness: simulates an incoming recruiter email to test classification and Notion sync."""
