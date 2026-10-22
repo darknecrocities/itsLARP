@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { HeroBackground } from "@/components/HeroBackground";
-import { HeroPeekingMascot } from "@/components/mascot";
+import { HeroMascotStage } from "@/components/mascot";
 import {
   FadeIn,
   AnimatedCounter,
@@ -95,7 +95,7 @@ export function HeroSection() {
 
             {/* Mobile / Tablet Mascot Stage positioned below metrics strip */}
             <div className="lg:hidden w-full mt-6 sm:mt-10 overflow-visible">
-              <HeroPeekingMascot isMobile={true} />
+              <HeroMascotStage isMobile={true} />
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ export function HeroSection() {
 
       {/* Desktop Mascot: Anchored Directly Flush to Right Viewport Edge & Vertically Centered */}
       <div className="hidden lg:flex items-center justify-end absolute right-0 top-0 bottom-0 z-20 pointer-events-auto">
-        <HeroPeekingMascot />
+        <HeroMascotStage />
       </div>
     </section>
   );

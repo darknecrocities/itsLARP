@@ -4,4 +4,6 @@ export * from "./MascotInteractive";
 export * from "./MascotCompanionCard";
 export * from "./PeekingCrabSvg";
 export * from "./HeroPeekingMascot";
-
+export * from "./RollingNumber";
+export * from "./MascotCounterTally";
+export * from "./HeroMascotStage";

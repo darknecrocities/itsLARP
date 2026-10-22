@@ -13,12 +13,27 @@ const HERO_QUOTES = [
   "1-click sync to your Notion job tracker.",
 ];
 
+export interface MascotReaction {
+  id: number;
+  text: string;
+  claw?: "left" | "right" | "both";
+}
+
 interface HeroPeekingMascotProps {
   className?: string;
   isMobile?: boolean;
+  reaction?: MascotReaction | null;
+  counterSlot?: React.ReactNode;
+  onCrabClick?: () => void;
 }
 
-export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeekingMascotProps) {
+export function HeroPeekingMascot({
+  className = "",
+  isMobile = false,
+  reaction = null,
+  counterSlot,
+  onCrabClick,
+}: HeroPeekingMascotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSnapping, setIsSnapping] = useState(false);
@@ -33,13 +48,13 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
   const springPupilX = useSpring(rawPupilX, { damping: 26, stiffness: 220 });
   const springPupilY = useSpring(rawPupilY, { damping: 26, stiffness: 220 });
 
-  // Spring for subtle body parallax tilt (tilt toward cursor, zero vertical jumping)
+  // Spring for subtle body parallax tilt
   const rawTiltZ = useMotionValue(0);
   const springTiltZ = useSpring(rawTiltZ, { damping: 30, stiffness: 120 });
 
   const [pupilCoords, setPupilCoords] = useState({ x: 0, y: 0 });
+  const prevReactionIdRef = useRef<number | null>(null);
 
-  // Update state whenever spring changes
   useEffect(() => {
     const unsubX = springPupilX.on("change", (val) => {
       setPupilCoords((prev) => ({ ...prev, x: val }));
@@ -70,19 +85,17 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     return () => clearTimeout(timeout);
   }, []);
 
-  // Snip animation (authentic scissor pinching, zero body jumping)
+  // Snip animation (authentic scissor pinching)
   const triggerDoubleSnip = useCallback(() => {
     if (isSnapping) return;
     setIsSnapping(true);
 
-    // Sequence: right claw snip -> left claw snip -> synchronized double pinch
     setRightClawOpen(true);
     setTimeout(() => {
       setRightClawOpen(false);
       setLeftClawOpen(true);
       setTimeout(() => {
         setLeftClawOpen(false);
-        // Synchronized double snip
         setTimeout(() => {
           setRightClawOpen(true);
           setLeftClawOpen(true);
@@ -96,11 +109,35 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     }, 110);
   }, [isSnapping]);
 
-  // Periodic autonomous gentle claw snip loop (brings mascot to life even without interaction)
+  // Trigger claw actions when an external reaction is dispatched
+  useEffect(() => {
+    if (!reaction || reaction.id === prevReactionIdRef.current) return;
+    prevReactionIdRef.current = reaction.id;
+
+    let cleanupTimer: NodeJS.Timeout | null = null;
+    const triggerTimer = setTimeout(() => {
+      if (reaction.claw === "left") {
+        setLeftClawOpen(true);
+        cleanupTimer = setTimeout(() => setLeftClawOpen(false), 900);
+      } else if (reaction.claw === "right") {
+        setRightClawOpen(true);
+        cleanupTimer = setTimeout(() => setRightClawOpen(false), 900);
+      } else {
+        triggerDoubleSnip();
+      }
+    }, 20);
+
+    return () => {
+      clearTimeout(triggerTimer);
+      if (cleanupTimer) clearTimeout(cleanupTimer);
+    };
+  }, [reaction, triggerDoubleSnip]);
+
+  // Periodic autonomous gentle claw snip loop
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     const scheduleSnip = () => {
-      const delay = Math.random() * 2500 + 3800;
+      const delay = Math.random() * 2500 + 4200;
       timeout = setTimeout(() => {
         if (!isSnapping) {
           triggerDoubleSnip();
@@ -125,15 +162,13 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
       const angle = Math.atan2(dy, dx);
       const distance = Math.hypot(dx, dy);
 
-      // Max eye pupil travel offset
       const maxOffset = 5.2;
       const offsetDistance = Math.min(distance / 50, maxOffset);
 
       rawPupilX.set(Math.cos(angle) * offsetDistance);
       rawPupilY.set(Math.sin(angle) * offsetDistance);
 
-      // Parallax body tilt: tilt slightly toward the cursor
-      const tilt = Math.max(-3.5, Math.min(3.5, (e.clientX - (window.innerWidth / 2)) / 160));
+      const tilt = Math.max(-3.5, Math.min(3.5, (e.clientX - window.innerWidth / 2) / 160));
       rawTiltZ.set(tilt);
     };
 
@@ -145,42 +180,50 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
     triggerDoubleSnip();
     setSpeechVisible(true);
     setQuoteIndex((prev) => (prev + 1) % HERO_QUOTES.length);
+    onCrabClick?.();
   };
+
+  const displayText = reaction?.text || HERO_QUOTES[quoteIndex];
 
   if (isMobile) {
     return (
       <div
         ref={containerRef}
-        className={`relative w-full h-[290px] sm:h-[330px] overflow-visible select-none ${className}`}
+        className={`relative w-full min-h-[350px] overflow-visible select-none ${className}`}
       >
-        {/* Cartoon Cloud Thought Bubble positioned on open left side, trail flowing to Scuttle */}
-        <AnimatePresence>
-          {speechVisible && (
-            <CloudDialogueBubble
-              text={HERO_QUOTES[quoteIndex]}
-              onClose={() => setSpeechVisible(false)}
-              className="absolute top-2 left-2 sm:left-6 w-[230px] sm:w-[260px] z-30"
-            />
-          )}
-        </AnimatePresence>
+        {/* Mobile Counter Slot rendered cleanly above crab stage */}
+        {counterSlot && <div className="mb-4 px-2">{counterSlot}</div>}
 
-        {/* Main Peeking Crab Body Wrapper Flush to Right Screen Edge */}
-        <motion.div
-          style={{ rotateZ: springTiltZ }}
-          className="cursor-pointer group absolute right-0 bottom-0 origin-bottom-right z-20"
-          onClick={handleClick}
-          onMouseEnter={triggerDoubleSnip}
-          title="Scuttle · Click to pinch & speak!"
-        >
-          <PeekingCrabSvg
-            eyeOffset={pupilCoords}
-            isBlinking={isBlinking}
-            isSnapping={isSnapping}
-            leftClawOpen={leftClawOpen}
-            rightClawOpen={rightClawOpen}
-            className="w-[210px] sm:w-[250px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
-          />
-        </motion.div>
+        <div className="relative w-full h-[280px]">
+          {/* Cartoon Cloud Thought Bubble positioned on open left side */}
+          <AnimatePresence>
+            {speechVisible && (
+              <CloudDialogueBubble
+                text={displayText}
+                onClose={() => setSpeechVisible(false)}
+                className="absolute top-2 left-2 sm:left-6 w-[230px] sm:w-[260px] z-30"
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Main Peeking Crab Body Wrapper Flush to Right Screen Edge */}
+          <motion.div
+            style={{ rotateZ: springTiltZ }}
+            className="cursor-pointer group absolute right-0 bottom-0 origin-bottom-right z-20"
+            onClick={handleClick}
+            onMouseEnter={triggerDoubleSnip}
+            title="Scuttle · Click to pinch & speak!"
+          >
+            <PeekingCrabSvg
+              eyeOffset={pupilCoords}
+              isBlinking={isBlinking}
+              isSnapping={isSnapping}
+              leftClawOpen={leftClawOpen}
+              rightClawOpen={rightClawOpen}
+              className="w-[210px] sm:w-[250px] h-auto drop-shadow-md transition-transform duration-200 group-hover:scale-[1.02]"
+            />
+          </motion.div>
+        </div>
       </div>
     );
   }
@@ -194,7 +237,7 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
       <AnimatePresence>
         {speechVisible && (
           <CloudDialogueBubble
-            text={HERO_QUOTES[quoteIndex]}
+            text={displayText}
             onClose={() => setSpeechVisible(false)}
             isMobile={false}
             className="absolute -top-4 lg:top-0 xl:top-4 right-[280px] lg:right-[300px] xl:right-[340px] w-[290px] xl:w-[320px] z-30"
@@ -202,7 +245,14 @@ export function HeroPeekingMascot({ className = "", isMobile = false }: HeroPeek
         )}
       </AnimatePresence>
 
-      {/* Main Peeking Crab Body Wrapper with Parallax Spring (No Body Jumping) */}
+      {/* Counter Slot positioned directly under speech cloud on desktop */}
+      {counterSlot && (
+        <div className="absolute top-[168px] lg:top-[178px] xl:top-[188px] right-[280px] lg:right-[300px] xl:right-[340px] z-30 w-[240px]">
+          {counterSlot}
+        </div>
+      )}
+
+      {/* Main Peeking Crab Body Wrapper with Parallax Spring */}
       <motion.div
         style={{ rotateZ: springTiltZ }}
         className="cursor-pointer group relative origin-bottom-right z-20"
