@@ -1,21 +1,21 @@
 import React from "react";
 import { Audio, staticFile, useCurrentFrame, interpolate } from "remotion";
 
-// Spoken ranges for smooth cosine ducking envelope (at 60 FPS across 108.000s)
+// Spoken ranges for smooth cosine ducking envelope (at 60 FPS across 76.000s)
 const DUCK_RANGES = [
-  { start: 30, end: 240 },     // Hook (0.50s - 4.00s)
-  { start: 300, end: 660 },    // Dashboard (5.00s - 11.00s)
-  { start: 696, end: 967 },    // Career DNA (11.60s - 16.11s)
-  { start: 1080, end: 1571 },  // APA Engine (18.00s - 26.18s)
-  { start: 2040, end: 2433 },  // Job Boards (34.00s - 40.55s)
-  { start: 2928, end: 3085 },  // Pre-drop Riser (48.80s - 51.42s)
-  // Drop climax at frame 3096 (51.60s: music swells to 0.32!)
-  { start: 3168, end: 3614 },  // Workforce Swarm (52.80s - 60.24s)
-  { start: 3870, end: 4381 },  // Guardrails (64.50s - 73.02s)
-  { start: 4590, end: 4924 },  // Kanban (76.50s - 82.07s)
-  { start: 5130, end: 5404 },  // Notion (85.50s - 90.06s)
-  { start: 5610, end: 5833 },  // Clients (93.50s - 97.22s)
-  { start: 6060, end: 6215 },  // Outro (101.00s - 103.59s)
+  { start: 18, end: 228 },     // Hook (0.30s - 3.80s)
+  { start: 240, end: 600 },    // Dashboard (4.00s - 10.00s)
+  { start: 630, end: 901 },    // Career DNA (10.50s - 15.01s)
+  { start: 990, end: 1481 },   // APA Engine (16.50s - 24.68s)
+  { start: 1530, end: 1923 },  // Job Boards (25.50s - 32.05s)
+  { start: 2076, end: 2233 },  // Pre-drop Riser (34.60s - 37.22s)
+  // Drop climax at frame 2244 (37.40s: music swells to 0.32!)
+  { start: 2268, end: 2714 },  // Workforce Swarm (37.80s - 45.24s)
+  { start: 2760, end: 3271 },  // Guardrails (46.00s - 54.52s)
+  { start: 3318, end: 3652 },  // Kanban (55.30s - 60.87s)
+  { start: 3690, end: 3964 },  // Notion (61.50s - 66.06s)
+  { start: 4038, end: 4261 },  // Clients (67.30s - 71.02s)
+  { start: 4290, end: 4446 },  // Outro (71.50s - 74.09s)
 ];
 
 export const AudioTrack: React.FC = () => {
@@ -44,20 +44,20 @@ export const AudioTrack: React.FC = () => {
     }
   }
 
-  // 3. Drop Swell (frame 3090 to 3240, 51.50s - 54.00s): let the climax drop punch through with power
+  // 3. Drop Swell (frame 2238 to 2350, 37.30s - 39.17s): let the climax drop punch through with power
   let musicVol = BASE_MUSIC_VOL - currentDuck * (BASE_MUSIC_VOL - DUCKED_MUSIC_VOL);
-  if (frame >= 3090 && frame <= 3240) {
+  if (frame >= 2238 && frame <= 2350) {
     musicVol = interpolate(
       frame,
-      [3090, 3105, 3210, 3240],
+      [2238, 2250, 2320, 2350],
       [musicVol, DROP_MUSIC_VOL, DROP_MUSIC_VOL, DUCKED_MUSIC_VOL],
       { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     );
   }
 
-  // 4. Outro smooth fade-out (frames 6180 to 6478): gentle resolution, zero volume spike
-  if (frame >= 6180) {
-    musicVol = interpolate(frame, [6180, 6478], [Math.min(musicVol, 0.10), 0.0], {
+  // 4. Outro smooth fade-out (frames 4450 to 4558): gentle resolution, zero volume spike
+  if (frame >= 4450) {
+    musicVol = interpolate(frame, [4450, 4558], [Math.min(musicVol, 0.10), 0.0], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
     });
@@ -70,7 +70,7 @@ export const AudioTrack: React.FC = () => {
         src={staticFile("soundtrack.mp3")}
         volume={musicVol}
         startFrom={0}
-        endAt={6480}
+        endAt={4560}
       />
 
       {/* 2. Contiguous Master Voiceover Track (Zero Collisions, Studio Clarity) */}
@@ -78,7 +78,7 @@ export const AudioTrack: React.FC = () => {
         src={staticFile("audio/voiceover_master.wav")}
         volume={1.0}
         startFrom={0}
-        endAt={6480}
+        endAt={4560}
       />
 
       {/* 3. Contiguous Master SFX Track (Pops, Snips, Whooshes & Climax Drop Impact) */}
@@ -86,7 +86,7 @@ export const AudioTrack: React.FC = () => {
         src={staticFile("audio/sfx_master.wav")}
         volume={0.65}
         startFrom={0}
-        endAt={6480}
+        endAt={4560}
       />
     </>
   );

@@ -11,7 +11,7 @@ export const Seq1Genesis: React.FC = () => {
   const { fps } = useVideoConfig();
 
   // Subtle camera drift backward during intro (no pulse, pure dimensional drift)
-  const driftScale = interpolate(frame, [0, 300], [1.04, 1.0], {
+  const driftScale = interpolate(frame, [0, 240], [1.04, 1.0], {
     extrapolateRight: "clamp",
   });
 
@@ -23,7 +23,7 @@ export const Seq1Genesis: React.FC = () => {
         transform: `scale(${driftScale})`,
       }}
     >
-      <ShutterBladeWipe slatCount={8} triggerFrame={265} durationInFrames={35} direction="horizontal">
+      <ShutterBladeWipe slatCount={8} triggerFrame={215} durationInFrames={25} direction="horizontal">
         <AbsoluteFill
           style={{
             display: "flex",
@@ -36,13 +36,13 @@ export const Seq1Genesis: React.FC = () => {
           <ApertureIntro />
 
           {/* Omnipresent Scuttle Mascot: Feature 0 (Hook) peeking top-right */}
-          {frame >= 30 && (
+          {frame >= 18 && (
             <div style={{ position: "absolute", top: 40, right: 80, zIndex: 40 }}>
               <ScuttleMascot
                 dialogue="Systems armed."
                 scale={0.55}
                 disableEntrance
-                snapBeats={[60, 120, 180]}
+                snapBeats={[45, 90, 135, 180]}
               />
             </div>
           )}
@@ -88,14 +88,16 @@ export const Seq1Genesis: React.FC = () => {
               Lets Larp
             </div>
 
-            {/* Live Typewriter Hook (Pure Bold High-Contrast Text) */}
+            {/* Live Typewriter Hook with Active Center-Anchor Zoom Push-In Tracking */}
             <TypewriterText
               text="Let's be real. Job hunting is completely broken."
-              startFrame={30}
-              charsPerSecond={24}
+              startFrame={18}
+              charsPerSecond={26}
               fontSize={20}
               fontWeight={700}
               color="#ffffff"
+              side="center"
+              enableZoomShiftTracking={true}
             />
           </div>
         </AbsoluteFill>

@@ -43,7 +43,7 @@ export const Seq2Command: React.FC = () => {
         }}
       />
 
-      {/* Feature 1: Command Center (Frames 0 - 245) */}
+      {/* Feature 1: Command Center (Frames 0 - 360) */}
       {!isCareerDnaActive ? (
         <EditorialSplitStage
           side="left"
@@ -51,7 +51,7 @@ export const Seq2Command: React.FC = () => {
           badgeColor={THEME.colors.accentEmerald}
           title="AUTONOMOUS BOT WORKSPACE"
           description="Stop tweaking resumes just to get ghosted. Meet itsLARP: your real-time autonomous bot command center."
-          startFrame={25}
+          startFrame={10}
           metrics={[
             { label: "BOTS CONFIGURED", value: "1,000", color: THEME.colors.accentEmerald },
             { label: "ATS READINESS", value: "99.4%", color: THEME.colors.ink },
@@ -101,7 +101,7 @@ export const Seq2Command: React.FC = () => {
           badgeColor={THEME.colors.accentAmber}
           title="VERIFIED SKILL EXTRACTION"
           description="It extracts your real work into a verified engineering skill graph with deep multi-modal competency clusters."
-          startFrame={385}
+          startFrame={370}
           metrics={[
             { label: "AI SYSTEMS", value: "98% MATCH", color: THEME.colors.accentEmerald },
             { label: "VECTOR GRAPH", value: "VERIFIED", color: THEME.colors.accentAmber },
@@ -145,7 +145,7 @@ export const Seq2Command: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Transition: Feature 1 -> Feature 2 Diagonal Laser Split Wipe (Frames 235 - 255) */}
+      {/* Transition: Feature 1 -> Feature 2 Diagonal Laser Split Wipe (Frames 345 - 370) */}
       {isTransition1to2 && (
         <div
           style={{

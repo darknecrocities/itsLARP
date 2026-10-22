@@ -10,36 +10,36 @@ export const Seq6Resolution: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Screen split at local frame 420 (global 6000):
-  // 0 - 420: Feature 9 (Cross-Platform Clients 3D Fan-out)
-  // 420 - 900: Feature 10 (Final Master Lockup Assembly & Harmonic Resolve)
-  const isFinalLockup = frame >= 420;
+  // Screen split at local frame 270 (global 4290):
+  // 0 - 270: Feature 9 (Cross-Platform Clients 3D Fan-out)
+  // 270 - 540: Feature 10 (Final Master Lockup Assembly & Animated Domain Capsule)
+  const isFinalLockup = frame >= 270;
 
-  // Master Lockup Spring Entrance (frame 420)
+  // Master Lockup Spring Entrance (frame 270)
   const lockupSpring = spring({
-    frame: Math.max(0, frame - 420),
+    frame: Math.max(0, frame - 270),
     fps,
     config: { damping: 24, stiffness: 180, mass: 1 },
   });
   const lockupScale = interpolate(lockupSpring, [0, 1], [0.88, 1.0]);
   const lockupOpacity = interpolate(lockupSpring, [0, 0.4], [0, 1]);
 
-  // Geometric Rule Lines drawing outward from logo (frames 460 - 600)
+  // Geometric Rule Lines drawing outward from logo (frames 290 - 370)
   const lineProgress = spring({
-    frame: Math.max(0, frame - 460),
+    frame: Math.max(0, frame - 290),
     fps,
     config: { damping: 20, stiffness: 160, mass: 0.9 },
   });
   const lineLength = interpolate(lineProgress, [0, 1], [0, 260]);
 
-  // Specular sheen sweep across final logo (frames 520 - 640)
-  const sheenX = interpolate(frame, [520, 640], [-150, 250], {
+  // Specular sheen sweep across final logo (frames 310 - 390)
+  const sheenX = interpolate(frame, [310, 390], [-150, 250], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Clean Exponential Harmonic Resolve on very last frames (850 - 898)
-  const resolveFade = interpolate(frame, [850, 898], [0, 1], {
+  // Clean Exponential Harmonic Resolve on very last frames (470 - 538)
+  const resolveFade = interpolate(frame, [470, 538], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -102,11 +102,13 @@ export const Seq6Resolution: React.FC = () => {
             </div>
             <TypewriterText
               text="Runs natively on macOS, Windows, and the Web."
-              startFrame={25}
+              startFrame={10}
               charsPerSecond={26}
               fontSize={20}
               fontWeight={700}
               color="#ffffff"
+              side="left"
+              enableZoomShiftTracking={true}
             />
           </div>
 
@@ -122,9 +124,9 @@ export const Seq6Resolution: React.FC = () => {
           <div style={{ position: "absolute", inset: 0, marginTop: 40 }}>
             <DeviceFanOut
               fanStartFrame={0}
-              fanDuration={120}
-              convergeStartFrame={240}
-              convergeDuration={140}
+              fanDuration={60}
+              convergeStartFrame={120}
+              convergeDuration={80}
             />
           </div>
         </div>
@@ -203,20 +205,22 @@ export const Seq6Resolution: React.FC = () => {
             Lets Larp
           </div>
 
-          {/* Live Typewriter Final Signoff */}
+          {/* Live Typewriter Final Signoff with Active Center Tracking */}
           <TypewriterText
             text="Stop applying manually. Lets Larp."
-            startFrame={470}
+            startFrame={285}
             charsPerSecond={24}
             fontSize={22}
             fontWeight={700}
             color="#ffffff"
+            side="center"
+            enableZoomShiftTracking={true}
             style={{ marginTop: 12 }}
           />
 
           {/* Animated Interactive Domain Capsule: getitslarp.vercel.app */}
           {(() => {
-            const pillSheenX = interpolate(frame, [540, 620], [-120, 360], {
+            const pillSheenX = interpolate(frame, [320, 420], [-120, 360], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
@@ -274,15 +278,17 @@ export const Seq6Resolution: React.FC = () => {
                   />
                 </div>
 
-                {/* Animated Character Reveal for Domain */}
+                {/* Animated Character Reveal for Domain with Active Zoom Tracking */}
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <TypewriterText
                     text="getitslarp.vercel.app"
-                    startFrame={500}
+                    startFrame={300}
                     charsPerSecond={26}
                     fontSize={22}
                     fontWeight={800}
                     color="#ffffff"
+                    side="center"
+                    enableZoomShiftTracking={true}
                     style={{ fontFamily: THEME.fonts.mono, letterSpacing: 2 }}
                   />
                 </div>

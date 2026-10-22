@@ -128,7 +128,7 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
           {title}
         </div>
 
-        {/* Pure Floating Bold Typewriter Description (NO BOX) */}
+        {/* Pure Floating Bold Typewriter Description with Active Zoom-Shift Tracking */}
         <div style={{ position: "relative", marginTop: 4 }}>
           <TypewriterText
             text={description}
@@ -139,6 +139,8 @@ export const EditorialSplitStage: React.FC<EditorialSplitStageProps> = ({
             fontWeight={700}
             lineHeight={1.55}
             color="#ffffff"
+            side={side}
+            enableZoomShiftTracking={true}
           />
         </div>
 

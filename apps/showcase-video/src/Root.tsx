@@ -7,7 +7,7 @@ export const RemotionRoot: React.FC = () => {
     <Composition
       id="ItsLarpProductShowcase"
       component={ShowcaseVideo}
-      durationInFrames={6480} // Exactly 108.000 seconds @ 60.000 FPS
+      durationInFrames={4560} // Exactly 76.000 seconds @ 60.000 FPS
       fps={60}
       width={1920}
       height={1080}
