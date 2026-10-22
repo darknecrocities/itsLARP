@@ -34,21 +34,24 @@ export function MascotCounterTally({
       } ${className}`}
       aria-label="Live community metrics"
     >
-      {/* Live Activity Pulse Indicator without "Live Telemetry" text */}
-      <div className="flex items-center gap-2 mb-2" aria-hidden="true">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neutral-900 opacity-60" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-neutral-950" />
+      {/* Clean Live Status Eyebrow */}
+      <div className="flex items-center gap-1.5 mb-2.5" aria-hidden="true">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+        </span>
+        <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-neutral-500">
+          Live
         </span>
       </div>
 
-      {/* Big and Bold Counters Container - Zero Card, Pure Typography */}
+      {/* Dual Metrics Grid (Architectural Divide, Zero Card) */}
       <div
-        className={`flex ${
-          isMobile ? "flex-row gap-8 justify-between items-center" : "flex-col gap-4"
+        className={`grid grid-cols-2 divide-x divide-neutral-200/90 ${
+          isMobile ? "max-w-full" : "max-w-[280px] sm:max-w-[320px]"
         }`}
       >
-        {/* Visits Row */}
+        {/* Visits Column */}
         <div
           role="button"
           tabIndex={0}
@@ -61,58 +64,34 @@ export function MascotCounterTally({
               onActivate?.("visits");
             }
           }}
-          className="group cursor-pointer focus:outline-hidden"
-          title="Live visitor count · Click to interact with Scuttle"
+          className="group cursor-pointer focus:outline-hidden pr-4 sm:pr-6"
         >
-          <div className="flex items-baseline gap-2.5">
-            <RollingNumber
-              value={visits ?? 0}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-950 font-display tracking-tight transition-transform duration-150 group-hover:translate-x-1"
-            />
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-950 transition-colors">
-              <Eye className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-950" aria-hidden="true" />
-              <span>Visits</span>
-            </span>
+          <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-950 font-display tracking-tight leading-none group-hover:opacity-75 transition-opacity">
+            <RollingNumber value={visits ?? 0} />
+          </div>
+          <div className="flex items-center gap-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-mono font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-950 transition-colors">
+            <Eye className="w-3 h-3 text-neutral-400 group-hover:text-neutral-950 transition-colors" aria-hidden="true" />
+            <span>Visits</span>
           </div>
         </div>
 
-        {/* Downloads Row */}
+        {/* Downloads Column */}
         <Link
           href="/download"
           onMouseEnter={() => onHoverTarget?.("downloads")}
           onMouseLeave={() => onHoverTarget?.(null)}
-          onClick={() => {
-            onActivate?.("downloads");
-          }}
-          className="group cursor-pointer focus:outline-hidden block"
-          title="Desktop app downloads · Click to view releases"
+          onClick={() => onActivate?.("downloads")}
+          className="group cursor-pointer focus:outline-hidden pl-4 sm:pl-6 block"
         >
-          <div className="flex items-baseline gap-2.5">
-            <RollingNumber
-              value={downloads ?? 0}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-950 font-display tracking-tight transition-transform duration-150 group-hover:translate-x-1"
-            />
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-950 transition-colors">
-              <Download className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-950" aria-hidden="true" />
-              <span>Downloads</span>
-            </span>
+          <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-950 font-display tracking-tight leading-none group-hover:opacity-75 transition-opacity">
+            <RollingNumber value={downloads ?? 0} />
+          </div>
+          <div className="flex items-center gap-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-mono font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-950 transition-colors">
+            <Download className="w-3 h-3 text-neutral-400 group-hover:text-neutral-950 transition-colors" aria-hidden="true" />
+            <span>Downloads</span>
           </div>
         </Link>
       </div>
-
-      {/* Decorative Dashed Leader SVG pointing toward crab claw on desktop */}
-      {!isMobile && (
-        <div className="relative mt-2.5 h-4 w-44 pointer-events-none opacity-40">
-          <svg className="w-full h-full" viewBox="0 0 176 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M 2 8 H 168 L 162 3 M 168 8 L 162 13"
-              stroke="#000000"
-              strokeWidth="1.2"
-              strokeDasharray="3 3"
-            />
-          </svg>
-        </div>
-      )}
     </div>
   );
 }
