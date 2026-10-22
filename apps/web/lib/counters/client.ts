@@ -85,7 +85,7 @@ let visitInFlight = false;
 let visitHandledThisPage = false;
 
 /**
- * Records at most one visit per browser per 30 minutes.
+ * Records a visit on every page load, reload, or revisit.
  * Resolves true only if this call actually incremented the counter.
  */
 export async function recordVisit(): Promise<boolean> {

@@ -1,10 +1,11 @@
 /**
- * Visit de-duplication and write protection for the browser counter.
- * Pure logic with injectable storage and clock so it can be unit tested.
+ * Visit rate-limiting and write protection for the browser counter.
+ * Allows visits to count on every reload or revisit while preventing sub-second
+ * double-increments from React StrictMode or concurrent duplicate mounts.
  */
 
-/** One visit per browser per 30 minutes (refreshes and extra tabs are not re-counted). */
-export const VISIT_WINDOW_MS = 30 * 60 * 1000;
+/** 1.5-second micro cooldown: protects against sub-second React StrictMode double mounts */
+export const VISIT_COOLDOWN_MS = 1500;
 export const VISIT_STORAGE_KEY = "itslarp:lastVisitAt";
 
 /** After quota / permission errors, stop writing for 5 minutes. */
@@ -27,7 +28,7 @@ export function shouldRecordVisit(store: KeyValueStore, now: number): boolean {
   const last = Number(raw);
   // Corrupt or future timestamps are treated as "never visited"
   if (!Number.isFinite(last) || last <= 0 || last > now) return true;
-  return now - last >= VISIT_WINDOW_MS;
+  return now - last >= VISIT_COOLDOWN_MS;
 }
 
 export function markVisitRecorded(store: KeyValueStore, now: number): void {

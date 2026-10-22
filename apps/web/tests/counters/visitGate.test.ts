@@ -3,7 +3,7 @@ import {
   shouldRecordVisit,
   markVisitRecorded,
   CircuitBreaker,
-  VISIT_WINDOW_MS,
+  VISIT_COOLDOWN_MS,
   type KeyValueStore,
 } from "@/lib/counters/visitGate";
 
@@ -24,22 +24,25 @@ describe("visit gate and circuit breaker", () => {
     expect(shouldRecordVisit(store, now)).toBe(true);
   });
 
-  it("blocks rapid repeat visits within the 30-minute window", () => {
+  it("blocks rapid sub-second double-mounts but allows reloads and revisits", () => {
     const store = new MemoryStore();
     const now = 1_000_000;
     markVisitRecorded(store, now);
 
-    // 5 minutes later: should block
-    expect(shouldRecordVisit(store, now + 5 * 60 * 1000)).toBe(false);
+    // 50ms later (same second double-mount / race): should block
+    expect(shouldRecordVisit(store, now + 50)).toBe(false);
 
-    // 29 minutes later: should block
-    expect(shouldRecordVisit(store, now + 29 * 60 * 1000)).toBe(false);
+    // 1000ms later: should block
+    expect(shouldRecordVisit(store, now + 1000)).toBe(false);
 
-    // Exactly 30 minutes later: should allow
-    expect(shouldRecordVisit(store, now + VISIT_WINDOW_MS)).toBe(true);
+    // 2 seconds later (user reloads page): should allow!
+    expect(shouldRecordVisit(store, now + 2000)).toBe(true);
 
-    // 2 hours later: should allow
-    expect(shouldRecordVisit(store, now + 2 * 60 * 60 * 1000)).toBe(true);
+    // After VISIT_COOLDOWN_MS (1.5s): should allow
+    expect(shouldRecordVisit(store, now + VISIT_COOLDOWN_MS)).toBe(true);
+
+    // 10 seconds later: should allow
+    expect(shouldRecordVisit(store, now + 10_000)).toBe(true);
   });
 
   it("recovers gracefully if stored value is corrupt or in the future", () => {
