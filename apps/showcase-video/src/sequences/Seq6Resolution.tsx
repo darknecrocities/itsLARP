@@ -214,30 +214,111 @@ export const Seq6Resolution: React.FC = () => {
             style={{ marginTop: 12 }}
           />
 
-          {/* Domain CTA Pill */}
-          <div
-            style={{
-              marginTop: 24,
-              padding: "14px 40px",
-              borderRadius: 100,
-              backgroundColor: "rgba(255, 255, 255, 0.08)",
-              border: `1px solid ${THEME.colors.borderLight}`,
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.7)",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: THEME.fonts.mono,
-                fontSize: 22,
-                fontWeight: 800,
-                color: THEME.colors.ink,
-                letterSpacing: 3,
-              }}
-            >
-              ITSLARP.APP
-            </span>
-          </div>
+          {/* Animated Interactive Domain Capsule: getitslarp.vercel.app */}
+          {(() => {
+            const pillSheenX = interpolate(frame, [540, 620], [-120, 360], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            const pingScale = interpolate(
+              (frame % 45),
+              [0, 44],
+              [1, 2.4],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            );
+            const pingOpacity = interpolate(
+              (frame % 45),
+              [0, 20, 44],
+              [0.8, 0.4, 0],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            );
+
+            return (
+              <div
+                style={{
+                  position: "relative",
+                  marginTop: 26,
+                  padding: "12px 28px",
+                  borderRadius: 100,
+                  backgroundColor: "rgba(10, 10, 10, 0.85)",
+                  border: "1px solid rgba(16, 185, 129, 0.4)",
+                  backdropFilter: "blur(16px)",
+                  boxShadow: "0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  overflow: "hidden",
+                }}
+              >
+                {/* Live Emerald Ping Beacon */}
+                <div style={{ position: "relative", width: 10, height: 10 }}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: -4,
+                      borderRadius: "50%",
+                      backgroundColor: THEME.colors.accentEmerald,
+                      opacity: pingOpacity,
+                      transform: `scale(${pingScale})`,
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      backgroundColor: THEME.colors.accentEmerald,
+                      boxShadow: "0 0 10px #10b981",
+                    }}
+                  />
+                </div>
+
+                {/* Animated Character Reveal for Domain */}
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <TypewriterText
+                    text="getitslarp.vercel.app"
+                    startFrame={500}
+                    charsPerSecond={26}
+                    fontSize={22}
+                    fontWeight={800}
+                    color="#ffffff"
+                    style={{ fontFamily: THEME.fonts.mono, letterSpacing: 2 }}
+                  />
+                </div>
+
+                {/* Lucide-style Semantic Arrow Up Right Vector Icon */}
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={THEME.colors.accentEmerald}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ display: "block", marginLeft: 4 }}
+                >
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+
+                {/* Specular Sheen Light Sweep Across Capsule */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    width: 50,
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent)",
+                    transform: `translateX(${pillSheenX}px) skewX(-25deg)`,
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+            );
+          })()}
 
           {/* Scuttle Mascot Standing Beside Logo */}
           <div style={{ position: "absolute", bottom: 60, right: 120, zIndex: 50 }}>

@@ -13,13 +13,13 @@ export const Seq3Architecture: React.FC = () => {
   const { fps } = useVideoConfig();
 
   // Breakdown across 2076 frames (17.00s to 51.60s):
-  // 0 - 600: Feature 3 (APA Resumes) with LEFT text & RIGHT zooming video (10.0s)
-  // 600 - 1080: Feature 4 (Job Platforms) with RIGHT text & LEFT zooming image (8.0s)
-  // 1080 - 2076: Pre-drop tension & strobe pull-back "UNLEASH THE SWARM" (16.6s)
-  const isJobSection = frame >= 600 && frame < 1080;
-  const isPreDrop = frame >= 1080;
+  // 0 - 950: Feature 3 (APA Resumes) with LEFT text & RIGHT zooming video (15.8s)
+  // 950 - 1908: Feature 4 (Job Platforms) with RIGHT text & LEFT zooming image (16.0s)
+  // 1908 - 2076: High-tension Pre-Drop Riser "UNLEASH THE SWARM" (2.8s directly into 51.60s Drop)
+  const isJobSection = frame >= 950 && frame < 1908;
+  const isPreDrop = frame >= 1908;
 
-  // Staggered Platform Icon Cascade (frames 630 - 750)
+  // Staggered Platform Icon Cascade (frames 980 - 1100)
   const platforms = [
     { name: "LinkedIn", badge: "DIRECT API" },
     { name: "Indeed", badge: "SWARM EXTRACTOR" },
@@ -29,18 +29,18 @@ export const Seq3Architecture: React.FC = () => {
   ];
   const platformStaggers = platforms.map((_, i) =>
     spring({
-      frame: Math.max(0, frame - 630 - i * 14),
+      frame: Math.max(0, frame - 980 - i * 14),
       fps,
       config: { damping: 18, stiffness: 220, mass: 0.8 },
     })
   );
 
-  // Pre-drop zoom and flash
-  const preDropZoom = interpolate(frame, [1080, 2076], [1.0, 0.85], {
+  // Pre-drop zoom and flash (frames 1908 - 2076)
+  const preDropZoom = interpolate(frame, [1908, 2076], [1.0, 0.88], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const preDropFlash = interpolate(frame, [2030, 2075], [0, 1], {
+  const preDropFlash = interpolate(frame, [2050, 2075], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -79,7 +79,7 @@ export const Seq3Architecture: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={600}
+            durationInFrames={950}
             fromScale={1.0}
             toScale={1.14}
             fromX={10}
@@ -139,7 +139,7 @@ export const Seq3Architecture: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Feature 4: Unified Job Ingestion (Frames 600 - 1080) */}
+      {/* Feature 4: Unified Job Ingestion (Frames 950 - 1908) */}
       {isJobSection && (
         <EditorialSplitStage
           side="right"
@@ -147,7 +147,7 @@ export const Seq3Architecture: React.FC = () => {
           badgeColor={THEME.colors.accentEmerald}
           title="5 MAJOR JOB PLATFORMS"
           description="Connecting across LinkedIn, Indeed, Glassdoor, and Greenhouse in one unified feed."
-          startFrame={625}
+          startFrame={970}
           metrics={[
             { label: "CONNECTED BOARDS", value: "5 PLATFORMS", color: THEME.colors.accentEmerald },
             { label: "LISTING DEDUP", value: "REAL-TIME", color: THEME.colors.ink },
@@ -159,7 +159,7 @@ export const Seq3Architecture: React.FC = () => {
           }}
         >
           <CameraZoomShift
-            durationInFrames={480}
+            durationInFrames={958}
             fromScale={1.0}
             toScale={1.15}
             fromX={-15}
@@ -215,8 +215,8 @@ export const Seq3Architecture: React.FC = () => {
         </EditorialSplitStage>
       )}
 
-      {/* Transition: Feature 3 -> Feature 4 Dual Curtain Push & Laser Blade Wipe (Frames 585 - 610) */}
-      {frame >= 585 && frame <= 610 && (
+      {/* Transition: Feature 3 -> Feature 4 Dual Curtain Push & Laser Blade Wipe (Frames 935 - 960) */}
+      {frame >= 935 && frame <= 960 && (
         <div
           style={{
             position: "absolute",
@@ -228,7 +228,7 @@ export const Seq3Architecture: React.FC = () => {
         >
           {/* Dual Curtain Slats sliding inwards */}
           {(() => {
-            const curProg = interpolate(frame, [585, 610], [0, 1], {
+            const curProg = interpolate(frame, [935, 960], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
@@ -267,7 +267,7 @@ export const Seq3Architecture: React.FC = () => {
         </div>
       )}
 
-      {/* Pre-Drop Tension & Countdown (Frames 750 - 874) */}
+      {/* Pre-Drop Tension Riser & Countdown (Frames 1908 - 2076) */}
       {isPreDrop && (
         <AbsoluteFill
           style={{
@@ -306,8 +306,8 @@ export const Seq3Architecture: React.FC = () => {
             </div>
             <TypewriterText
               text="And then... we unleash the swarm."
-              startFrame={1135}
-              charsPerSecond={22}
+              startFrame={1912}
+              charsPerSecond={26}
               fontSize={22}
               fontWeight={700}
               color="#ffffff"

@@ -69,7 +69,7 @@ export const DeviceFanOut: React.FC<DeviceFanOutProps> = ({
       opacity: frame >= convergeStartFrame ? interpolate(convergeProgress, [0, 1], [0.9, 0]) : 0.9,
     },
     {
-      title: "itslarp.app — Production Web Console",
+      title: "getitslarp.vercel.app — Production Web Console",
       badge: "CHROMIUM · BRAVE · SAFARI",
       tag: "PWA READY",
       x: 0,
