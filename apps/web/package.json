@@ -7,11 +7,13 @@
     "dev:web-only": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",
     "clsx": "^2.1.1",
+    "firebase": "^13.1.0",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.53.0",
     "next": "16.4.0",
@@ -27,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.12"
   }
 }

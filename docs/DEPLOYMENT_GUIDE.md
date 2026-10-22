@@ -146,3 +146,38 @@ server {
     }
 }
 ```
+
+---
+
+## 5. Realtime Landing Page Counters (Firestore & Vercel)
+
+The landing page features a live, card-less visitor and download counter powered by Cloud Firestore (`itslarp-counter`).
+
+### 5.1 Vercel Environment Variables
+
+Set the following variables in your **Vercel Project Settings > Environment Variables** (Production, Preview, and Development):
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=itslarp-counter
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+```
+
+> **Note**: Because Next.js inlines `NEXT_PUBLIC_*` variables at compile time, you must trigger a **Redeploy** on Vercel after configuring or updating these variables.
+
+### 5.2 Firestore Security Rules
+
+Deploy rules to the Firebase project:
+
+```bash
+firebase deploy --only firestore:rules --project itslarp-counter
+```
+
+The deployed rules strictly enforce:
+- Public read of `/itslarpcounter/{visits|downloads}`.
+- Zero arbitrary overwrites, resets, or deletions.
+- Writes are restricted to initial creation (`count == 1`) or exact atomic increments (`count == resource.data.count + 1`).
+

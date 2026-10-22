@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import fs from "fs";
 import path from "path";
+import { downloadInfoFromRequest, shouldCountDownload } from "@/lib/counters/filters";
+import { incrementCounterServer } from "@/lib/counters/server";
 
 const GITHUB_RELEASE_BASE =
   "https://github.com/darknecrocities/itsLARP/releases/download/v1.0.0-desktop";
@@ -11,6 +13,12 @@ export async function GET(req: NextRequest) {
 
   if (!file || file.includes("..") || file.includes("/") || file.includes("\\")) {
     return new NextResponse("Invalid file request", { status: 400 });
+  }
+
+  // Live download counter: increment after the response is sent so the
+  // redirect / file stream is never delayed by the Firestore round-trip.
+  if (shouldCountDownload(downloadInfoFromRequest(req), file)) {
+    after(() => incrementCounterServer("downloads"));
   }
 
   // Check local release directories first (desktop/release and web/public/releases across workspaces)
