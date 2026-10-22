@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// itsLARP landing page live counters (Firebase project: itslarp-counter)
+// Public can read the two counter documents. Writes are only accepted when they
+// raise the count by exactly +1 and stamp updatedAt with the server time.
+// Everything else is denied by default.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /itslarpcounter/{counterId} {
+      allow read: if counterId in ['visits', 'downloads'];
+
+      // The counters can never be wiped
+      allow delete: if false;
+
+      // First ever write creates the document at exactly 1
+      allow create: if counterId in ['visits', 'downloads']
+                    && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+                    && request.resource.data.count is int
+                    && request.resource.data.count == 1
+                    && request.resource.data.updatedAt == request.time;
+
+      // Every subsequent write must be exactly +1 (no resets, no jumps, no extra fields)
+      allow update: if counterId in ['visits', 'downloads']
+                    && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+                    && request.resource.data.count is int
+                    && request.resource.data.count == resource.data.count + 1
+                    && request.resource.data.updatedAt == request.time;
+    }
+
+    // Default deny for every other path
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
