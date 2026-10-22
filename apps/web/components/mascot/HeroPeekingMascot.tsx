@@ -247,7 +247,7 @@ export function HeroPeekingMascot({
 
       {/* Counter Slot positioned directly under speech cloud on desktop */}
       {counterSlot && (
-        <div className="absolute top-[168px] lg:top-[178px] xl:top-[188px] right-[280px] lg:right-[300px] xl:right-[340px] z-30 w-[240px]">
+        <div className="absolute top-[168px] lg:top-[178px] xl:top-[188px] right-[270px] lg:right-[300px] xl:right-[340px] z-30 w-[300px] lg:w-[340px] xl:w-[380px]">
           {counterSlot}
         </div>
       )}
