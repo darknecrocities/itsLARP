@@ -194,7 +194,7 @@ export function LandingHeader() {
           {/* Mobile / Tablet Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden btn text-xs p-2 border border-line hover:border-black transition-colors"
+            className="lg:!hidden btn text-xs p-2 border border-line hover:border-black transition-colors"
             aria-label="Toggle navigation menu"
             aria-expanded={mobileMenuOpen}
           >
@@ -211,7 +211,7 @@ export function LandingHeader() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="lg:hidden border-t border-line bg-bg/98 backdrop-blur-xl px-4 py-5 shadow-2xl overflow-hidden"
+            className="lg:!hidden border-t border-line bg-bg/98 backdrop-blur-xl px-4 py-5 shadow-2xl overflow-hidden"
           >
             <div className="flex flex-col space-y-3">
               <div className="text-[11px] font-mono uppercase tracking-wider text-muted px-2">

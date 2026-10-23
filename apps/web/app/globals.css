@@ -127,83 +127,85 @@ h1, h2, h3, h4 {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
-.card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
+@layer components {
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
 
-.card:hover {
-  border-color: #71717a;
-}
+  .card:hover {
+    border-color: #71717a;
+  }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: #ffffff;
-  color: #09090b;
-  cursor: pointer;
-  transition: all 0.12s ease;
-  white-space: nowrap;
-}
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: #09090b;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    white-space: nowrap;
+  }
 
-.btn:hover {
-  background: var(--bg2);
-  border-color: #a1a1aa;
-}
+  .btn:hover {
+    background: var(--bg2);
+    border-color: #a1a1aa;
+  }
 
-.btn:active {
-  transform: scale(0.99);
-}
+  .btn:active {
+    transform: scale(0.99);
+  }
 
-.btn-primary {
-  background: #000000;
-  color: #ffffff;
-  border-color: #000000;
-}
+  .btn-primary {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+  }
 
-.btn-primary:hover {
-  background: #27272a;
-  border-color: #27272a;
-  color: #ffffff;
-}
+  .btn-primary:hover {
+    background: #27272a;
+    border-color: #27272a;
+    color: #ffffff;
+  }
 
-.btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 
-.input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: #ffffff;
-  color: #09090b;
-  font-size: 13px;
-  transition: border-color 0.12s ease;
-}
+  .input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #ffffff;
+    color: #09090b;
+    font-size: 13px;
+    transition: border-color 0.12s ease;
+  }
 
-.input:focus {
-  outline: none;
-  border-color: #000000;
-}
+  .input:focus {
+    outline: none;
+    border-color: #000000;
+  }
 
-.label-xs {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
-  color: var(--muted);
-  font-family: var(--font-mono), monospace;
+  .label-xs {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--muted);
+    font-family: var(--font-mono), monospace;
+  }
 }
 
 /* Dense Minimalist Tables */
